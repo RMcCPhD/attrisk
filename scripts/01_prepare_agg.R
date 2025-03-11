@@ -13,7 +13,7 @@
 #' TBC
 
 #' END RESULT
-#' 207 aact trials with design variables
+#' 207 aact trials with 12 design variables (excl. duration)
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
