@@ -1,0 +1,181 @@
+---
+title: "Trial design model"
+format: html
+editor: source
+echo: false
+warning: false
+message: false
+---
+
+## Summary
+
+We will construct the design stage model using aggregate-level data to predict attrition rates based on trial design features while accounting for differences in trial duration. The model will be similar to that described in NICE Technical Support Document 3 (3.2. Rate data: Binomial likelihood and cloglog link) for modelling rates where event times are not available.
+
+## Data
+
+```{r makedata}
+library(tidyverse)
+mydf <- tibble(trial_id = paste0("NCT", sample(1000000:9999999, 4)),
+               r = c(25, 10, 73, 91),
+               N = c(1000, 500, 2000, 700),
+               t = c(26, 52, 36, 12),
+               arm_type = c("Placebo", "Active", "Active", "Placebo"),
+               blinding = c("Single", "Double", "Triple", "Double"),
+               phase = c(3L, 4L, 3L, 3L),
+               other_covariates = c("...", "...", "...", "..."))
+
+mydf %>% knitr::kable()
+
+```
+
+## Model description
+
+For each trial $i$, we will specify the model likelihood using the binomial distribution:
+
+\begin{aligned}
+r_i \sim binom(\theta_i, N_i) \\
+\end{aligned}
+
+Where $i$ indicates a trial, $r$ represents the observed number of attrition events, $\theta$ represents the probability of attrition at time $t$ and $N$ represents the number of participants in trial $i$. 
+
+Informed by findings from our previous IPD analysis of attrition rates (i.e. rates described well by Gompertz time-to-event models), we will use the Gompertz cumulative distribution function as a link function for $\theta_i$:
+
+\begin{aligned}
+F(t_i) &= 1 - \exp \left(-\frac{a_i}{b_i} \exp(b_i t_i) \right),
+\end{aligned}
+
+where $a \geq 0$ is the shape parameter and $b \geq 0$ is the rate parameter for trial $i$ at time $t$.
+
+We will treat covariates as fixed effects over all trials and place covariates on $a$:
+
+\begin{aligned}
+\log(a_i) = \beta_{0i} + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
+\end{aligned}
+
+where $\beta_{0i}$ is a fixed intercept, $\beta_{1i} \dots \beta_{ki}$ are coefficients estimated for covariates and $X_{1i} \dots X_{ki}$ are the covariates.
+
+We will specify random intercepts (i.e. across trials) for $b$:
+
+\begin{aligned}
+b_i = \exp(\beta_{0i} + u_i),
+\end{aligned}
+
+where $\beta_{0i}$ is the baseline hazard for trial $i$ and $u_i$ is a random intercept.
+
+## Model code (without coefficient shrinkage)
+
+``` stan
+data {
+  int<lower=0> N; // number of participants
+  int<lower=0> r[N]; // observed attrition events
+  int<lower=0> n[N]; // number of trials
+  vector[N] dt; // time in weeks
+  vector[N] var1; // example var
+}
+
+parameters {
+  real mu1; // intercept
+  real beta; // coefficient
+  real a_raw; // raw shape parameter
+}
+
+transformed parameters {
+  real a; // shape
+  vector[N] b; // rate
+  vector[N] p; // attrition probability
+  
+  a = a_raw == 0 ? 0.0001 : a_raw; // ensure shape is not exactly zero
+  for (i in 1:N) {
+    b[i] = exp(mu1 + var1[i] * beta);
+    p[i] = 1 - exp(-b[i] / a * (exp(a * dt[i]) - 1));
+  }
+}
+
+model {
+  mu1 ~ normal(0, 1); // Intercept prior
+  beta ~ normal(0, 1); // Normal prior for coefficient
+  a_raw ~ normal(0, 1); // Normal prior for shape
+  
+  // likelihood
+  for (i in 1:N) {
+    r[i] ~ binomial(n[i], p[i]);
+  }
+}
+
+generated quantities {
+  vector[N] r_new; // predicted count
+  vector[N] p_new; // predicted probability of attrition
+  
+  for (i in 1:N) {
+    p_new[i] = 1 - exp(-b[i] / a * (exp(a * dt[i]) - 1));
+    r_new[i] = binomial_rng(n[i], p_new[i]);
+  }
+  real rate = exp(mu1); // transformed rate
+}
+```
+
+## Model code (with coefficient shrinkage)
+
+A common laplace prior will be placed on coefficients to allow for shrinkage towards zero.
+
+``` stan
+data {
+  int<lower=0> N; // number of participants
+  int<lower=0> r[N]; // observed attrition events
+  int<lower=0> n[N]; // number of trials
+  vector[N] dt; // time in weeks
+  vector[N] var1; // example var
+}
+
+parameters {
+  real mu1; // intercept
+  real beta_raw; // raw coefficient
+  real<lower=0> tau_beta; // scale parameter for coefficient shrinkage
+  real a_raw; // raw shape parameter
+}
+
+transformed parameters {
+  real a; // shape
+  vector[N] b; // rate
+  vector[N] p; // attrition probability
+  real beta = beta_raw * tau_beta; // coefficient with shrinkage
+  
+  a = a_raw == 0 ? 0.0001 : a_raw; // ensure shape is not exactly zero
+  for (i in 1:N) {
+    b[i] = exp(mu1 + var1[i] * beta);
+    p[i] = 1 - exp(-b[i] / a * (exp(a * dt[i]) - 1));
+  }
+}
+
+model {
+  mu1 ~ normal(0, 1); // Intercept prior
+  tau_beta ~ exponential(1); // Shrinkage prior
+  beta_raw ~ normal(0, 1); // Normal prior for coefficient
+  a_raw ~ lognormal(0, 1); // Lognormal prior for shape
+  
+  // likelihood
+  for (i in 1:N) {
+    r[i] ~ binomial(n[i], p[i]);
+  }
+}
+
+generated quantities {
+  vector[N] r_new; // predicted count
+  vector[N] p_new; // predicted probability of attrition
+  
+  for (i in 1:N) {
+    p_new[i] = 1 - exp(-b[i] / a * (exp(a * dt[i]) - 1));
+    r_new[i] = binomial_rng(n[i], p_new[i]);
+  }
+  real rate = exp(mu1); // transformed rate
+}
+```
+
+
+## Prediction
+
+## Prediction with uncertainty
+
+## Glossary
+
+

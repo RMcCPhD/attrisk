@@ -7,5 +7,6 @@ library(broom)
 library(rstan)
 library(bayesplot)
 library(tidybayes)
+library(markdown)
 
 options(scipen = 999)
