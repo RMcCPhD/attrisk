@@ -22,15 +22,24 @@ source("scripts/00_functions_packages_etc.R")
 ## 1. GET ELIGIBLE TRIALS FOR PROJECT ##########################################
 
 # Import data - attrition counts, design variables
-imp_trials <- read_rds("data/trials_n410_agg_ready.rds")
-imp_design <- read_rds("data/design_vars.rds")
+imp_trials <- read_rds("data/trials_n392_attrisk.rds")
+imp_design <- read_rds("data/design_vars_n372.rds")
 
-# 207 aact trials
+# 300 agg, 92 ipd
 imp_trials %>% count(trial_id, source) %>%  count(source)
-trials_aact <- imp_trials %>% filter(source == "agg")
+
+# 7 ipd trials missing arm attrition counts, removing for test
+imp_trials %>% group_by(trial_id) %>% filter(any(is.na(arm_n_attr)))
+
+# 385 trials
+imp_trials_counts <- imp_trials %>% 
+  group_by(trial_id) %>% 
+  filter(!any(is.na(arm_n_attr))) %>% 
+  ungroup() %>% 
+  select(-c(has_ipd:on_aact))
 
 # Add overall attrition counts
-add_oattr <- trials_aact %>% 
+add_oattr <- imp_trials_counts %>% 
   group_by(trial_id) %>% 
   mutate(attr = sum(arm_n_attr)) %>% 
   ungroup()
@@ -41,6 +50,9 @@ df_oattr <- add_oattr %>%
   distinct() %>% 
   rename(nct_id = trial_id) %>% 
   left_join(imp_design)
+
+# Save without any removals for missingness
+saveRDS(df_oattr, "processed_data/df_oattr_all_design_vars.rds")
 
 # Check missingness
 remove_vars <- df_oattr %>% 
