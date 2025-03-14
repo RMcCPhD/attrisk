@@ -148,7 +148,7 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">NCT7670997</td>
+<td style="text-align: left;">NCT4910473</td>
 <td style="text-align: right;">25</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">26</td>
@@ -158,7 +158,7 @@ window.Quarto = {
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">NCT5837549</td>
+<td style="text-align: left;">NCT8402291</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">500</td>
 <td style="text-align: right;">52</td>
@@ -168,7 +168,7 @@ window.Quarto = {
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">NCT6429302</td>
+<td style="text-align: left;">NCT2707026</td>
 <td style="text-align: right;">73</td>
 <td style="text-align: right;">2000</td>
 <td style="text-align: right;">36</td>
@@ -178,7 +178,7 @@ window.Quarto = {
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">NCT2340363</td>
+<td style="text-align: left;">NCT1553824</td>
 <td style="text-align: right;">91</td>
 <td style="text-align: right;">700</td>
 <td style="text-align: right;">12</td>
@@ -191,14 +191,17 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<p>We will code categorical variables as dummy variables to allow normal priors to be specified.</p>
 </section>
 <section id="model-description" class="level2">
 <h2 class="anchored" data-anchor-id="model-description">Model description</h2>
+<section id="likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="likelihood">Likelihood</h3>
 <p>For each trial <span class="math inline">\(i\)</span>, we will specify the model likelihood using the binomial distribution:</p>
 <span class="math display">\[\begin{aligned}
-r_i \sim binom(\theta_i, N_i) \\
+r_i \sim \text{Binomial}(N_i, \theta_i) \\
 \end{aligned}\]</span>
-<p>Where <span class="math inline">\(i\)</span> indicates a trial, <span class="math inline">\(r\)</span> represents the observed number of attrition events, <span class="math inline">\(\theta\)</span> represents the probability of attrition at time <span class="math inline">\(t\)</span> and <span class="math inline">\(N\)</span> represents the number of participants in trial <span class="math inline">\(i\)</span>.</p>
+<p>Where <span class="math inline">\(i\)</span> indicates a trial, <span class="math inline">\(r\)</span> represents the observed number of attrition events, <span class="math inline">\(N\)</span> represents the number of participants and <span class="math inline">\(\theta\)</span> represents the probability of attrition at time <span class="math inline">\(t\)</span>.</p>
 <p>Informed by findings from our previous IPD analysis of attrition rates (i.e.&nbsp;rates described well by Gompertz time-to-event models), we will use the Gompertz cumulative distribution function as a link function for <span class="math inline">\(\theta_i\)</span>:</p>
 <span class="math display">\[\begin{aligned}
 F(t_i) &amp;= 1 - \exp \left(-\frac{a_i}{b_i} \exp(b_i t_i) \right),
@@ -206,64 +209,81 @@ F(t_i) &amp;= 1 - \exp \left(-\frac{a_i}{b_i} \exp(b_i t_i) \right),
 <p>where <span class="math inline">\(a \geq 0\)</span> is the shape parameter and <span class="math inline">\(b \geq 0\)</span> is the rate parameter for trial <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span>.</p>
 <p>We will treat covariates as fixed effects over all trials and place covariates on <span class="math inline">\(a\)</span>:</p>
 <span class="math display">\[\begin{aligned}
-\log(a_i) = \beta_{0i} + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
+\log(a_i) = \alpha_i + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
 \end{aligned}\]</span>
-<p>where <span class="math inline">\(\beta_{0i}\)</span> is a fixed intercept, <span class="math inline">\(\beta_{1i} \dots \beta_{ki}\)</span> are coefficients estimated for covariates and <span class="math inline">\(X_{1i} \dots X_{ki}\)</span> are the covariates.</p>
+<p>where <span class="math inline">\(\alpha_i\)</span> is a fixed intercept, <span class="math inline">\(\beta_{1i} \dots \beta_{ki}\)</span> are coefficients estimated for covariates and <span class="math inline">\(X_{1i} \dots X_{ki}\)</span> are the covariates.</p>
 <p>We will specify random intercepts (i.e.&nbsp;across trials) for <span class="math inline">\(b\)</span>:</p>
 <span class="math display">\[\begin{aligned}
 b_i = \exp(\beta_{0i} + u_i),
 \end{aligned}\]</span>
-<p>where <span class="math inline">\(\beta_{0i}\)</span> is the baseline hazard for trial <span class="math inline">\(i\)</span> and <span class="math inline">\(u_i\)</span> is a random intercept.</p>
+<p>where <span class="math inline">\(\beta_{0i}\)</span> is the log-baseline hazard rate for trial <span class="math inline">\(i\)</span> and <span class="math inline">\(u_i\)</span> is a random effect.</p>
+</section>
+<section id="priors" class="level3">
+<h3 class="anchored" data-anchor-id="priors">Priors</h3>
+<p>We will specify weakly informative priors for <span class="math inline">\(a\)</span> and <span class="math inline">\(\beta_{ki}\)</span>. We will not specify a prior for <span class="math inline">\(b\)</span>, but will place a weakly informative prior on rate intercept <span class="math inline">\(\beta_{0i}\)</span> and random effect <span class="math inline">\(u_i\)</span> to enable random variability between trials.</p>
+<p>A log-normal prior will be specified for <span class="math inline">\(a\)</span> to ensure it is positive:</p>
+<span class="math display">\[\begin{aligned}
+a &amp;\sim \text{Log-normal}(0, 1).
+\end{aligned}\]</span>
+<p>A normal prior will be specified for <span class="math inline">\(\beta_{ki}\)</span>, <span class="math inline">\(\beta_{0i}\)</span> and <span class="math inline">\(u_i\)</span>:</p>
+<span class="math display">\[\begin{aligned}
+\beta_{ki}, \beta_{0i}, u_i &amp;\sim \text{Normal}(0, 1).
+\end{aligned}\]</span>
+</section>
 </section>
 <section id="model-code-without-coefficient-shrinkage" class="level2">
 <h2 class="anchored" data-anchor-id="model-code-without-coefficient-shrinkage">Model code (without coefficient shrinkage)</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N; <span class="co">// number of participants</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; r[N]; <span class="co">// observed attrition events</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n[N]; <span class="co">// number of trials</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] dt; <span class="co">// time in weeks</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] var1; <span class="co">// example var</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; I; <span class="co">// Number of trials</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; r[I]; <span class="co">// Observed attrition events per trial</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N[I]; <span class="co">// Number of participants per trial</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] dt; <span class="co">// Time in weeks per trial</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] var1; <span class="co">// Covariate</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> mu1; <span class="co">// intercept</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta; <span class="co">// coefficient</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> a_raw; <span class="co">// raw shape parameter</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> a; <span class="co">// shape</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] b; <span class="co">// rate</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] p; <span class="co">// attrition probability</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  a = a_raw == <span class="dv">0</span> ? <span class="fl">0.0001</span> : a_raw; <span class="co">// ensure shape is not exactly zero</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    b[i] = exp(mu1 + var1[i] * beta);</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    p[i] = <span class="dv">1</span> - exp(-b[i] / a * (exp(a * dt[i]) - <span class="dv">1</span>));</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  mu1 ~ normal(<span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Intercept prior</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Normal prior for coefficient</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  a_raw ~ normal(<span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Normal prior for shape</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="co">// likelihood</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    r[i] ~ binomial(n[i], p[i]);</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] r_new; <span class="co">// predicted count</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] p_new; <span class="co">// predicted probability of attrition</span></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    p_new[i] = <span class="dv">1</span> - exp(-b[i] / a * (exp(a * dt[i]) - <span class="dv">1</span>));</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    r_new[i] = binomial_rng(n[i], p_new[i]);</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> rate = exp(mu1); <span class="co">// transformed rate</span></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> mu1; <span class="co">// Log-baseline hazard rate</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] u; <span class="co">// Random effect for rate</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha; <span class="co">// Shape intercept</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta; <span class="co">// Coefficient</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> &lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a_raw; <span class="co">// Raw shape parameter</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] a; <span class="co">// Shape per trial</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] b; <span class="co">// Rate per trial</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] p; <span class="co">// Attrition probability per trial</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    a[i] = fmax(exp(a_raw + alpha + beta * var1[i]), <span class="fl">1e-4</span>); <span class="co">// Place covariate on shape</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    b[i] = exp(mu1 + u[i]); <span class="co">// Combine rate intercept with random effect</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    p[i] = <span class="dv">1</span> - exp(-b[i] / a[i] * (exp(a * dt[i]) - <span class="dv">1</span>)); <span class="co">// Get p as Gompertz CDF</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  a_raw ~ lognormal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  mu1 ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  u ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">// likelihood</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    r[i] ~ binomial(N[i], p[i]);</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] r_new; <span class="co">// Predicted count</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] p_new; <span class="co">// Predicted probability of attrition</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] rate; <span class="co">// Baseline hazard rate per trial</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    p_new[i] = <span class="dv">1</span> - exp(-b[i] / a[i] * (exp(a * dt[i]) - <span class="dv">1</span>));</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    r_new[i] = binomial_rng(N[i], p_new[i]);</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    rate[i] = exp(mu1 + u[i]);</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="model-code-with-coefficient-shrinkage" class="level2">
 <h2 class="anchored" data-anchor-id="model-code-with-coefficient-shrinkage">Model code (with coefficient shrinkage)</h2>
