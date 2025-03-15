@@ -7,7 +7,9 @@ library(broom)
 library(rstan)
 library(bayesplot)
 library(tidybayes)
+library(posterior)
 library(markdown)
+library(flexsurv)
 
 options(scipen = 999)
 

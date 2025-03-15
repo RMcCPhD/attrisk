@@ -7,8 +7,6 @@
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-source("scripts/00_functions_packages_etc.R")
-
 ## 1. TESTING STAN MODEL #######################################################
 
 # Import data - attrition counts, design variables
@@ -62,6 +60,8 @@ ppc_stat(obs_r, r, stat = "sd")
 
 ## 1. TESTING STAN MODEL 2 ######################################################
 
+source("scripts/00_functions_packages_etc.R")
+
 # Import data - attrition counts, design variables
 imp_trials <- read_rds("processed_data/df_oattr.rds")
 glimpse(imp_trials)
@@ -89,19 +89,25 @@ str(stan_data)
 # Compile model
 compile <- stan_model("Scripts/zz_test4.stan")
 
-# Fit model
+# Fit model (less iter and removed warmup to speed up for examples)
 fit <- sampling(
   compile,
   data = stan_data,
-  iter = 4000,
+  iter = 2000,
   chains = 4,
-  warmup = 2000,
   seed = 123
 )
 
 # Summarise parameters
-fit_sum <- fit %>% 
-  sample_draws()
+fit_sum <- summarize_draws(fit)
+fit_sum %>% 
+  filter(grepl("a\\[|b\\[", variable)) %>% 
+  mutate(
+    variable = gsub("\\[|\\]", "", variable),
+    variable = gsub("[0-9]", "", variable)
+  ) %>% 
+  group_by(variable) %>% 
+  reframe(mean = mean(mean))
 
 # Compare observed vs predicted counts
 r <- extract(fit, pars = "r_new")$r_new
