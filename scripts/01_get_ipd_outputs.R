@@ -13,13 +13,14 @@ gompertz_data <- model_data %>% filter(dist == "gompertz")
 
 gompertz_data %>% 
   ggplot(aes(x = est, colour = parameter)) +
-  geom_density() +
+  geom_histogram() +
   facet_wrap(~parameter, scales = "free")
 
 gompertz_data %>% 
   group_by(parameter) %>% 
   reframe(
     mean = mean(est),
-    sd = sd(est)^2
+    sd = sd(est),
+    variance = sd(est)^2
   )
 

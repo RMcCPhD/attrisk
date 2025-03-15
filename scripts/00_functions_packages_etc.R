@@ -10,3 +10,5 @@ library(tidybayes)
 library(markdown)
 
 options(scipen = 999)
+
+Sys.setenv(STANC3 = TRUE)

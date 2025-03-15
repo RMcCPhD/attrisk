@@ -70,8 +70,10 @@ glimpse(imp_trials)
 imp_trials <- imp_trials %>% select(nct_id:duration)
 
 # Create a mock numeric variable
+# Remove one trial with 100% attrition (likely a count error)
 imp_trials_mock <- imp_trials %>% 
-  mutate(mock_age = rnorm(207, mean = 52.5, sd = 10.6))
+  mutate(mock_age = rnorm(207, mean = 52.5, sd = 10.6)) %>% 
+  filter(nct_id != "NCT00313313")
 
 # Get stan data
 stan_data <- list(
@@ -85,32 +87,32 @@ stan_data <- list(
 str(stan_data)
 
 # Compile model
-compile <- stan_model("Scripts/zz_test3.stan")
+compile <- stan_model("Scripts/zz_test4.stan")
 
 # Fit model
 fit <- sampling(
   compile,
   data = stan_data,
-  iter = 1000,
+  iter = 4000,
   chains = 4,
+  warmup = 2000,
   seed = 123
 )
 
-# Summarise
-print(
-  fit,
-  pars = c("mu1", "beta", "a")
-)
-
-# Trace plot
-stan_trace(fit, pars = c("mu1", "beta", "a"))
+# Summarise parameters
+fit_sum <- fit %>% 
+  sample_draws()
 
 # Compare observed vs predicted counts
 r <- extract(fit, pars = "r_new")$r_new
 obs_r <- stan_data$r
-ppc_dens_overlay(obs_r, r[1:100, ])
 
-# Compare test statistics
-ppc_stat(obs_r, r, stat = "mean")
-ppc_stat(obs_r, r, stat = "sd")
+ppc_dens_overlay(obs_r, r[1:207, ])
+ppc_intervals(y = obs_r, yrep = r[1:207, ])
+
+# Check divergent transitions
+check_hmc_diagnostics(fit)
+
+# Check trace plots
+traceplot(fit, pars = c("a_raw", "beta", "b_mu", "u[1]", "u[2]"))
 

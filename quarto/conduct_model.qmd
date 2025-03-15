@@ -1,0 +1,66 @@
+---
+title: "Trial design model"
+format: html
+editor: source
+echo: false
+warning: false
+message: false
+---
+
+## Summary
+
+We will construct a conduct-stage model by constructing participant-level and trial-level sub-models. The trial-level model will allow us to generate a baseline hazard rate for any trial conditional on trial design features. The participant-level model will enable us to modify the baseline hazard rate by applying hazard ratios for participant-level characteristics.
+
+## Partipant-level model
+
+### Data
+
+```{r makedata}
+library(tidyverse)
+
+df <- tibble(
+  trial_id = paste0("NCT", sample(1000000:9999999, 4)),
+  subject_id = paste0("SUBJ", sample(1:10000), 4),
+  status = c(1L, 0L, 0L, 1L),
+  time = c(26, 3, 21, 26),
+  arm_type = c("Placebo", "Active", "Active", "Placebo"),
+  age = c(56.8, 72.1, 45.8, 49.3),
+  sex = c("M", "M", "F", "M"),
+  other_covariates = c("...", "...", "...", "...")
+)
+
+df %>% knitr::kable()
+```
+
+### Model description
+
+### Model code
+
+## Trial-level model
+
+### Data
+
+```{r makedata2}
+library(tidyverse)
+
+df <- tibble(
+  trial_id = paste0("NCT", sample(1000000:9999999, 4)),
+  r = c(25, 10, 73, 91),
+  N = c(1000, 500, 2000, 700),
+  t = c(26, 52, 36, 12),
+  arm_type = c("Placebo", "Active", "Active", "Placebo"),
+  blinding = c("Single", "Double", "Triple", "Double"),
+  phase = c(3L, 4L, 3L, 3L),
+  other_covariates = c("...", "...", "...", "...")
+)
+
+df %>% knitr::kable()
+```
+
+### Model description
+
+### Model code
+
+## Prediction
+
+## Prediction with uncertainty
