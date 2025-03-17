@@ -8,6 +8,7 @@
 #' Get overall attrition counts (ignoring arms for first initial stan model)
 #' Add design variables
 #' Check missingness, remove variables with high missingness
+#' Remove 2 trials (1 with 100% attrition, 1 with unknown treatment arm counts)
 
 #' ## 2. PREPARE AACT DATA - ARM-LEVEL ATTRITION
 #' TBC
@@ -26,7 +27,7 @@ imp_trials <- read_rds("data/trials_n392_attrisk.rds")
 imp_design <- read_rds("data/design_vars_n372.rds")
 
 # 300 agg, 92 ipd
-imp_trials %>% count(trial_id, source) %>%  count(source)
+imp_trials %>% count(trial_id, source) %>% count(source)
 
 # 7 ipd trials missing arm attrition counts, removing for test
 imp_trials %>% group_by(trial_id) %>% filter(any(is.na(arm_n_attr)))
@@ -37,6 +38,24 @@ imp_trials_counts <- imp_trials %>%
   filter(!any(is.na(arm_n_attr))) %>% 
   ungroup() %>% 
   select(-c(has_ipd:on_aact))
+
+# Save test version for STAN model
+# Keep only placebo and active arms
+df_plc_ac <- imp_trials_counts %>% 
+  select(trial_id, drug_name, arm_n, arm_n_attr) %>% 
+  filter(!(trial_id %in% c("NCT03159052", "NCT00313313"))) %>% 
+  mutate(
+    flag = if_else(
+      grepl("tin$|ide$|ofzin$", drug_name) 
+      | grepl("^Dipeptidyl|^Glucagon|^Sodium", drug_name),
+      0, 1
+    ),
+    flag = if_else(drug_name == "placebo", 0, 1)
+  ) %>% 
+  rename(nct_id = trial_id) %>% 
+  left_join(imp_design %>% select(nct_id, duration))
+
+write_rds(df_plc_ac, "processed_data/df_plc_ac.rds")
 
 # Add overall attrition counts
 add_oattr <- imp_trials_counts %>% 

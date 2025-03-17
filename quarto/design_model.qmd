@@ -34,35 +34,35 @@ df %>% knitr::kable()
 * N - Number of participants in trial
 * t - Randomised treatment duration
 
-We will code categorical variables as dummy variables to allow normal priors to be specified.
+We will code categorical variables as dummy variables to allow normal priors to be specified. Arm will be coded as a dummy variable where 0 = placebo and 1 = active comparator.
 
 ## Model description
 
 ### Likelihood
 
-For each trial $i$, we will specify the model likelihood using the binomial distribution:
+For arm $j$ in trial $i$, we will specify the model likelihood using the binomial distribution:
 
 \begin{aligned}
-r_i \sim \text{Binomial}(N_i, \theta_i) \\
+r_{ij} \sim \text{Binomial}(N_{ij}, \theta_{ij}) \\
 \end{aligned}
 
-Where $i$ indicates a trial, $r$ represents the observed number of attrition events, $N$ represents the number of participants and $\theta$ represents the probability of attrition at time $t$. 
+Where $r$ indicates the observed number of attrition events, $N$ indicates the number of participants and $\theta$ indicates the probability of attrition at time $t$.
 
 Informed by findings from our previous IPD analysis of attrition rates, we will use the Gompertz cumulative distribution function as a link function for $\theta_i$:
 
 \begin{aligned}
-F(t_i) &= 1 - \exp \left(-\frac{b_i}{a_i} \exp(a_i t_i) \right),
+F(t_{i}) &= 1 - \exp \left(-\frac{b_{i}}{a_{i}} \exp(a_{i} t_{i}) \right),
 \end{aligned}
 
-where $a \geq 0$ is the shape parameter and $b \geq 0$ is the rate parameter for trial $i$ at time $t$.
+where $a \geq 0$ is the shape parameter and $b \geq 0$ is the rate parameter for trial $i$.
 
-We will specify a fixed intercept for $a$ across all trials and place covariates on $a$ for each trial:
+We will place covariates on $a$ for each trial. We will specify a fixed intercept for $a$ across all trials and random effects for $j$:
 
 \begin{aligned}
-\log(a_i) = \alpha_i + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
+\log(a_{i}) = \alpha_{i} + \gamma j + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
 \end{aligned}
 
-where $\alpha_i$ is the fixed intercept, $\beta_{1i} \dots \beta_{ki}$ are coefficients estimated for covariates and $X_{1i} \dots X_{ki}$ are the covariates.
+where $\alpha_i$ is the fixed intercept, $\gamma$ is a random effect for arm $j$, $\beta_{1i} \dots \beta_{ki}$ are coefficients estimated for covariates and $X_{1i} \dots X_{ki}$ are the covariates.
 
 We will specify random rate intercepts (i.e. across trials) for $b$:
 
@@ -74,10 +74,10 @@ where $\beta_{0i}$ is the log-baseline hazard rate for trial $i$ and $u_i$ is th
 
 ### Priors
 
-We will specify weakly informative priors for $\alpha_i$ and $\beta_{ki}$. We will not specify a prior for $b$, but will place a weakly informative prior on rate intercept $\beta_{0i}$ and random effect $u_i$ to enable random variability between trials.
+We will specify weakly informative priors for $\alpha_i$, $\gamma$ and $\beta_{ki}$. We will not specify a prior for $b$, but will place a weakly informative prior on rate intercept $\beta_{0i}$ and random effect $u_i$ to enable random variability between trials.
 
 \begin{aligned}
-\alpha_i, \beta_{ki}, \beta_{0i}, u_i &\sim \text{Normal}(0, 1).
+\alpha_i, \gamma, \beta_{ki}, \beta_{0i}, u_i &\sim \text{Normal}(0, 1).
 \end{aligned}
 
 ## Model code (without coefficient shrinkage)
@@ -85,10 +85,11 @@ We will specify weakly informative priors for $\alpha_i$ and $\beta_{ki}$. We wi
 ``` stan
 data {
   int<lower=1> I; // Number of trials
-  int<lower=0> r[I]; // Observed attrition events per trial
-  int<lower=0> N[I]; // Number of participants per trial
+  int<lower=0> r[I]; // Observed attrition events per arm and trial
+  int<lower=0> N[I]; // Number of participants per arm and trial
   vector[I] dt; // Time in weeks per trial
   vector[I] var1; // Covariate
+  vector[I] arm; // Treatment arm (0 = placebo, 1 = active)
 }
 
 parameters {
@@ -96,6 +97,7 @@ parameters {
   vector[I] u; // Random intercept for rate
   real a_raw; // Baseline shape parameter
   real beta; // Covariate coefficient
+  real gamma; // Treatment arm random effect
 }
 
 transformed parameters {
@@ -104,7 +106,7 @@ transformed parameters {
   vector[I] p; // Probability of attrition
   
   for (i in 1:I) {
-    a[i] = a_raw + beta * var1[i];
+    a[i] = a_raw + beta * var1[i] + gamma * arm[i];
     b[i] = exp(b_mu + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
     
@@ -122,6 +124,7 @@ model {
   a_raw ~ normal(0, 1);
   beta ~ normal(0, 0.5);
   u ~ normal(0, 1);
+  gamma ~ normal(0, 0.5);
   
   // Likelihood
   for (i in 1:I) {
@@ -146,10 +149,6 @@ generated quantities {
 
 A double-exponential (Laplace) prior will be specified to introduce shrinkage to covariate coefficients.
 
-\begin{aligned}
-
-\end{aligned}
-
 ``` stan
 data {
   int<lower=1> I; // Number of trials
@@ -157,6 +156,7 @@ data {
   int<lower=0> N[I]; // Number of participants per trial
   vector[I] dt; // Time in weeks per trial
   vector[I] var1; // Covariate
+  vector[I] arm; // Treatment arm (0 = placebo, 1 = active)
 }
 
 parameters {
@@ -164,6 +164,7 @@ parameters {
   vector[I] u; // Random intercept for rate
   real a_raw; // Baseline shape parameter
   real beta; // Covariate coefficient
+  real gamma; // Treatment arm effect
 }
 
 transformed parameters {
@@ -172,7 +173,7 @@ transformed parameters {
   vector[I] p; // Probability of attrition
   
   for (i in 1:I) {
-    a[i] = a_raw + beta * var1[i];
+    a[i] = a_raw + beta * var1[i] + gamma * arm[i];
     b[i] = exp(b_mu + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
     
@@ -190,6 +191,7 @@ model {
   a_raw ~ normal(0, 1);
   beta ~ double_exponential(0, 1); // Shrinkage factor of 1
   u ~ normal(0, 1);
+  gamma ~ normal(0, 0.5);
   
   // Likelihood
   for (i in 1:I) {
@@ -212,7 +214,7 @@ generated quantities {
 
 ## Prediction
 
-After evaluating model fit (i.e. convergence, posterior predictive checks), we will extract posterior point estimates (i.e. mean and 95% confidence intervals) from the fitted model. In this approach (withou gauging uncertainty), we can use the estimates to make predictions about attrition rates based on trial design features.
+After evaluating model fit (i.e. convergence, posterior predictive checks), we will extract posterior point estimates (i.e. mean and 95% confidence intervals) from the fitted model. In this approach (without gauging uncertainty), we can use the estimates to make predictions about attrition rates based on trial design features.
 
 ### Example
 
@@ -221,29 +223,56 @@ library(flexsurv)
 
 df2 <- tibble(
   time = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
-  a = rep(-0.3, 19),
-  b = rep(7.2, 19),
+  t2e = c(1, 1, 1, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.97, 0.97, 0.97),
+  a = rep(-0.005512, 19),
+  b = rep(exp(-6.466), 19),
 )
 
 df2_haz <- df2 %>% 
   mutate(
     haz = pmap_dbl(
       list(time, a, b),
-      ~ hgompertz(..1, shape = ..2, rate = ..3)
+      ~ hgompertz(x = ..1, shape = ..2, rate = ..3)
+    ),
+    cdf = pmap_dbl(
+      list(time, a, b),
+      ~ 1 - pgompertz(q = ..1, shape = ..2, rate = ..3)
     )
   )
 
 plot <- df2_haz %>% 
+  ggplot(aes(x = time, y = t2e)) +
+  geom_step(colour = "black") +
+  geom_line(aes(x = time, y = cdf), colour = "orange") +
+  geom_vline(xintercept = 3, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 9, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 18, linetype = "dashed", colour = "red") +
+  scale_x_continuous(n.breaks = 17) +
+  theme_bw() +
+  labs(x = "Trial duration in weeks", y = "Cumulative incidence")
+
+plot2 <- df2_haz %>% 
   ggplot(aes(x = time, y = haz)) +
   geom_line() +
+  geom_vline(xintercept = 3, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 9, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 18, linetype = "dashed", colour = "red") +
+  scale_x_continuous(n.breaks = 17) +
   theme_bw() +
   labs(x = "Trial duration in weeks", y = "Hazard rate")
 
 df2_haz %>% knitr::kable()
 print(plot)
+print(plot2)
 ```
 
 ## Prediction with uncertainty
+
+To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients (with intercepts included) and variance-covariance matrices obtained from the design-stage model.
+
+```{r makedata3}
+
+```
 
 ## Glossary
 
