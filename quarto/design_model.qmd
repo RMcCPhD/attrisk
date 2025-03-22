@@ -239,7 +239,7 @@ print(plot)
 
 ## Prediction with uncertainty
 
-To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients (with intercepts included) and variance-covariance matrices obtained from the design-stage model posterior draws. We will draw samples using the *mvrnorm* package.
+To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients and variance-covariance matrices obtained from the design-stage model posterior draws. We will draw samples using the *mvrnorm* package.
 
 ### Example (test data)
 

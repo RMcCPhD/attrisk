@@ -130,13 +130,6 @@ transformed parameters {
     a[i] = a_raw + (beta + beta_ext) * var1[i] + gamma * arm[i];
     b[i] = exp(b_mu + (beta + beta_ext) * var1[i] + gamma * arm[i] + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
-    
-    // Check values
-    // if (i <= 5) {
-    //   print("a_raw = ", a_raw, ", var1[i] = ", var1[i], "beta = ", beta);
-    //   print("a = ", a[i], ", b[i] = ", b[i]);
-    //   print("p[i] = ", p[i]);
-    // }
   }
 }
 
@@ -175,15 +168,15 @@ library(flexsurv)
 
 df3 <- tibble(
   time = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
-  a = rep(-0.3, 18),
-  hr = rep(2.1, 18),
+  rate = rep(exp(-0.3), 18),
+  hr = rep(1.2, 18),
 )
 
 df3_haz <- df3 %>% 
   mutate(
     haz = pmap_dbl(
-      list(time, a, hr),
-      ~ hgompertz(x = ..1, shape = ..2, rate = ..3)
+      list(time, rate, hr),
+      ~ hgompertz(x = ..1, shape = ..3, rate = ..2)
     )
   )
 
@@ -202,3 +195,24 @@ print(plot)
 ```
 
 ## Prediction with uncertainty
+
+To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients and variance-covariance matrices obtained from the design-stage model posterior draws. We will draw samples using the *mvrnorm* package.
+
+### Example (test data)
+
+```r
+# Cox sampling
+n <- 100
+samples_cox <- mvrnorm(n = n, mu = coef(cox_mdl), sigma = vcov(sigma))
+samples_cox <- exp(samples_cox)
+
+# Gomp bayes sampling
+n <- 100
+mu <- matrix(c(rnorm(100, mean = 0.221, sd = 1), rnorm(100, mean = -1.77, sd = 1)), ncol = 2)
+colnames(mu) <- c("rate", "shape")
+sigma <- matrix(c(0.0289, -0.0004, -0.0004, 0.0561), ncol = 2)
+colnames(sigma) <- c("shape", "rate")
+rownames(sigma) <- c("shape", "rate")
+samples <- mvrnorm(n = n, mu = mu, sigma = sigma)
+
+```
