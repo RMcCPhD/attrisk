@@ -11,7 +11,7 @@ data {
 parameters {
   real b_mu; // Log-baseline hazard rate
   vector[I] u; // Random intercept for rate
-  real a_raw; // Baseline shape parameter
+  real a_raw; // Shape intercept
   real beta; // Covariate coefficient
   real gamma; // Treatment arm effect
 }
@@ -23,7 +23,7 @@ transformed parameters {
   
   for (i in 1:I) {
     a[i] = a_raw + beta * var1[i] + gamma * arm[i];
-    b[i] = exp(b_mu + u[i]);
+    b[i] = exp(b_mu + beta * var1[i] + gamma * arm[i] + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
     
     // Check values
@@ -36,11 +36,11 @@ transformed parameters {
 }
 
 model {
-  b_mu ~ normal(0, 0.5);
+  b_mu ~ normal(0, 1);
   a_raw ~ normal(0, 1);
-  beta ~ normal(0, 0.5);
+  beta ~ normal(0, 1);
   u ~ normal(0, 1);
-  gamma ~ normal(0, 0.5);
+  gamma ~ normal(0, 1);
   
   // Likelihood
   for (i in 1:I) {

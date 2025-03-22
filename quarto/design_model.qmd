@@ -17,13 +17,13 @@ We will construct a design stage model using aggregate-level data to predict att
 library(tidyverse)
 
 df <- tibble(
-  trial_id = paste0("NCT", sample(1000000:9999999, 4)),
-  r = c(25, 10, 73, 91),
-  N = c(1000, 500, 2000, 700),
-  t = c(26, 52, 36, 12),
+  trial_id = c(1, 1, 2, 2),
+  r = c(25, 31, 73, 91),
+  N = c(100, 101, 203, 204),
+  t = c(26, 26, 52, 52),
   arm_type = c("Placebo", "Active", "Active", "Placebo"),
-  blinding = c("Single", "Double", "Triple", "Double"),
-  phase = c(3L, 4L, 3L, 3L),
+  blinding = c("Double", "Double", "Triple", "Triple"),
+  phase = c(3L, 3L, 4L, 4L),
   other_covariates = c("...", "...", "...", "...")
 )
 
@@ -31,7 +31,7 @@ df %>% knitr::kable()
 ```
 
 * r - Attrition event count
-* N - Number of participants in trial
+* N - Number of participants in arm
 * t - Randomised treatment duration
 
 We will code categorical variables as dummy variables to allow normal priors to be specified. Arm will be coded as a dummy variable where 0 = placebo and 1 = active comparator.
@@ -56,7 +56,9 @@ F(t_{i}) &= 1 - \exp \left(-\frac{b_{i}}{a_{i}} \exp(a_{i} t_{i}) \right),
 
 where $a \geq 0$ is the shape parameter and $b \geq 0$ is the rate parameter for trial $i$.
 
-We will place covariates on $a$ for each trial. We will specify a fixed intercept for $a$ across all trials and random effects for $j$:
+We will place covariates on $a$ and $b$ for each trial with random effects for $j$. 
+
+For $a$, we will specify a fixed intercept across all trials:
 
 \begin{aligned}
 \log(a_{i}) = \alpha_{i} + \gamma j + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki},
@@ -67,10 +69,10 @@ where $\alpha_i$ is the fixed intercept, $\gamma$ is a random effect for arm $j$
 We will specify random rate intercepts (i.e. across trials) for $b$:
 
 \begin{aligned}
-b_i = \exp(\beta_{0i} + u_i),
+b_i = \exp(\beta_{0i} + \gamma j + \beta_{1i}X_{1i} + \dots + \beta_{ki}X_{ki} + u_i),
 \end{aligned}
 
-where $\beta_{0i}$ is the log-baseline hazard rate for trial $i$ and $u_i$ is the rate intercept.
+where $\beta_{0i}$ is the log-baseline hazard rate for trial $i$, $\gamma$ is a random effect for arm $j$, $\beta_{1i} \dots \beta_{ki}$ are coefficients estimated for covariates and $X_{1i} \dots X_{ki}$ are the covariates and $u_i$ is the rate intercept.
 
 ### Priors
 
@@ -85,8 +87,8 @@ We will specify weakly informative priors for $\alpha_i$, $\gamma$ and $\beta_{k
 ``` stan
 data {
   int<lower=1> I; // Number of trials
-  int<lower=0> r[I]; // Observed attrition events per arm and trial
-  int<lower=0> N[I]; // Number of participants per arm and trial
+  int<lower=0> r[I]; // Observed attrition events per trial
+  int<lower=0> N[I]; // Number of participants per trial
   vector[I] dt; // Time in weeks per trial
   vector[I] var1; // Covariate
   vector[I] arm; // Treatment arm (0 = placebo, 1 = active)
@@ -95,9 +97,9 @@ data {
 parameters {
   real b_mu; // Log-baseline hazard rate
   vector[I] u; // Random intercept for rate
-  real a_raw; // Baseline shape parameter
+  real a_raw; // Shape intercept
   real beta; // Covariate coefficient
-  real gamma; // Treatment arm random effect
+  real gamma; // Treatment arm effect
 }
 
 transformed parameters {
@@ -107,24 +109,17 @@ transformed parameters {
   
   for (i in 1:I) {
     a[i] = a_raw + beta * var1[i] + gamma * arm[i];
-    b[i] = exp(b_mu + u[i]);
+    b[i] = exp(b_mu + beta * var1[i] + gamma * arm[i] + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
-    
-    // Check values
-    // if (i <= 5) {
-    //   print("a_raw = ", a_raw, ", var1[i] = ", var1[i], "beta = ", beta);
-    //   print("a = ", a[i], ", b[i] = ", b[i]);
-    //   print("p[i] = ", p[i]);
-    // }
   }
 }
 
 model {
-  b_mu ~ normal(0, 0.5);
+  b_mu ~ normal(0, 1);
   a_raw ~ normal(0, 1);
-  beta ~ normal(0, 0.5);
+  beta ~ normal(0, 1);
   u ~ normal(0, 1);
-  gamma ~ normal(0, 0.5);
+  gamma ~ normal(0, 1);
   
   // Likelihood
   for (i in 1:I) {
@@ -162,7 +157,7 @@ data {
 parameters {
   real b_mu; // Log-baseline hazard rate
   vector[I] u; // Random intercept for rate
-  real a_raw; // Baseline shape parameter
+  real a_raw; // Shape intercept
   real beta; // Covariate coefficient
   real gamma; // Treatment arm effect
 }
@@ -174,24 +169,17 @@ transformed parameters {
   
   for (i in 1:I) {
     a[i] = a_raw + beta * var1[i] + gamma * arm[i];
-    b[i] = exp(b_mu + u[i]);
+    b[i] = exp(b_mu + beta * var1[i] + gamma * arm[i] + u[i]);
     p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
-    
-    // Check values
-    // if (i <= 5) {
-    //   print("a_raw = ", a_raw, ", var1[i] = ", var1[i], "beta = ", beta);
-    //   print("a = ", a[i], ", b[i] = ", b[i]);
-    //   print("p[i] = ", p[i]);
-    // }
   }
 }
 
 model {
-  b_mu ~ normal(0, 0.5);
+  b_mu ~ normal(0, 1);
   a_raw ~ normal(0, 1);
   beta ~ double_exponential(0, 1); // Shrinkage factor of 1
   u ~ normal(0, 1);
-  gamma ~ normal(0, 0.5);
+  gamma ~ normal(0, 1);
   
   // Likelihood
   for (i in 1:I) {
@@ -214,18 +202,17 @@ generated quantities {
 
 ## Prediction
 
-After evaluating model fit (i.e. convergence, posterior predictive checks), we will extract posterior point estimates (i.e. mean and 95% confidence intervals) from the fitted model. In this approach (without gauging uncertainty), we can use the estimates to make predictions about attrition rates based on trial design features.
+After evaluating model fit (e.g. convergence, posterior predictive checks), we will extract posterior point estimates (i.e. mean and 95% confidence intervals) from the fitted model. We can use the estimates to make predictions about attrition rates based on trial design features. We will make predictions using the Gompertz distribution (i.e. hazard function).
 
-### Example
+### Example (test data)
 
 ```{r makedata2}
 library(flexsurv)
 
 df2 <- tibble(
-  time = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
-  t2e = c(1, 1, 1, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.97, 0.97, 0.97),
-  a = rep(-0.005512, 19),
-  b = rep(exp(-6.466), 19),
+  time = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
+  a = rep(-0.3356, 18),
+  b = rep(exp(0.25590214), 18),
 )
 
 df2_haz <- df2 %>% 
@@ -233,25 +220,10 @@ df2_haz <- df2 %>%
     haz = pmap_dbl(
       list(time, a, b),
       ~ hgompertz(x = ..1, shape = ..2, rate = ..3)
-    ),
-    cdf = pmap_dbl(
-      list(time, a, b),
-      ~ 1 - pgompertz(q = ..1, shape = ..2, rate = ..3)
     )
   )
 
 plot <- df2_haz %>% 
-  ggplot(aes(x = time, y = t2e)) +
-  geom_step(colour = "black") +
-  geom_line(aes(x = time, y = cdf), colour = "orange") +
-  geom_vline(xintercept = 3, linetype = "dashed", colour = "red") +
-  geom_vline(xintercept = 9, linetype = "dashed", colour = "red") +
-  geom_vline(xintercept = 18, linetype = "dashed", colour = "red") +
-  scale_x_continuous(n.breaks = 17) +
-  theme_bw() +
-  labs(x = "Trial duration in weeks", y = "Cumulative incidence")
-
-plot2 <- df2_haz %>% 
   ggplot(aes(x = time, y = haz)) +
   geom_line() +
   geom_vline(xintercept = 3, linetype = "dashed", colour = "red") +
@@ -263,17 +235,23 @@ plot2 <- df2_haz %>%
 
 df2_haz %>% knitr::kable()
 print(plot)
-print(plot2)
 ```
 
 ## Prediction with uncertainty
 
-To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients (with intercepts included) and variance-covariance matrices obtained from the design-stage model.
+To gauge the uncertainty of predictions, we will sample posterior point estimates using Monte Carlo simulation. To do this, we will sample from a multivariate normal distribution using the coefficients (with intercepts included) and variance-covariance matrices obtained from the design-stage model posterior draws. We will draw samples using the *mvrnorm* package.
 
-```{r makedata3}
+### Example (test data)
+
+```r
+n <- 100
+mu <- matrix(c(rnorm(100, mean = 0.221, sd = 1), rnorm(100, mean = -1.77, sd = 1)), ncol = 2)
+colnames(mu) <- c("rate", "shape")
+sigma <- matrix(c(0.0289, -0.0004, -0.0004, 0.0561), ncol = 2)
+colnames(sigma) <- c("shape", "rate")
+rownames(sigma) <- c("shape", "rate")
+samples <- mvrnorm(n = n, mu = mu, sigma = sigma)
 
 ```
-
-## Glossary
 
 

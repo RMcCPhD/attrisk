@@ -1,5 +1,5 @@
 ---
-title: "Trial design model"
+title: "Trial conduct model"
 format: html
 editor: source
 echo: false
@@ -9,9 +9,9 @@ message: false
 
 ## Summary
 
-We will construct a conduct-stage model by constructing participant-level and trial-level sub-models. The trial-level model will allow us to generate a baseline hazard rate for any trial conditional on trial design features. The participant-level model will enable us to modify the baseline hazard rate by applying hazard ratios for participant-level characteristics.
+We will construct a conduct-stage model comprising participant-level and trial-level sub-models. The trial-level model will allow us to generate a baseline hazard rate for any trial conditional on trial design features. The participant-level model will enable us to modify the baseline hazard rate by applying hazard ratios for participant-level characteristics.
 
-## Partipant-level model
+## Partipant sub-model
 
 ### Data
 
@@ -19,8 +19,8 @@ We will construct a conduct-stage model by constructing participant-level and tr
 library(tidyverse)
 
 df <- tibble(
-  trial_id = paste0("NCT", sample(1000000:9999999, 4)),
-  subject_id = paste0("SUBJ", sample(1:10000), 4),
+  trial_id = c(1, 1, 1, 1),
+  subject_id = paste0("SUBJ", sample(1:10000, 4)),
   status = c(1L, 0L, 0L, 1L),
   time = c(26, 3, 21, 26),
   arm_type = c("Placebo", "Active", "Active", "Placebo"),
@@ -34,33 +34,171 @@ df %>% knitr::kable()
 
 ### Model description
 
-### Model code
+We will fit a stratified Cox model with the inclusion of participant-level characteristics. We will stratify by trial to allow for variation in baseline hazard across trials without explicit modelling. Stratification will produce a single set of hazard ratios adjusted relative to the baseline hazard of each trial. 
 
-## Trial-level model
+The stratified model maintains the assumption that predictors have a constant effect on the hazard rate over time. As such, we will test for proportional hazards by calculating Schoenfeld residuals from the model plotted against time to identify any non-random residual patterns. We will implement this check using *cox.zph* from the *survival* package.
+
+### Model code
+```r
+library(survival)
+cox <- coxph(Surv(time, status) ~ age + sex + treatment + strata(trial_id), data = df)
+```
+
+### Model code (with coefficient shrinkage)
+
+We will apply LASSO (Least absolute shrinkage and selection operator shrinkage using the *glmnet* package for cox models. As this does not support stratification, we will fit a Cox model to each trial and meta-analyse the outputs.
+
+```r
+library(glmnet)
+
+# Fit a penalised cox model for each trial
+df_cox <- df %>%
+    group_by(trial_id) %>% 
+    group_map(~ {
+        x <- model.matrix(~ age + sex + treatment, data = .x)[, -1]
+        y <- with(.x, Surv(time, status))
+        fit <- cv.glmnet(x, y, family = "cox", alpha = 1) # LASSO applied
+        coefs <- as.matrix(coef(fit, s = "lambda.min"))
+        data.frame(term = rownames(coefs), estimate = coefs[,1])
+    })
+    
+# Filter out zero coefficients
+df_cox_filter <- df %>% 
+    filter(estimate != 0 & term != "(Intercept)")
+    
+# Meta-analyse for each variable (individually as an example)
+age_meta_df <- df_cox_filter %>%
+  filter(term == "age") %>%
+  mutate(var = stderror)
+
+age_meta <- rma(yi = estimate, vi = var, data = age_meta)
+
+```
+
+## Trial sub-model
 
 ### Data
 
 ```{r makedata2}
 library(tidyverse)
 
-df <- tibble(
-  trial_id = paste0("NCT", sample(1000000:9999999, 4)),
-  r = c(25, 10, 73, 91),
-  N = c(1000, 500, 2000, 700),
-  t = c(26, 52, 36, 12),
+df2 <- tibble(
+  trial_id = c(1, 1, 2, 2),
+  r = c(25, 31, 73, 91),
+  N = c(100, 101, 203, 204),
+  t = c(26, 26, 52, 52),
   arm_type = c("Placebo", "Active", "Active", "Placebo"),
-  blinding = c("Single", "Double", "Triple", "Double"),
-  phase = c(3L, 4L, 3L, 3L),
-  other_covariates = c("...", "...", "...", "...")
+  blinding = c("Double", "Double", "Triple", "Triple"),
+  mean_age = c(54.7, 57.8, 63.1, 59.7),
+  prop_female = c(49.1, 50.9, 52.8, 48.6)
 )
 
-df %>% knitr::kable()
+df2 %>% knitr::kable()
 ```
 
 ### Model description
 
+The trial sub-model will be similar to the design model, but with the addition of participant characteristics that are also present in IPD trials (e.g. age, sex, BMI). By doing so, we can introduce an offset to this model that incorporates the effects of participant characteristics in both models as a fixed effect.
+
 ### Model code
 
+``` stan
+data {
+  int<lower=1> I; // Number of trials
+  int<lower=0> r[I]; // Observed attrition events per trial
+  int<lower=0> N[I]; // Number of participants per trial
+  vector[I] dt; // Time in weeks per trial
+  vector[I] var1; // Covariate
+  vector[I] arm; // Treatment arm (0 = placebo, 1 = active)
+  real beta_ext // Coefficient for covariate in participant sub-model
+}
+
+parameters {
+  real b_mu; // Log-baseline hazard rate
+  vector[I] u; // Random intercept for rate
+  real a_raw; // Shape intercept
+  real beta; // Covariate coefficient
+  real gamma; // Treatment arm effect
+}
+
+transformed parameters {
+  vector[I] b; // Rate
+  vector[I] a; // Shape
+  vector[I] p; // Probability of attrition
+  
+  for (i in 1:I) {
+    a[i] = a_raw + (beta + beta_ext) * var1[i] + gamma * arm[i];
+    b[i] = exp(b_mu + (beta + beta_ext) * var1[i] + gamma * arm[i] + u[i]);
+    p[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
+    
+    // Check values
+    // if (i <= 5) {
+    //   print("a_raw = ", a_raw, ", var1[i] = ", var1[i], "beta = ", beta);
+    //   print("a = ", a[i], ", b[i] = ", b[i]);
+    //   print("p[i] = ", p[i]);
+    // }
+  }
+}
+
+model {
+  b_mu ~ normal(0, 1);
+  a_raw ~ normal(0, 1);
+  beta ~ normal(0, 1);
+  u ~ normal(0, 1);
+  gamma ~ normal(0, 1);
+  
+  // Likelihood
+  for (i in 1:I) {
+    r[i] ~ binomial(N[i], p[i]);
+  }
+}
+
+generated quantities {
+  vector[I] r_new; // Predicted count
+  vector[I] p_new; // Predicted probability of attrition
+  vector[I] rate; // Baseline hazard rate
+  
+  for (i in 1:I) {
+    p_new[i] = 1 - exp(-b[i]/a[i] * (exp(a[i] * dt[i]) - 1));
+    r_new[i] = binomial_rng(N[i], p_new[i]);
+    rate[i] = exp(b_mu);
+  }
+}
+```
+
 ## Prediction
+
+By fitting participant and trial sub-models, we can extract the outputs of both to make predictions about attrition rates over time. Like the design model, we will make predictions using the Gompertz hazard function, plugging in shape extracted from the trial sub-model, and rate as the hazard ratio obtained from the participant sub-model.
+
+```{r makedata3}
+library(flexsurv)
+
+df3 <- tibble(
+  time = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
+  a = rep(-0.3, 18),
+  hr = rep(2.1, 18),
+)
+
+df3_haz <- df3 %>% 
+  mutate(
+    haz = pmap_dbl(
+      list(time, a, hr),
+      ~ hgompertz(x = ..1, shape = ..2, rate = ..3)
+    )
+  )
+
+plot <- df3_haz %>% 
+  ggplot(aes(x = time, y = haz)) +
+  geom_line() +
+  geom_vline(xintercept = 3, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 9, linetype = "dashed", colour = "red") +
+  geom_vline(xintercept = 18, linetype = "dashed", colour = "red") +
+  scale_x_continuous(n.breaks = 17) +
+  theme_bw() +
+  labs(x = "Trial duration in weeks", y = "Hazard rate")
+
+df3_haz %>% knitr::kable()
+print(plot)
+```
 
 ## Prediction with uncertainty
