@@ -102,6 +102,17 @@ The trial sub-model will be similar to the design model, but with the addition o
 
 ### Model code
 
+``` r
+fit <- sampling(
+  compile,
+  data = stan_data,
+  warmup = 1000,
+  iter = 4000, # Less chains but more iterations (3000, 1000 originally)
+  chains = 3, # Running with four chains caused convergence issues
+  seed = 123
+)
+```
+
 ``` stan
 data {
   int<lower=1> I; // Number of trials

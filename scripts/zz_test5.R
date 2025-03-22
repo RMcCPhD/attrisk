@@ -30,7 +30,7 @@ str(stan_data)
 # Compile model
 compile <- stan_model("Scripts/zz_test6.stan")
 
-# Fit model (less iter and removed warmup to speed up for examples)
+# Fit model
 fit <- sampling(
   compile,
   data = stan_data,
