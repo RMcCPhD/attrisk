@@ -1,0 +1,374 @@
+trial_id,source,n,arm_n,arm_n_attr,type,phase,number_of_arms,n_facilities,duration,n_poms,masking,n_regions,region_of_the_americas,european_region,western_pacific_region,african_region,south_east_asia_region,eastern_mediterranean_region
+NCT00035984,agg,734,247,59,placebo,Phase 3,4,100,30,1,Double,1,1,0,0,0,0,0
+NCT00039013,agg,336,113,24,placebo,Phase 3,4,129,30,1,Double,1,1,0,0,0,0,0
+NCT00039026,agg,377,123,49,placebo,Phase 3,4,126,30,1,Double,1,1,0,0,0,0,0
+NCT00082381,agg,549,267,25,ac,Phase 3,2,91,26,1,None (Open Label),3,3,9,1,0,0,0
+NCT00082407,agg,501,248,25,ac,Phase 3,2,69,52,1,None (Open Label),2,0,11,1,0,0,0
+NCT00086502,agg,353,178,20,placebo,Phase 3,2,73,24,1,Double,4,1,1,1,1,0,0
+NCT00086515,agg,701,237,45,placebo,Phase 3,2,109,24,1,Double,5,1,1,1,0,1,0
+NCT00087516,agg,741,253,37,placebo,Phase 3,4,110,24,1,Double,5,1,1,1,1,0,0
+NCT00094757,agg,521,110,19,placebo,Phase 3,3,119,18,1,Double,5,1,1,1,0,1,0
+NCT00094770,agg,1172,584,172,ac,Phase 3,2,170,52,1,Double,5,1,1,1,1,0,0
+NCT00099320,agg,233,112,16,placebo,Phase 3,2,51,4,2,Double,2,2,1,0,0,0,0
+NCT00099853,agg,463,158,30,placebo,Phase 3,3,123,24,1,Quadruple,1,1,0,0,0,0,0
+NCT00099892,agg,416,130,22,placebo,Phase 3,3,109,24,1,Double,1,1,0,0,0,0,0
+NCT00099905,agg,380,94,24,placebo,Phase 3,4,NA,24,1,Double,1,1,0,0,0,0,0
+NCT00099918,agg,697,238,6,ac,Phase 3,2,202,24,1,Double,2,1,1,0,0,0,0
+NCT00099931,agg,296,152,28,placebo,Phase 3,2,68,24,1,Double,1,0,1,0,0,0,0
+NCT00099944,agg,408,144,23,placebo,Phase 3,3,114,24,1,Quadruple,1,1,0,0,0,0,0
+NCT00101712,agg,306,150,28,placebo,Phase 3,2,69,52,1,Double,1,0,2,0,0,0,0
+NCT00101803,agg,315,161,28,ac,Phase 3,4,145,24,1,Double,1,1,0,0,0,0,0
+NCT00102466,agg,1007,494,82,ac,Phase 3,2,NA,52,1,Double,1,0,2,0,0,0,0
+NCT00103857,agg,719,182,26,ac,Phase 3,7,141,24,1,Double,5,1,1,1,1,1,0
+NCT00103857,agg,719,182,29,ac,Phase 3,7,141,24,1,Double,5,1,1,1,1,0,0
+NCT00103857,agg,719,176,49,placebo,Phase 3,7,141,24,1,Double,5,1,1,1,1,0,0
+NCT00106340,agg,2789,1393,275,ac,Phase 3,2,386,104,1,Quadruple,2,1,1,0,0,0,0
+NCT00106704,agg,425,219,40,placebo,Phase 3,2,NA,24,1,Double,5,1,1,1,0,0,0
+NCT00110240,agg,661,220,28,ac,Phase 3,2,31,24,1,Double,1,0,1,0,0,0,0
+NCT00120536,agg,354,92,29,placebo,Phase 3,4,98,24,1,Double,1,1,0,0,0,0,0
+NCT00121641,agg,401,95,40,placebo,Phase 3,5,135,24,2,Double,2,4,0,2,0,0,0
+NCT00121667,agg,743,179,67,placebo,Phase 3,4,154,24,1,Double,2,7,0,2,0,0,0
+NCT00237237,agg,576,281,37,ac,Phase 3,2,118,52,1,Double,2,1,1,0,0,0,0
+NCT00286429,ipd,390,130,75,placebo,Phase 3,3,60,26,1,Quadruple,5,7,6,2,1,1,0
+NCT00286442,ipd,527,104,32,placebo,Phase 3,3,56,26,1,Quadruple,5,7,7,2,1,1,0
+NCT00286455,ipd,329,65,25,placebo,Phase 3,3,67,26,1,Quadruple,5,8,6,2,1,1,0
+NCT00286468,ipd,500,99,37,placebo,Phase 3,3,68,26,1,Quadruple,5,8,4,2,1,1,0
+NCT00286494,ipd,493,97,26,placebo,Phase 3,3,77,26,1,Quadruple,5,6,5,2,1,1,0
+NCT00289848,agg,530,178,45,placebo,Phase 3,2,18,18,1,Double,2,0,0,1,0,0,0
+NCT00294723,agg,745,248,96,ac,Phase 3,4,117,52,3,Double,1,3,0,0,0,0,0
+NCT00295633,agg,585,184,46,placebo,Phase 3,3,133,24,1,Double,3,6,0,1,0,1,0
+NCT00300287,agg,302,149,18,placebo,Phase 3,2,69,108,1,Double,1,0,1,0,0,0,0
+NCT00305604,agg,206,104,47,placebo,Phase 3,2,52,24,1,Double,1,1,0,0,0,0,0
+NCT00313001,agg,372,248,44,ac,Phase 3,3,102,24,1,None (Open Label),1,1,0,0,0,0,0
+NCT00313313,agg,768,264,267,placebo,Phase 3,3,115,24,1,Double,5,6,1,5,1,1,0
+NCT00316082,agg,294,74,21,placebo,Phase 3,5,74,24,1,Double,4,1,1,1,0,1,0
+NCT00318461,agg,1091,244,34,ac,Phase 3,5,190,26,2,Double,5,1,16,2,1,1,0
+NCT00318461,agg,1091,122,48,placebo,Phase 3,5,190,26,2,Double,5,1,16,2,1,1,0
+NCT00324363,agg,466,232,24,placebo,Phase 3,2,14,16,1,Double,2,0,0,3,0,1,0
+NCT00325117,agg,202,100,4,placebo,Phase 3,2,29,12,1,Double,1,0,0,1,0,0,0
+NCT00327015,agg,663,328,85,ac,Phase 3,4,211,24,2,Double,4,5,6,1,0,1,0
+NCT00328627,agg,646,388,104,ac,Phase 3,12,90,26,2,Double,5,6,10,2,1,1,0
+NCT00328627,agg,646,129,59,placebo,Phase 3,12,90,26,2,Double,5,6,10,2,1,1,0
+NCT00331851,agg,581,234,13,ac,Phase 3,3,116,26,1,Double,5,2,13,1,1,1,0
+NCT00331851,agg,581,115,18,placebo,Phase 3,3,116,26,1,Double,5,2,13,1,1,1,0
+NCT00333151,agg,533,177,6,placebo,Phase 3,2,89,26,1,Double,1,2,0,0,0,0,0
+NCT00337610,agg,190,94,17,placebo,Phase 3,2,19,18,1,Double,3,1,1,0,0,0,0
+NCT00350779,agg,262,92,21,placebo,Phase 3,2,41,18,1,Double,3,1,1,1,0,0,0
+NCT00351832,agg,239,61,2,placebo,Phase 3,4,49,12,1,Double,1,0,0,1,0,0,0
+NCT00351884,agg,370,122,32,placebo,Phase 3,3,67,24,1,Triple,2,1,1,0,0,0,0
+NCT00359762,agg,1029,514,128,ac,Phase 3,2,115,234,2,None (Open Label),2,1,13,0,0,0,0
+NCT00363948,agg,149,72,4,placebo,Phase 3,2,39,12,3,Quadruple,1,0,0,1,0,0,0
+NCT00368134,agg,380,192,10,ac,Phase 3,2,51,12,1,Double,1,0,0,1,0,0,0
+NCT00372060,agg,134,68,1,placebo,Phase 3,2,31,12,1,Double,1,0,0,1,0,0,0
+NCT00375492,agg,194,98,26,placebo,Phase 3,2,NA,24,1,Double,1,1,0,0,0,0,0
+NCT00381342,agg,232,77,9,placebo,Phase 3,3,19,24,1,Double,3,2,2,0,0,1,0
+NCT00382096,agg,594,294,49,ac,Phase 3,4,250,24,1,Double,2,1,1,0,0,0,0
+NCT00383578,agg,335,166,26,ac,Phase 3,2,113,24,1,Double,1,0,2,0,0,0,0
+NCT00393718,agg,400,132,22,ac,Phase 3,2,75,24,1,Double,1,0,0,1,0,0,0
+NCT00395343,agg,641,319,36,placebo,Phase 3,2,102,24,1,Double,5,3,15,4,1,2,0
+NCT00395512,agg,327,163,37,ac,Phase 3,4,161,26,1,Quadruple,5,7,14,2,1,1,0
+NCT00395746,agg,264,88,22,placebo,Phase 3,4,49,24,1,Double,1,0,0,1,0,0,0
+NCT00396227,agg,2664,888,105,ac,Phase 3,2,577,12,1,None (Open Label),1,1,0,0,0,0,0
+NCT00397631,agg,520,259,44,placebo,Phase 3,2,62,24,1,Double,4,6,4,3,0,1,0
+NCT00411554,agg,319,156,9,ac,Phase 3,2,65,12,1,Double,1,0,0,1,0,0,0
+NCT00432276,agg,803,399,156,placebo,Phase 3,2,86,26,1,Quadruple,1,1,0,0,0,0,0
+NCT00434954,agg,494,246,71,ac,Phase 3,2,39,26,2,None (Open Label),1,0,1,0,0,0,0
+NCT00449930,agg,1050,522,75,ac,Phase 3,2,112,24,1,Double,4,6,14,1,0,1,0
+NCT00482729,agg,1250,624,218,placebo,Phase 3,2,229,18,1,Double,1,2,0,0,0,0,0
+NCT00509262,agg,423,212,42,ac,Phase 3,2,NA,54,2,Triple,5,7,10,5,0,2,1
+NCT00528372,agg,274,75,12,placebo,Phase 3,9,78,24,2,Double,2,3,1,0,0,0,0
+NCT00528879,agg,546,137,22,placebo,Phase 3,4,75,24,1,Double,2,5,1,0,0,0,0
+NCT00541775,agg,273,87,2,ac,Phase 3,3,37,18,1,Double,3,0,1,1,0,1,0
+NCT00541775,agg,273,92,8,placebo,Phase 3,3,37,18,1,Double,3,0,1,1,0,1,0
+NCT00575588,agg,858,430,283,ac,Phase 3,2,95,52,1,Quadruple,3,0,8,2,0,1,0
+NCT00577824,agg,181,36,2,placebo,Phase 3,3,12,24,1,Double,1,0,0,1,0,0,0
+NCT00601250,ipd,700,177,14,placebo,Phase 3,2,82,24,1,Double,4,2,6,1,0,1,0
+NCT00602472,ipd,1055,263,21,placebo,Phase 3,2,100,24,1,Double,3,3,6,4,0,0,0
+NCT00603239,agg,165,54,4,placebo,Phase 3,2,25,26,1,Double,3,3,1,0,1,0,0
+NCT00614120,agg,929,231,16,ac,Phase 3,4,50,16,1,Double,2,0,0,2,0,1,0
+NCT00614939,agg,170,85,35,placebo,Phase 3,2,75,12,1,Triple,2,1,13,0,0,0,0
+NCT00621140,ipd,503,167,15,placebo,Phase 3,2,69,24,1,Double,3,0,8,1,0,2,0
+NCT00622284,ipd,1551,775,171,ac,Phase 3,2,221,52,2,Double,5,2,12,1,1,1,0
+NCT00637273,agg,514,172,41,ac,Phase 3,3,62,26,1,Double,2,2,0,0,0,1,0
+NCT00641043,ipd,389,130,19,placebo,Phase 3,2,43,24,1,Double,2,0,7,1,0,0,0
+NCT00641056,agg,467,234,25,ac,Phase 3,2,75,26,1,None (Open Label),3,3,10,3,0,0,0
+NCT00643851,agg,404,201,30,ac,Phase 3,3,99,24,1,Double,4,3,2,3,0,1,0
+NCT00654381,ipd,561,162,4,ac,Phase 3,4,47,12,3,Double,1,0,0,1,0,0,0
+NCT00654381,ipd,561,80,6,placebo,Phase 3,4,47,12,3,Double,1,0,0,1,0,0,0
+NCT00660907,agg,814,408,94,ac,Phase 3,2,77,52,1,Quadruple,3,3,7,0,1,0,0
+NCT00661362,agg,570,287,40,placebo,Phase 3,2,30,24,1,Quadruple,2,0,0,2,0,1,0
+NCT00673231,agg,807,197,29,placebo,Phase 3,4,96,24,1,Quadruple,2,2,11,0,0,0,0
+NCT00676338,agg,820,246,33,ac,Phase 3,4,106,26,2,Double,5,6,13,1,1,1,0
+NCT00676338,agg,820,163,30,ac,Phase 3,4,106,26,2,Double,5,6,13,1,1,1,0
+NCT00680745,agg,596,146,13,placebo,Phase 3,4,66,24,1,Quadruple,3,0,4,2,0,2,0
+NCT00683878,agg,420,139,23,placebo,Phase 3,3,89,24,1,Double,3,6,0,2,0,1,0
+NCT00698932,agg,568,284,36,placebo,Phase 3,2,30,24,1,Quadruple,2,0,0,3,0,1,0
+NCT00701090,agg,1035,519,51,ac,Phase 3,2,NA,30,1,Double,4,9,9,3,0,1,0
+NCT00707993,ipd,441,219,94,ac,Phase 3,2,80,52,1,Quadruple,5,3,6,1,1,1,0
+NCT00713830,ipd,859,286,82,placebo,Phase 3,2,16,24,1,Double,5,1,8,3,0,2,2
+NCT00715624,ipd,496,167,52,placebo,Phase 3,2,15,24,1,Quadruple,5,6,6,1,0,1,1
+NCT00722371,agg,2310,693,200,ac,Phase 3,7,NA,24,2,Double,6,8,12,3,1,1,3
+NCT00740051,ipd,227,76,18,placebo,Phase 3,3,53,18,2,Double,3,3,3,1,0,0,0
+NCT00744367,agg,313,94,6,placebo,Phase 3,3,113,24,1,Double,2,7,2,0,0,0,0
+NCT00751114,agg,515,250,38,ac,Phase 4,2,17,24,1,None (Open Label),5,4,9,2,0,1,2
+NCT00754988,agg,636,90,7,placebo,Phase 3,4,148,24,1,Double,5,7,14,3,1,1,0
+NCT00755287,agg,1028,319,26,ac,Phase 3,3,210,24,1,None (Open Label),4,7,15,5,0,1,0
+NCT00757588,agg,455,151,17,placebo,Phase 3,2,80,24,1,Double,4,4,5,0,1,1,0
+NCT00763815,ipd,484,161,52,placebo,Phase 3,2,150,24,1,Double,3,6,6,0,0,1,0
+NCT00765817,agg,261,123,22,placebo,Phase 3,2,59,30,1,Double,2,3,3,0,0,0,0
+NCT00798161,ipd,505,147,21,ac,Phase 3,6,138,24,1,Double,5,3,10,0,1,1,1
+NCT00798161,ipd,505,144,17,ac,Phase 3,6,138,24,1,Double,5,3,10,0,1,1,1
+NCT00798161,ipd,505,72,18,placebo,Phase 3,6,138,24,1,Double,5,3,10,0,1,1,1
+NCT00800683,ipd,133,65,17,placebo,Phase 3,2,53,12,1,Double,3,1,2,3,0,0,0
+NCT00813995,agg,395,198,16,placebo,Phase 3,2,17,24,1,Double,1,0,0,1,0,0,0
+NCT00819091,ipd,245,84,7,placebo,Phase 3,2,45,18,1,Double,4,2,4,1,0,1,0
+NCT00822211,agg,438,144,13,placebo,Phase 3,3,17,24,1,Triple,1,0,0,1,0,0,0
+NCT00823992,agg,292,143,7,placebo,Phase 3,2,71,24,1,Double,2,5,7,0,0,0,0
+NCT00837577,agg,133,63,0,placebo,Phase 3,2,13,12,1,Double,1,0,0,1,0,0,0
+NCT00838903,ipd,1012,101,46,placebo,Phase 3,4,386,104,1,Double,4,3,5,2,1,0,0
+NCT00838916,ipd,745,241,77,ac,Phase 3,2,338,52,1,None (Open Label),3,2,3,0,1,0,0
+NCT00839527,ipd,663,277,118,ac,Phase 3,3,358,52,1,Double,4,2,4,2,0,1,0
+NCT00839527,ipd,663,115,60,placebo,Phase 3,3,358,52,1,Double,4,2,4,2,0,1,0
+NCT00849017,ipd,301,101,43,placebo,Phase 3,3,262,52,1,Double,2,3,0,0,1,0,0
+NCT00849056,ipd,301,151,63,placebo,Phase 3,2,331,52,1,Double,5,3,1,2,1,1,0
+NCT00854035,agg,266,137,8,placebo,Phase 3,2,60,16,2,Double,1,0,0,1,0,0,0
+NCT00856284,ipd,2639,874,447,ac,Phase 3,3,262,52,2,Double,5,9,13,7,1,2,0
+NCT00859898,agg,427,208,27,ac,Phase 3,3,123,24,1,Quadruple,4,4,1,1,0,1,0
+NCT00866658,ipd,311,157,13,placebo,Phase 3,2,57,24,1,Double,1,0,0,4,0,0,0
+NCT00870194,agg,255,127,26,placebo,Phase 4,2,36,20,1,Double,4,2,2,2,0,1,0
+NCT00885352,agg,313,156,20,placebo,Phase 3,2,58,26,1,Double,5,4,4,2,1,1,0
+NCT00885378,agg,160,86,8,placebo,Phase 3,2,41,12,1,Quadruple,2,3,2,0,0,0,0
+NCT00894868,agg,254,126,26,placebo,Phase 4,2,94,52,1,Double,4,1,13,1,0,1,0
+NCT00909597,agg,740,255,27,ac,Phase 3,3,147,24,1,Double,5,7,9,2,1,1,0
+NCT00918879,agg,213,106,6,placebo,Phase 3,2,9,24,1,Quadruple,1,0,0,0,0,1,0
+NCT00935532,agg,427,212,11,ac,Phase 3,2,22,26,1,None (Open Label),1,0,0,1,0,0,0
+NCT00954447,ipd,1261,630,110,placebo,Phase 3,2,169,24,1,Double,3,7,12,2,0,0,0
+NCT00957060,agg,400,200,179,ac,Phase 4,2,NA,12,2,None (Open Label),1,2,0,0,0,0,0
+NCT00960076,agg,282,144,25,ac,Phase 3,2,35,18,1,Quadruple,1,5,0,0,0,0,0
+NCT00960661,agg,637,321,46,ac,Phase 3,2,97,30,1,None (Open Label),3,4,14,1,0,0,0
+NCT00968812,ipd,1450,482,168,ac,Phase 3,3,142,52,1,Quadruple,5,7,12,2,1,1,0
+NCT00974090,agg,194,98,3,placebo,Phase 3,2,37,12,1,Quadruple,1,0,0,1,0,0,0
+NCT00975286,ipd,446,223,29,placebo,Phase 3,2,140,24,1,Double,5,8,14,2,1,1,0
+NCT00976391,ipd,566,281,39,ac,Phase 3,2,210,26,1,None (Open Label),5,4,4,4,1,1,0
+NCT00984867,agg,451,226,23,placebo,Phase 3,2,88,24,1,Quadruple,2,3,3,0,0,0,0
+NCT00996658,ipd,278,92,16,placebo,Phase 3,2,52,24,1,Double,4,1,1,1,0,1,0
+NCT00998881,agg,203,104,8,placebo,Phase 3,2,NA,12,1,Quadruple,1,0,0,1,0,0,0
+NCT01003184,agg,222,111,12,ac,Phase 3,2,34,26,1,None (Open Label),1,0,2,0,0,0,0
+NCT01006590,agg,286,139,32,ac,Phase 4,2,50,24,1,Triple,1,0,7,0,0,0,0
+NCT01006603,agg,720,360,75,ac,Phase 4,2,131,52,1,Double,2,1,12,0,0,0,0
+NCT01023581,ipd,559,111,16,ac,Phase 3,7,201,26,1,Quadruple,4,6,9,0,1,1,0
+NCT01023581,ipd,559,114,20,ac,Phase 3,7,201,26,1,Quadruple,4,6,9,0,1,1,0
+NCT01023581,ipd,559,109,35,placebo,Phase 3,7,201,26,1,Quadruple,4,6,9,0,1,1,0
+NCT01026194,agg,204,101,3,placebo,Phase 3,2,39,12,1,Quadruple,1,0,0,1,0,0,0
+NCT01028391,agg,317,153,11,placebo,Phase 3,2,62,54,1,Double,4,1,1,1,0,1,0
+NCT01031680,agg,922,462,58,placebo,Phase 3,2,141,24,2,Quadruple,3,3,5,2,0,0,0
+NCT01042977,agg,965,483,55,placebo,Phase 3,2,135,24,2,Quadruple,3,4,5,1,0,0,0
+NCT01046110,agg,458,229,55,ac,Phase 3,2,93,26,1,None (Open Label),4,4,1,0,1,1,0
+NCT01057628,agg,129,67,10,placebo,Phase 3,2,22,16,1,Quadruple,1,0,0,1,0,0,0
+NCT01064414,agg,269,90,13,placebo,Phase 3,3,109,26,1,Quadruple,5,4,8,5,1,1,0
+NCT01064687,ipd,978,141,17,placebo,Phase 3,4,89,26,1,Quadruple,2,4,0,1,0,0,0
+NCT01075282,ipd,810,265,27,ac,Phase 3,3,78,52,1,None (Open Label),4,4,12,3,0,1,0
+NCT01076075,agg,427,214,47,placebo,Phase 3,2,48,24,3,Double,3,0,2,6,0,1,0
+NCT01076088,agg,497,126,17,ac,Phase 3,6,NA,24,1,Double,1,0,0,1,0,0,0
+NCT01076088,agg,497,124,15,ac,Phase 3,6,NA,24,1,Double,1,0,0,1,0,0,0
+NCT01076088,agg,497,127,23,placebo,Phase 3,6,NA,24,1,Double,1,0,0,1,0,0,0
+NCT01081834,ipd,584,192,32,placebo,Phase 3,3,79,26,2,Triple,5,6,8,3,1,1,0
+NCT01084005,ipd,241,79,5,placebo,Phase 3,2,34,24,1,Double,3,1,3,1,0,0,0
+NCT01087502,ipd,241,123,9,placebo,Phase 3,3,52,12,1,Double,3,2,4,3,0,0,0
+NCT01095653,agg,393,132,19,placebo,Phase 3,3,39,24,1,Quadruple,2,0,0,3,0,1,0
+NCT01095666,agg,444,145,17,placebo,Phase 3,3,33,24,1,Quadruple,2,0,0,2,0,1,0
+NCT01099137,agg,344,172,20,ac,Phase 4,2,1,2,1,Quadruple,1,0,0,1,0,0,0
+NCT01106625,ipd,469,156,27,placebo,Phase 3,3,76,26,1,Triple,3,4,10,1,0,0,0
+NCT01106651,ipd,714,237,79,placebo,Phase 3,3,86,26,1,Triple,5,4,10,3,1,1,0
+NCT01106677,ipd,1284,183,28,placebo,Phase 3,4,128,26,1,Triple,4,8,12,2,0,2,0
+NCT01106690,ipd,342,115,24,placebo,Phase 3,3,83,26,1,Triple,3,4,8,0,0,2,0
+NCT01117350,agg,978,489,42,ac,Phase 4,2,136,12,1,None (Open Label),2,4,13,0,0,0,0
+NCT01126580,ipd,807,268,55,ac,Phase 3,3,91,26,1,Quadruple,5,6,10,1,1,1,0
+NCT01128153,agg,257,128,15,placebo,Phase 3,2,33,24,1,Quadruple,4,1,1,2,0,2,0
+NCT01137474,agg,613,311,24,placebo,Phase 3,4,329,12,2,Triple,3,6,9,0,0,1,0
+NCT01147627,agg,416,138,24,ac,Not Applicable,3,25,48,1,None (Open Label),1,0,0,1,0,0,0
+NCT01147627,agg,416,136,18,ac,Not Applicable,3,25,48,1,None (Open Label),1,0,0,1,0,0,0
+NCT01159600,ipd,4364,432,45,placebo,Phase 3,4,148,24,1,Double,4,3,5,3,0,1,0
+NCT01164501,ipd,741,321,43,placebo,Phase 3,3,127,24,3,Double,5,2,9,3,1,1,0
+NCT01167881,ipd,1549,780,191,ac,Phase 3,2,182,104,1,Double,5,5,11,4,1,2,0
+NCT01169779,ipd,391,195,11,placebo,Phase 3,2,35,24,1,Double,2,0,0,3,0,1,0
+NCT01177384,agg,381,190,26,placebo,Phase 3,2,31,24,3,Double,2,0,0,4,0,1,0
+NCT01177813,ipd,899,228,41,placebo,Phase 3,5,124,24.14285714,1,Double,4,2,4,2,0,1,0
+NCT01183013,agg,1362,409,125,ac,Phase 3,7,132,30,1,Double,4,1,5,1,0,1,0
+NCT01183104,agg,305,152,41,ac,Not Applicable,2,104,52,2,None (Open Label),1,0,0,1,0,0,0
+NCT01189890,agg,480,239,39,ac,Phase 3,2,85,30,4,Double,3,6,3,4,0,0,0
+NCT01191268,ipd,884,296,52,ac,Phase 3,3,101,26,1,None (Open Label),4,6,8,2,1,0,0
+NCT01194830,ipd,234,124,36,placebo,Phase 3,2,93,24,1,Double,1,1,0,0,0,0,0
+NCT01195662,agg,449,224,22,placebo,Phase 3,2,298,12,2,Triple,4,5,9,1,0,1,0
+NCT01210001,ipd,499,166,19,placebo,Phase 3,3,68,24,2,Double,4,2,2,2,0,2,0
+NCT01214239,ipd,299,99,12,placebo,Phase 3,2,19,24,1,Double,1,0,0,3,0,0,0
+NCT01215097,ipd,305,100,12,placebo,Phase 3,2,19,24,1,Double,1,0,0,3,0,0,0
+NCT01217892,ipd,400,101,8,placebo,Phase 3,4,54,16,1,Quadruple,2,0,6,0,1,0,0
+NCT01224366,agg,449,221,30,placebo,Phase 3,2,66,24,1,Quadruple,4,1,7,2,0,1,0
+NCT01225081,agg,151,54,10,placebo,Phase 3,2,43,24,1,Quadruple,1,0,0,1,0,0,0
+NCT01242215,agg,242,77,20,placebo,Phase 3,2,40,24,1,Quadruple,1,0,0,1,0,0,0
+NCT01272232,agg,846,212,72,placebo,Phase 3,3,161,56,3,Double,5,2,8,1,1,1,0
+NCT01289119,ipd,506,63,5,placebo,Phase 3,6,21,16,1,Quadruple,1,0,0,3,0,0,0
+NCT01289119,ipd,506,93,9,placebo,Phase 3,6,21,16,1,Quadruple,1,0,0,3,0,0,0
+NCT01289119,ipd,506,98,9,placebo,Phase 3,6,21,16,1,Quadruple,1,0,0,3,0,0,0
+NCT01294423,agg,261,87,8,placebo,Phase 3,3,27,24,1,Quadruple,1,0,0,1,0,0,0
+NCT01306214,ipd,566,189,28,placebo,Phase 3,3,103,18,1,Double,3,6,9,0,0,1,0
+NCT01316094,agg,165,46,4,placebo,Phase 3,2,67,24,1,Quadruple,1,0,0,1,0,0,0
+NCT01336023,agg,1663,414,48,ac,Phase 3,3,302,26,1,None (Open Label),5,4,9,4,1,2,0
+NCT01341717,agg,440,221,16,ac,Phase 4,2,1,24,1,None (Open Label),1,0,0,0,0,1,0
+NCT01357252,agg,279,136,10,placebo,Phase 3,2,18,24,1,Triple,1,0,0,1,0,0,0
+NCT01370005,ipd,825,272,16,placebo,Phase 3,3,120,12,2,Double,4,2,9,0,0,1,1
+NCT01381900,ipd,676,226,9,placebo,Phase 3,3,25,18,1,Double,1,0,0,3,0,0,0
+NCT01388361,agg,177,89,14,ac,Phase 3,3,124,26,1,None (Open Label),2,2,10,0,0,0,0
+NCT01392573,agg,413,206,35,placebo,Phase 3,2,86,26,1,Double,3,1,5,0,0,1,0
+NCT01392677,agg,218,109,8,placebo,Phase 3,2,47,24,1,Quadruple,2,1,5,0,0,0,0
+NCT01406717,agg,360,180,31,placebo,Phase 3,2,34,24,4,Quadruple,1,0,0,0,0,1,0
+NCT01413204,agg,272,93,19,placebo,Phase 3,3,31,24,1,Triple,1,0,0,1,0,0,0
+NCT01438814,ipd,689,345,14,ac,Phase 4,2,90,14,1,Double,5,4,3,4,0,2,1
+NCT01462266,agg,660,330,27,placebo,Phase 3,2,NA,24,1,Double,5,7,16,3,1,1,0
+NCT01497522,agg,139,70,4,placebo,Phase 3,2,20,12,1,Double,1,0,0,1,0,0,0
+NCT01505426,agg,170,83,14,placebo,Phase 3,2,12,24,1,Quadruple,1,0,0,2,0,0,0
+NCT01512108,agg,363,120,9,ac,Phase 3,2,36,52,1,None (Open Label),1,0,0,1,0,0,0
+NCT01517321,agg,155,80,2,placebo,Phase 3,2,30,12,1,Double,1,0,0,1,0,0,0
+NCT01541956,agg,2985,484,33,ac,Phase 4,2,127,24,1,None (Open Label),1,0,0,1,0,0,0
+NCT01558271,ipd,492,70,11,placebo,Phase 3,3,14,26,1,Quadruple,1,0,0,1,0,0,0
+NCT01572740,agg,257,130,5,placebo,Phase 3,2,23,36,1,Double,1,0,0,1,0,0,0
+NCT01582230,agg,293,147,10,placebo,Phase 3,2,21,24,2,Double,2,0,0,3,0,1,0
+NCT01584232,agg,361,180,3,ac,Phase 3,2,15,26,1,None (Open Label),1,0,0,1,0,0,0
+NCT01590771,agg,498,249,39,placebo,Phase 3,2,32,24,3,Triple,1,0,0,1,0,0,0
+NCT01590797,agg,467,233,16,placebo,Phase 3,2,28,24,3,Triple,1,0,0,1,0,0,0
+NCT01601990,agg,174,87,3,placebo,Phase 3,2,2,24,1,Double,1,0,0,1,0,0,0
+NCT01617434,agg,451,225,51,placebo,Phase 3,2,86,26,1,Double,3,4,4,0,0,1,0
+NCT01619059,ipd,315,162,6,placebo,Phase 3,2,84,24,1,Triple,2,4,5,0,0,0,0
+NCT01620489,agg,279,139,34,placebo,Phase 3,2,97,26,1,Double,2,1,5,0,0,0,0
+NCT01621178,ipd,577,194,31,ac,Phase 3,3,89,26,1,None (Open Label),4,3,5,0,1,1,0
+NCT01644500,agg,737,245,15,ac,Phase 3,3,30,26,1,Triple,2,0,0,3,0,1,0
+NCT01646320,agg,320,160,7,placebo,Phase 3,2,67,24,1,Triple,3,3,6,0,0,1,0
+NCT01648582,ipd,774,259,32,ac,Phase 3,3,30,26,1,None (Open Label),4,1,1,2,0,1,0
+NCT01652729,agg,365,61,14,placebo,Phase 3,3,60,28,1,None (Open Label),1,1,0,0,0,0,0
+NCT01676116,agg,438,292,16,ac,Phase 3,2,109,26,1,None (Open Label),3,1,3,1,0,0,0
+NCT01682759,agg,751,375,70,ac,Phase 3,2,127,54,3,Double,4,1,6,2,0,0,1
+NCT01697592,agg,2925,196,5,placebo,Phase 3,10,11,24,4,Triple,1,0,0,1,0,0,0
+NCT01698775,agg,213,106,9,placebo,Phase 3,2,109,24,5,Triple,4,2,10,4,1,0,0
+NCT01703221,agg,414,83,3,placebo,Phase 3,3,13,24,5,Triple,1,0,0,1,0,0,0
+NCT01704261,agg,307,153,15,placebo,Phase 3,2,51,24,3,Triple,4,1,3,1,1,0,0
+NCT01708902,ipd,436,144,17,ac,Phase 3,5,56,24,3,Double,1,0,0,4,0,0,0
+NCT01708902,ipd,436,145,8,ac,Phase 3,5,56,24,3,Double,1,0,0,4,0,0,0
+NCT01717313,agg,329,164,13,placebo,Phase 3,2,76,24,5,Triple,3,1,8,3,0,0,0
+NCT01719003,ipd,680,170,20,ac,Phase 3,9,190,24,1,Double,5,6,8,4,0,3,3
+NCT01719003,ipd,680,171,20,ac,Phase 3,9,190,24,1,Double,5,6,8,4,0,3,3
+NCT01733758,ipd,490,77,15,placebo,Phase 3,4,74,24,2,Double,1,0,0,1,0,0,0
+NCT01734785,ipd,333,110,5,placebo,Phase 3,3,90,24,1,Double,4,4,6,4,0,1,0
+NCT01755156,agg,402,201,24,placebo,Phase 3,2,NA,24,4,Triple,3,1,7,0,1,0,0
+NCT01768559,ipd,1490,596,30,ac,Phase 3,3,199,26,2,None (Open Label),2,4,14,0,0,0,0
+NCT01769378,ipd,300,60,4,placebo,Phase 3,2,31,24,1,Triple,3,5,4,0,1,0,0
+NCT01792518,ipd,360,178,8,placebo,Phase 3,2,74,24,1,Double,3,2,5,5,0,0,0
+NCT01798238,agg,142,43,9,placebo,Phase 3,2,9,24,1,Double,1,0,0,1,0,0,0
+NCT01798706,ipd,350,174,21,placebo,Phase 3,2,83,24,1,Quadruple,4,3,8,1,1,0,0
+NCT01805830,agg,204,68,12,placebo,Phase 3,2,12,16,1,Double,1,0,0,1,0,0,0
+NCT01809327,ipd,712,237,32,ac,Phase 3,5,137,26,1,Quadruple,4,8,8,2,1,0,0
+NCT01814748,agg,203,101,7,placebo,Phase 3,2,47,24,3,Double,3,2,4,0,1,0,0
+NCT01882907,agg,228,111,28,ac,Phase 4,2,15,16,1,None (Open Label),1,0,0,1,0,0,0
+NCT01890122,ipd,488,162,27,ac,Phase 3,4,45,26,1,Quadruple,1,0,0,4,0,0,0
+NCT01890122,ipd,488,163,59,placebo,Phase 3,4,45,26,1,Quadruple,1,0,0,4,0,0,0
+NCT01919489,agg,273,137,37,ac,4,2,5,26,1,None (Open Label),1,1,0,0,0,0,0
+NCT01958671,agg,461,153,32,placebo,Phase 3,3,67,26,3,Double,3,3,3,0,1,0,0
+NCT01986855,agg,468,154,11,placebo,Phase 3,3,121,26,3,Double,4,4,7,1,1,0,0
+NCT01990469,agg,216,109,5,placebo,Phase 3,2,23,24,1,Quadruple,1,0,0,1,0,0,0
+NCT01999218,agg,1326,437,110,ac,Phase 3,3,185,52,3,Double,4,4,7,3,1,0,0
+NCT02002221,agg,156,78,3,placebo,Phase 4,2,31,12,1,Triple,1,0,0,1,0,0,0
+NCT02025907,ipd,216,108,27,placebo,Phase 4,2,57,26,1,Quadruple,3,2,2,1,0,0,0
+NCT02033889,agg,621,209,34,placebo,Phase 3,3,NA,26,3,Double,4,2,8,3,1,0,0
+NCT02036515,agg,464,153,14,placebo,Phase 3,3,104,26,3,Double,3,1,7,2,0,0,0
+NCT02054897,agg,388,129,12,placebo,Phase 3,4,86,30,1,Double,4,3,4,1,1,0,0
+NCT02058147,agg,701,467,27,ac,Phase 3,3,273,30,1,None (Open Label),4,4,17,1,1,0,0
+NCT02061969,agg,140,73,0,ac,Phase 4,2,4,24,1,None (Open Label),1,1,0,0,0,0,0
+NCT02081599,agg,148,71,8,placebo,Phase 4,2,37,16,1,Quadruple,1,0,0,1,0,0,0
+NCT02096705,agg,272,133,9,placebo,Phase 3,2,29,24,1,Quadruple,1,0,0,3,0,0,0
+NCT02104804,agg,466,232,19,placebo,Phase 3,2,11,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02128932,agg,1082,360,19,ac,Phase 3,3,231,30,1,None (Open Label),4,4,10,0,1,1,0
+NCT02152371,ipd,300,150,16,placebo,Phase 3,2,40,28,1,Double,2,2,6,0,0,0,0
+NCT02157298,agg,183,60,2,placebo,Phase 4,2,14,16,1,Quadruple,1,0,0,1,0,0,0
+NCT02175784,agg,255,87,11,placebo,Phase 4,2,43,16,1,Quadruple,1,0,0,1,0,0,0
+NCT02182830,ipd,166,83,15,placebo,Phase 3,2,92,24,1,Double,1,1,0,0,0,0,0
+NCT02201004,agg,211,70,2,placebo,Phase 4,2,30,16,1,Double,1,0,0,1,0,0,0
+NCT02207374,agg,601,121,6,ac,Phase 3,3,43,56,1,None (Open Label),1,0,0,1,0,0,0
+NCT02220920,agg,146,70,3,placebo,Phase 4,2,7,16,1,Triple,1,0,0,1,0,0,0
+NCT02229227,ipd,814,412,62,ac,Phase 3,2,158,26,1,None (Open Label),4,4,7,2,1,0,0
+NCT02229383,agg,461,229,22,placebo,Phase 3,2,123,28,1,Double,3,1,4,0,1,0,0
+NCT02240680,agg,302,151,15,placebo,Phase 4,2,145,24,1,Double,4,3,10,3,1,0,0
+NCT02243176,agg,488,244,15,ac,Phase 4,2,35,24,2,None (Open Label),1,0,0,1,0,0,0
+NCT02273050,agg,424,210,24,ac,Phase 3,3,17,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02280486,agg,373,186,160,ac,Phase 4,2,11,48,1,None (Open Label),1,0,0,1,0,0,0
+NCT02305381,agg,397,133,7,placebo,Phase 3,4,99,30,1,Double,3,2,3,1,0,0,0
+NCT02324569,agg,240,124,21,placebo,Phase 3,2,65,12,2,Quadruple,2,1,0,1,0,0,0
+NCT02354222,agg,154,77,11,placebo,Phase 3,2,3,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02354235,agg,138,68,7,placebo,Phase 3,2,3,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02413398,agg,321,161,7,placebo,Phase 3,2,87,24,1,Double,2,2,7,0,0,0,0
+NCT02452632,agg,139,66,9,placebo,Phase 3,2,22,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02471404,ipd,627,313,25,ac,Phase 4,3,173,52,1,Triple,1,0,6,0,0,0,0
+NCT02577003,agg,143,70,5,placebo,Phase 3,2,23,24,3,Double,1,0,0,1,0,0,0
+NCT02577016,agg,141,71,2,placebo,Phase 3,2,13,24,3,Double,1,0,0,1,0,0,0
+NCT02589639,agg,269,90,10,placebo,Phase 4,3,48,16,1,None (Open Label),1,0,0,1,0,0,0
+NCT02597049,ipd,424,140,3,placebo,Phase 3,3,41,24,2,Double,2,3,7,0,0,0,0
+NCT02607306,agg,544,271,23,ac,Phase 3,3,76,52,1,None (Open Label),1,0,0,1,0,0,0
+NCT02630706,agg,506,167,10,placebo,Phase 3,3,NA,26,6,Double,1,0,0,5,0,0,0
+NCT02715258,agg,210,70,6,placebo,Phase 3,2,23,24,1,Quadruple,1,2,0,0,0,0,0
+NCT02730377,agg,1991,995,633,ac,Phase 4,2,232,26,1,None (Open Label),4,4,4,0,0,1,1
+NCT02738879,agg,746,372,25,placebo,Phase 3,2,149,30,4,Double,3,6,15,4,0,0,0
+NCT02750410,ipd,159,39,2,placebo,Phase 4,2,25,16,1,Double,1,0,0,1,0,0,0
+NCT02752412,agg,512,257,13,placebo,Phase 3,2,122,26,1,None (Open Label),1,0,0,1,0,0,0
+NCT02752828,agg,521,261,7,placebo,Phase 3,2,113,26,1,None (Open Label),1,0,0,1,0,0,0
+NCT02769481,agg,426,213,36,ac,Phase 3,2,45,60,1,Quadruple,2,1,3,0,0,0,0
+NCT02791490,agg,458,229,8,placebo,Phase 3,2,68,20,3,Double,2,6,3,0,0,0,0
+NCT02794792,agg,165,55,3,placebo,Phase 3,3,14,12,1,Triple,1,0,1,0,0,0,0
+NCT02827708,agg,324,161,5,placebo,Phase 3,2,117,26,1,Double,2,1,7,0,0,0,0
+NCT02831361,agg,283,97,4,placebo,Phase 3,2,18,25,1,Double,1,0,0,1,0,0,0
+NCT02836873,agg,312,155,11,placebo,Phase 3,2,56,24,1,Triple,3,1,2,1,0,0,0
+NCT02863419,agg,711,142,8,placebo,Phase 3,3,108,26,1,Double,5,2,9,1,1,0,1
+NCT02897349,agg,206,102,5,placebo,Phase 3,2,25,24,1,Double,1,0,0,1,0,0,0
+NCT02906709,agg,184,61,3,placebo,Phase 4,2,19,16,5,Double,1,0,0,1,0,0,0
+NCT02906930,agg,703,178,8,placebo,Phase 3,4,103,26,1,Double,4,2,8,1,1,0,0
+NCT02911948,agg,210,105,7,placebo,Phase 3,2,38,26,1,Double,1,0,0,1,0,0,0
+NCT02916706,agg,254,127,31,placebo,Phase 3,2,42,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02924064,agg,247,124,43,placebo,Phase 3,2,51,24,1,Quadruple,1,0,0,1,0,0,0
+NCT02926937,agg,399,150,19,placebo,Phase 3,3,70,26,1,Double,1,3,0,0,0,0,0
+NCT02926950,agg,518,259,48,placebo,Phase 3,2,93,26,1,Double,2,2,2,0,0,0,0
+NCT02963922,agg,396,198,30,placebo,Phase 3,2,54,56,2,Double,2,3,4,0,0,0,0
+NCT02964247,agg,303,100,2,placebo,Phase 3,2,82,26,1,Double,4,3,2,0,0,1,1
+NCT03018028,agg,243,49,0,placebo,Phase 3,5,16,26,1,Double,1,0,0,1,0,0,0
+NCT03021187,agg,731,184,9,placebo,Phase 3,4,119,26,1,Double,4,4,4,1,0,1,0
+NCT03066830,agg,507,254,33,placebo,Phase 3,2,76,26,1,Double,3,1,8,1,0,0,0
+NCT03086330,agg,302,151,4,placebo,Phase 3,2,72,30,1,Double,3,3,3,1,0,0,0
+NCT03125694,agg,250,125,15,ac,Phase 3,2,1,52,1,None (Open Label),1,0,0,0,0,0,1
+NCT03159052,agg,452,151,18,placebo,3,3,1,52,2,Quadruple,1,0,0,1,0,0,0
+NCT03172494,agg,359,179,12,ac,Phase 3,3,37,26,1,None (Open Label),1,0,0,1,0,0,0
+NCT03175120,agg,453,151,12,placebo,Phase 3,2,37,26,1,Double,1,0,0,2,0,0,0
+NCT03242018,agg,277,93,18,placebo,Phase 3,3,106,26,1,Quadruple,3,5,9,0,1,0,0
+NCT03242252,agg,787,260,36,placebo,Phase 3,3,170,26,1,Triple,3,6,9,0,1,0,0
+NCT03259789,agg,317,159,17,placebo,Phase 3,3,43,24,2,Triple,2,1,0,1,0,0,0
+NCT03332771,agg,954,318,48,ac,Phase 3,4,142,52,1,Quadruple,2,1,3,0,0,0,0
+NCT03332771,agg,954,159,34,placebo,Phase 3,4,142,52,1,Quadruple,2,1,3,0,0,0,0
+NCT03351478,agg,770,154,7,placebo,Phase 3,3,160,26,1,Double,2,3,9,0,0,0,0
+NCT03353350,agg,406,102,22,placebo,3,4,54,30,1,Quadruple,2,1,1,0,0,0,0
+NCT03552757,agg,1210,403,20,placebo,Phase 3,3,147,68,2,Quadruple,6,4,5,1,2,1,1
+NCT03689374,agg,1748,874,24,ac,3,2,209,52,1,None (Open Label),3,0,1,0,1,1,0
+NCT03730662,agg,1995,1000,139,ac,3,4,216,52,1,None (Open Label),4,1,1,1,0,0,1
+NCT03730662,agg,1995,995,76,ac,3,4,216,52,1,None (Open Label),4,1,1,1,0,0,1
+NCT03794336,agg,1088,363,29,ac,4,2,46,16,2,None (Open Label),1,0,0,1,0,0,0
+NCT03798054,agg,527,350,17,ac,3,3,79,24,1,None (Open Label),2,0,0,1,0,1,0
+NCT03861052,agg,636,477,16,ac,3,4,46,52,1,Double,1,0,0,1,0,0,0
+NCT03882970,agg,1079,360,31,ac,3,4,122,52,1,None (Open Label),3,1,1,1,0,0,0
+NCT03882970,agg,1079,719,44,ac,3,4,122,52,1,None (Open Label),3,1,1,1,0,0,0
+NCT03954834,agg,478,363,34,ac,3,4,53,40,1,Double,3,1,0,1,0,1,0
+NCT03954834,agg,478,115,16,placebo,3,4,53,40,1,Double,3,1,0,1,0,1,0
+NCT03987919,agg,1408,939,51,ac,3,4,127,40,1,None (Open Label),4,1,1,1,0,0,1
+NCT04039503,agg,475,355,21,ac,3,4,48,40,1,Double,3,1,1,1,0,0,0
+NCT04039503,agg,475,120,3,placebo,3,4,48,40,1,Double,3,1,1,1,0,0,0
+NCT04093752,agg,907,220,27,ac,3,4,67,40,1,None (Open Label),2,0,0,1,0,1,0
+NCT04093752,agg,907,687,64,ac,3,4,67,40,1,None (Open Label),2,0,0,1,0,1,0
+NCT04170998,agg,283,142,2,placebo,3,4,1,24,1,Quadruple,1,0,0,1,0,0,0
+NCT04196231,agg,305,101,0,ac,4,3,1,52,2,None (Open Label),1,0,1,0,0,0,0
+NCT04218734,agg,213,71,3,placebo,3,2,1,24,1,Quadruple,1,0,0,1,0,0,0
+NCT04233801,agg,219,73,0,placebo,3,3,24,24,1,Triple,1,0,0,1,0,0,0
+NCT04632862,agg,167,84,15,placebo,3,2,23,24,1,Double,1,0,0,1,0,0,0
