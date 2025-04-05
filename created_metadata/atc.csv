@@ -1,0 +1,76 @@
+drug,class,code_short,class_short,code
+insulin,insulins and analogues,A10A,insulin,A10AB01
+insulin (human),insulin (human),A10AB,insulin,A10AB02
+insulin (beef),insulin (beef),A10AB,insulin,A10AB03
+insulin (pork),insulin (pork),A10AB,insulin,A10AB04
+insulin lispro,insulin lispro,A10AB,insulin,A10AB05
+insulin aspart,insulin aspart,A10AB,insulin,A10AB06
+insulin glulisine,insulin glulisine,A10AB,insulin,A10AB30
+combinations,combinations,A10AB,insulin,A10AC
+"Insulins and analogues for injection, intermediate-acting","Insulins and analogues for injection, intermediate-acting",A10AC,insulin,A10AC01
+insulin (human),insulin (human),A10AC,insulin,A10AC02
+insulin (beef),insulin (beef),A10AC,insulin,A10AC03
+insulin (pork),insulin (pork),A10AC,insulin,A10AC04
+insulin lispro,insulin lispro,A10AC,insulin,A10AC30
+combinations,combinations,A10AC,insulin,A10AD
+"Insulins and analogues for injection, intermediate- or long-acting combined with fast-acting","Insulins and analogues for injection, intermediate- or long-acting combined with fast-acting",A10AD,insulin,A10AD01
+insulin (human),insulin (human),A10AD,insulin,A10AD02
+insulin (beef),insulin (beef),A10AD,insulin,A10AD03
+insulin (pork),insulin (pork),A10AD,insulin,A10AD04
+insulin lispro,insulin lispro,A10AD,insulin,A10AD05
+insulin aspart,insulin aspart,A10AD,insulin,A10AD06
+insulin degludec and insulin aspart,insulin degludec and insulin aspart,A10AD,insulin,A10AD30
+combinations,combinations,A10AD,insulin,A10AE
+"Insulins and analogues for injection, long-acting","Insulins and analogues for injection, long-acting",A10AE,insulin,A10AE01
+insulin (human),insulin (human),A10AE,insulin,A10AE02
+insulin (beef),insulin (beef),A10AE,insulin,A10AE03
+insulin (pork),insulin (pork),A10AE,insulin,A10AE04
+insulin glargine,insulin glargine,A10AE,insulin,A10AE05
+insulin detemir,insulin detemir,A10AE,insulin,A10AE06
+insulin degludec,insulin degludec,A10AE,insulin,A10AE30
+combinations,combinations,A10AE,insulin,A10AE54
+insulin glargine and lixisenatide,insulin glargine and lixisenatide,A10AE,insulin,A10AE56
+insulin degludec and liraglutide,insulin degludec and liraglutide,A10AE,insulin,A10AF
+Insulins and analogues for inhalation,Insulins and analogues for inhalation,A10AF,insulin,A10AF01
+insulin (human),insulin (human),A10AF,insulin,A10BA02
+metformin,biguanides,A10BA,biguanides,A10BB01
+glibenclamide,sulfonylureas,A10BB,sulf,A10BB09
+gliclazide,sulfonylureas,A10BB,sulf,A10BB12
+glimepiride,sulfonylureas,A10BB,sulf,A10BB07
+glipizide,sulfonylureas,A10BB,sulf,
+su,sulfonylureas,A10BB,sulf,A10BF01
+acarbose,alpha glucosidase inhibitors,A10BF,a_gluc,A10BF03
+voglibose,alpha glucosidase inhibitors,A10BF,a_gluc,A10BG03
+pioglitazone,thiazolidinediones,A10BG,thia,A10BG02
+rosiglitazone,thiazolidinediones,A10BG,thia,A10BH04
+alogliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH05
+linagliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH05
+linagliptinOL,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH06
+gemigliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH07
+evogliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH08
+teneligliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,
+omarigliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH03
+saxagliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH01
+sitagliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH08
+teneligliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,
+trelagliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BH02
+vildagliptin,dipeptidyl peptidase 4 inhibitors,A10BH,dpp4,A10BJ04
+albiglutide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BJ05
+dulaglutide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BJ01
+exenatide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BJ02
+liraglutide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BJ03
+lixisenatide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BJ06
+semaglutide,glucagon-like peptide-1 analogues,A10BJ,glp1,A10BK08
+bexagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK02
+canagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK01
+dapagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK03
+empagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK04
+ertugliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK05
+ipragliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK06
+sotagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK07
+luseogliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK08
+bexagliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,A10BK09
+enavogliflozin,sodium-glucose co-transporter 2 inhibitors,A10BK,sglt2,
+oad,"other blood glucose lowering drugs, excl. insulin",A10BX,oad,
+other_oad,"other blood glucose lowering drugs, excl. insulin",A10BX,oad,
+placebo,placebo,,placebo,
