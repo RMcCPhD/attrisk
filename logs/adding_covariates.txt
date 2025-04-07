@@ -2,22 +2,41 @@
 
 Testing how the model performs with each covariate added in
 
-type | Runs smoothly, convergence is good
-n_arms | Runs smoothly, convergence is good
-n - 
-n_facilities 
-duration 
-n_poms 
-n_regions 
+Runs fine - convergence good, rhat <1.01, ESS >400, posterior draws look good
+type
+n_arms
+n | Scaled
+n_facilities | Binary (1-<=50, 2->50)
+n_regions | Binary (0-<=2, 1->2)
+phase_3 
+phase_4 
 region_of_the_americas 
 european_region 
 western_pacific_region 
 african_region 
 south_east_asia_region 
 eastern_mediterranean_region 
-phase_3 
-phase_4 
-phase_notapp 
+
+
+Problems (now fixed)
+n_facilities | Significant divergence
+Trying as an integer (1 - <50 sites, 2 - 50-100, 3 - >100)
+Still issues with convergence
+
+n_regions | Convergence
+Most have 1 region, few have more than 4
+Creating a binary variable (0 - <=2 regions, 1 - >2)
+Adding a tighter shrinkage factor got it working
+
+
+Problems (unresolved)
+
+
+Still to try
+duration 
+n_poms 
+
 double 
-none_(open_label) 
-quadruple triple
+open_label
+quadruple 
+triple
