@@ -1,0 +1,23 @@
+07.05.25
+
+Testing how the model performs with each covariate added in
+
+type | Runs smoothly, convergence is good
+n_arms | Runs smoothly, convergence is good
+n - 
+n_facilities 
+duration 
+n_poms 
+n_regions 
+region_of_the_americas 
+european_region 
+western_pacific_region 
+african_region 
+south_east_asia_region 
+eastern_mediterranean_region 
+phase_3 
+phase_4 
+phase_notapp 
+double 
+none_(open_label) 
+quadruple triple

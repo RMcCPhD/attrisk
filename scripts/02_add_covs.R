@@ -65,4 +65,45 @@ c_impute_join <- c_impute_complete %>%
 c_impute_join %>% reframe(across(everything(), ~ sum(is.na(.))))
 
 # Save
-write_csv(c_impute_join, "processed_data/df_counts_arms_covs.csv")
+# write_csv(c_impute_join, "processed_data/df_counts_arms_covs.csv")
+
+# Format for modelling
+b_fmt <- c_impute_join %>% 
+  mutate(
+    phase = if_else(!grepl("Phase", phase), paste0("Phase ", phase), phase)
+  ) %>% 
+  pivot_wider(names_from = "phase", values_from = "phase") %>% 
+  pivot_wider(names_from = "masking", values_from = "masking") %>% 
+  mutate(
+    across(`Phase 3`:`Phase Not Applicable`, ~ if_else(is.na(.), 0, 1)),
+    type = if_else(type == "placebo", 1, 0),
+    across(Double:Triple, ~ if_else(is.na(.), 0, 1))
+  ) %>% 
+  rename_at(vars(`Phase 3`:`Phase Not Applicable`), ~ gsub(" ", "_", .)) %>% 
+  rename_at(vars(Double:Triple), ~ gsub(" ", "_", .)) %>% 
+  rename_at(vars(Phase_3:Triple), ~ tolower(.)) %>% 
+  rename(
+    n_arms = number_of_arms,
+    phase_notapp = phase_not_applicable,
+    open_label = `none_(open_label)`
+  ) %>% 
+  select(
+    trial_id:source, n, arm_n:n_arms, phase_3:phase_notapp,
+    double:triple, everything()
+  ) %>% 
+  mutate(
+    across(
+      c(phase_3:triple, region_of_the_americas:eastern_mediterranean_region),
+      ~ as.integer(.)
+    )
+  )
+
+# Remove arms with no attrition - down to 340 trials
+# Scale variables
+b_fmt2 <- b_fmt %>% 
+  group_by(trial_id) %>% 
+  filter(arm_n_attr != 0 & arm_n_attr < arm_n) %>% 
+  ungroup()
+
+# Save
+write_csv(b_fmt2, "processed_data/df_stan_n340.csv")
