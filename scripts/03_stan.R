@@ -1,67 +1,67 @@
 
 # Run stan model and inspect outputs
 source("scripts/00_functions_packages_etc.R")
-a_imp_df <- read_csv("processed_data/df_stan_n340.csv")
 
-# Categorise variables - 338 removing notApp phase trials
-a_cats <- a_imp_df %>% 
-  mutate(
-    cat_sites = case_when(
-      n_facilities <= 50 ~ 0,
-      n_facilities >= 50 ~ 1
-    ),
-    cat_regions = case_when(
-      n_regions <= 2 ~ 0,
-      TRUE ~ 1
-    ),
-    cat_duration = case_when(
-      duration <= 26 ~ 0,
-      duration > 26 ~ 1
-    ),
-    cat_poms = case_when(
-      n_poms == 1 ~ 0,
-      n_poms > 1 ~ 1
-    )
-  ) %>% 
-  filter(phase_notapp != 1) %>% 
-  select(-phase_notapp)
+a_imp_df <- readRDS("processed_data/df_stan_ready.rds") %>% rename(b_dbl = b_dlb)
+a_imp_df %>% count(trial_id)
 
-# Get stan data
+# Setup stan dataset (340 trials, 367 rows, 41 vars incl. arm)
 c_stan_data <- list(
-  I = nrow(a_cats),
-  r = a_cats$arm_n_attr,
-  N = a_cats$arm_n,
-  dt = a_cats$duration,
-  arm = as.integer(a_cats$type),
-  var1 = as.integer(a_cats$n_arms),
-  var2 = as.vector(scale(a_cats$n)),
-  var3 = as.integer(a_cats$cat_regions),
-  var4 = as.integer(a_cats$cat_sites),
-  var5 = as.integer(a_cats$phase_3),
-  var6 = as.integer(a_cats$phase_4),
-  var7 = as.integer(a_cats$region_of_the_americas),
-  var8 = as.integer(a_cats$european_region),
-  var9 = as.integer(a_cats$western_pacific_region),
-  var10 = as.integer(a_cats$african_region),
-  var11 = as.integer(a_cats$south_east_asia_region),
-  var12 = as.integer(a_cats$eastern_mediterranean_region),
-  var13 = as.integer(a_cats$double),
-  var14 = as.integer(a_cats$open_label),
-  var15 = as.integer(a_cats$quadruple),
-  var16 = as.integer(a_cats$triple),
-  var17 = as.integer(a_cats$cat_duration),
-  var18 = as.integer(a_cats$cat_poms)
+  I = nrow(a_imp_df),
+  r = a_imp_df$arm_n_attr,
+  N = a_imp_df$arm_n,
+  dt = a_imp_df$duration,
+  arm = as.integer(a_imp_df$type),
+  var1 = as.integer(a_imp_df$p3),
+  var2 = as.integer(a_imp_df$p4),
+  var3 = as.integer(a_imp_df$po),
+  var4 = as.integer(a_imp_df$b_dbl),
+  var5 = as.integer(a_imp_df$b_ol),
+  var6 = as.integer(a_imp_df$b_q),
+  var7 = as.integer(a_imp_df$b_t),
+  var8 = as.integer(a_imp_df$reg_1),
+  var9 = as.integer(a_imp_df$reg_2),
+  var10 = as.integer(a_imp_df$reg_3),
+  var11 = as.integer(a_imp_df$reg_4),
+  var12 = as.integer(a_imp_df$reg_5),
+  var13 = as.integer(a_imp_df$reg_6),
+  var14 = as.integer(a_imp_df$reg_am),
+  var15 = as.integer(a_imp_df$reg_eur),
+  var16 = as.integer(a_imp_df$reg_pac),
+  var17 = as.integer(a_imp_df$reg_afr),
+  var18 = as.integer(a_imp_df$reg_sea),
+  var19 = as.integer(a_imp_df$reg_med),
+  var20 = as.integer(a_imp_df$n_250),
+  var21 = as.integer(a_imp_df$n_500),
+  var22 = as.integer(a_imp_df$n_750),
+  var23 = as.integer(a_imp_df$n_1000),
+  var24 = as.integer(a_imp_df$n_abv),
+  var25 = as.integer(a_imp_df$arm_2),
+  var26 = as.integer(a_imp_df$arm_3),
+  var27 = as.integer(a_imp_df$arm_abv),
+  var28 = as.integer(a_imp_df$dur_6m),
+  var29 = as.integer(a_imp_df$dur_1yr),
+  var30 = as.integer(a_imp_df$dur_abv),
+  var31 = as.integer(a_imp_df$pom_1),
+  var32 = as.integer(a_imp_df$pom_2),
+  var33 = as.integer(a_imp_df$pom_3),
+  var34 = as.integer(a_imp_df$pom_4),
+  var35 = as.integer(a_imp_df$pom_5),
+  var36 = as.integer(a_imp_df$pom_6),
+  var37 = as.integer(a_imp_df$site_50),
+  var38 = as.integer(a_imp_df$site_100),
+  var39 = as.integer(a_imp_df$site_150),
+  var40 = as.integer(a_imp_df$site_abv)
 )
 
 glimpse(c_stan_data)
 
 # Compile stan model
-# d_compile_1var <- stan_model("Scripts/03_stan_addVars.stan")
-d_compile_reg <- stan_model("Scripts/03_stan_mdl.stan")
+d_compile <- stan_model("Scripts/03_model.stan")
 
 # Fit model
 d_fit <- sampling(
-  d_compile_reg,
+  d_compile,
   data = c_stan_data,
   warmup = 1000,
   iter = 3000,
@@ -92,19 +92,13 @@ ppc_stat(y = r_obs, yrep = r_new[1:338, ])
 ppc_intervals(y = r_obs, yrep = r_new[1:338, ])
 
 # Covariate PPCs
-covariate_names <- c(
-  "type", "n_arms", "n", "cat_regions", "cat_sites", "phase_3", "phase_4",
-  "region_of_the_americas", "european_region", "western_pacific_region", 
-  "african_region", "south_east_asia_region", "eastern_mediterranean_region", 
-  "double", "open_label", "quadruple", "triple", "cat_duration", 
-  "cat_poms"
-)
+covariate_names <- names(select(a_imp_df, -c(trial_id:duration)))
 
 # Get plots
 ppc_plots <- plot_subgroup_ppcs(
-  y = a_cats$arm_n_attr,
+  y = a_imp_df$arm_n_attr,
   yrep = extract(d_fit, pars = "r_new")$r_new,
-  covariate_df = a_cats,
+  covariate_df = a_imp_df,
   covariate_names = covariate_names
 )
 
