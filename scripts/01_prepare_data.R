@@ -61,20 +61,18 @@ c_prp_ipd <- a_imp_ipd %>%
 # All there (83/86)
 sum(c_prp_ipd$trial_id %in% b_id_arms$trial_id[b_id_arms$source == "ipd"])
 
-c_na_ipd <- b_id_arms %>% 
+c_add_ipd <- b_id_arms %>% 
   filter(!trial_id %in% c_prp_ipd$trial_id) %>% 
-  full_join(
-    c_prp_ipd %>% 
-      filter(trial_id %in% b_id_arms$trial_id[b_id_arms$source == "ipd"])
-  ) %>% 
+  full_join(c_prp_ipd) %>% 
   select(trial_id, source, arm_n, arm_n_attr, trttype)
 
 # Remove arms with no attrition
-d_no_attr <- c_na_ipd %>% filter(arm_n_attr != 0)
+d_no_attr <- c_add_ipd %>% filter(arm_n_attr != 0)
 
-# 345 trials
-# 262 agg, 83 ipd
+# 348 trials
+# 262 agg, 86 ipd
 d_no_attr %>% count(trial_id, source) %>% count(source)
+d_no_attr %>% reframe(across(everything(), ~ sum(is.na(.))))
 
 # Save (remove ipd when trials are out)
 write_csv(d_no_attr, "processed_data/df_counts_arms.csv")

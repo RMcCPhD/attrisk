@@ -6,7 +6,7 @@
 source("scripts/00_functions_packages_etc.R")
 
 # Import dataset
-a_imp_df <- read_csv("processed_data/df_stan_n340.csv")
+a_imp_df <- read_csv("processed_data/df_stan_n348.csv")
 glimpse(a_imp_df)
 
 # Inspecting variables to determine cut-offs
@@ -80,7 +80,7 @@ a_shrt <- a_dmy %>%
     reg_med = eastern_mediterranean_region
   ) %>% 
   select(
-    trial_id, arm_n, arm_n_attr, duration, type, p3, p4, po,
+    trial_id, arm_n, arm_n_attr, duration, trttype, p3, p4, po,
     starts_with("b_"),
     starts_with("reg_"), 
     everything()
