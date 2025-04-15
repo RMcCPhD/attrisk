@@ -12,7 +12,6 @@ library(markdown)
 library(flexsurv)
 
 options(scipen = 999)
-
 Sys.setenv(STANC3 = TRUE)
 
 # Function for covariate posterior predictive checks

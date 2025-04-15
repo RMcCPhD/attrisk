@@ -21,48 +21,33 @@ summary(a_imp_df$n_poms)
 a_dmy <- a_imp_df %>% 
   mutate(
     
-    # Sample size (<250 - 250-<500 - 500-<750 - 750-<1000 - >=1000)
-    n_250 = if_else(n < 250, 1, 0),
-    n_500 = if_else(n >= 250 & n < 500, 1, 0),
+    # Sample size (<500 - 500-<750 - >=750)
+    n_500 = if_else(n < 500, 1, 0),
     n_750 = if_else(n >= 500 & n < 750, 1, 0),
-    n_1000 = if_else(n >= 750 & n < 1000, 1, 0),
-    n_abv = if_else(n >= 1000, 1, 0),
+    n_abv = if_else(n >= 750, 1, 0),
     
-    # Number of arms (2 - 3 - <3)
+    # Number of arms (2 - 3 - >3)
     arm_2 = if_else(n_arms == 2, 1, 0),
     arm_3 = if_else(n_arms == 3, 1, 0),
     arm_abv = if_else(n_arms > 3, 1, 0),
     
-    # Number of sites (<50 - 50-<100 - 100-<150 - >=150)
-    site_50 = if_else(n_facilities < 50, 1, 0),
-    site_100 = if_else(n_facilities >= 50 & n_facilities < 100, 1, 0),
-    site_150 = if_else(n_facilities >= 100 & n_facilities < 150, 1, 0),
-    site_abv = if_else(n_facilities >= 150, 1, 0),
+    # Number of sites (<100 vs >= 100)
+    site_100 = if_else(n_facilities < 100, 1, 0),
     
-    # Number of regions (1 - 2 - 3 - 4 - 5 - 6)
+    # Number of regions (1 or >=1)
     reg_1 = if_else(n_regions == 1, 1, 0),
-    reg_2 = if_else(n_regions == 2, 1, 0),
-    reg_3 = if_else(n_regions == 3, 1, 0),
-    reg_4 = if_else(n_regions == 4, 1, 0),
-    reg_5 = if_else(n_regions == 5, 1, 0),
-    reg_6 = if_else(n_regions == 6, 1, 0),
-    
-    # Trial duration (<6m - 6m-<1yr - >=1yr)
+
+    # Trial duration (<6m - >=6m)
     dur_6m = if_else(duration < 26, 1, 0),
-    dur_1yr = if_else(duration >= 26 & duration < 52, 1, 0),
-    dur_abv = if_else(duration >= 52, 1, 0),
     
-    # Number of primary outcomes (1 - 2 - 3 - 4 - 5 - 6)
+    # Number of primary outcomes (1 - >= 1)
     pom_1 = if_else(n_poms == 1, 1, 0),
-    pom_2 = if_else(n_poms == 2, 1, 0),
-    pom_3 = if_else(n_poms == 3, 1, 0),
-    pom_4 = if_else(n_poms == 4, 1, 0),
-    pom_5 = if_else(n_poms == 5, 1, 0),
-    pom_6 = if_else(n_poms == 6, 1, 0)
     
   )
 
 # Shorten names
+# Remove phase 4 or other (either phase 3 or not for model stability)
+# Remove region counts and just use WHO regions instead (same thing)
 a_shrt <- a_dmy %>% 
   rename(
     p3 = phase_3,
@@ -85,9 +70,46 @@ a_shrt <- a_dmy %>%
     starts_with("reg_"), 
     everything()
   ) %>% 
-  select(-c(source:n_regions))
+  select(-c(source:n_regions)) %>% 
+  select(-c(
+    p4, po, reg_1
+  )) %>% 
+  rename(b_dbl = b_dlb)
 
 glimpse(a_shrt)
 
+for (i in seq_along(a_shrt)) {
+  nm <- names(a_shrt[i])
+  print(nm)
+  sum <- table(a_shrt[i])
+  print(sum)
+}
+
+# Check for collinearity between dummy variables
+# Model falls over and suspect this
+X_dummies <- a_shrt %>% select(trttype:pom_1)
+X_cor <- cor(as.matrix(X_dummies))
+X_high_cor <- which(abs(X_cor) > 0.8 & lower.tri(X_cor), arr.ind = TRUE)
+colnames(X_dummies)[unique(c(X_high_cor[,1], X_high_cor[,2]))]
+
 # Save
 saveRDS(a_shrt, "processed_data/df_stan_ready.rds")
+
+covs <- names(select(a_imp_df, names(a_shrt)[-c(1:5)]))
+
+a_shrt[, covs] <- lapply(a_imp_df[, covs], as.integer)
+
+b_stan_dat <- list(
+  I = nrow(a_shrt),
+  K = length(covs),
+  r = a_shrt$arm_n_attr,
+  N = a_shrt$arm_n,
+  dt = a_shrt$duration,
+  arm = as.integer(a_shrt$trttype),
+  X = as.matrix(a_shrt[, covs])
+)
+
+glimpse(b_stan_dat)
+
+# Save
+saveRDS(b_stan_dat, "processed_data/stan_dat.rds")
