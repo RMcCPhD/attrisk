@@ -48,10 +48,13 @@ b_add_new <- b_imp_manual %>%
   filter(trial_id %in% b_join_covs$trial_id) %>% 
   left_join(z_n, by = "trial_id") %>% 
   mutate(n = coalesce(n, n_new)) %>% 
-  select(-n_new)
+  select(-n_new) %>% 
+  mutate(
+    trttype = if_else(trttype == "placebo", "plc", trttype)
+  )
 
 b_add_new %>% count(trial_id, source) %>% count(source)
-b_add_new %>% reframe(across(everything(), ~ sum(is.na(.))))
+b_add_new %>% reframe(across(everything(), ~ sum(is.na(.)))) %>% View()
 
 # Save version with new trials added to manually find missing data
 # write_csv(b_add_new, "scratch_data/aact_manual_find_missingness_new.csv")
@@ -101,7 +104,7 @@ b_fmt <- c_impute_join %>%
   pivot_wider(names_from = "masking", values_from = "masking") %>% 
   mutate(
     across(`Phase 3`:`Phase Not Applicable`, ~ if_else(is.na(.), 0, 1)),
-    trttype = if_else(trttype == "placebo", 1, 0),
+    trttype = if_else(trttype == "plc", 1, 0),
     across(Double:Triple, ~ if_else(is.na(.), 0, 1))
   ) %>% 
   rename_at(vars(`Phase 3`:`Phase Not Applicable`), ~ gsub(" ", "_", .)) %>% 
