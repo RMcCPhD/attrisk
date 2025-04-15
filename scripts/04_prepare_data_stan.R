@@ -6,7 +6,7 @@
 source("scripts/00_functions_packages_etc.R")
 
 # Import dataset
-a_imp_df <- read_csv("processed_data/df_stan_n348.csv")
+a_imp_df <- readRDS("processed_data/df_fu_n348.rds")
 glimpse(a_imp_df)
 
 # Inspecting variables to determine cut-offs
@@ -65,7 +65,7 @@ a_shrt <- a_dmy %>%
     reg_med = eastern_mediterranean_region
   ) %>% 
   select(
-    trial_id, arm_n, arm_n_attr, duration, trttype, p3, p4, po,
+    trial_id, arm_n, arm_n_attr, pt, trttype, p3, p4, po,
     starts_with("b_"),
     starts_with("reg_"), 
     everything()
@@ -92,19 +92,16 @@ X_cor <- cor(as.matrix(X_dummies))
 X_high_cor <- which(abs(X_cor) > 0.8 & lower.tri(X_cor), arr.ind = TRUE)
 colnames(X_dummies)[unique(c(X_high_cor[,1], X_high_cor[,2]))]
 
-# Save
-saveRDS(a_shrt, "processed_data/df_stan_ready.rds")
+covs <- names(a_shrt[-c(1:5)])
 
-covs <- names(select(a_imp_df, names(a_shrt)[-c(1:5)]))
-
-a_shrt[, covs] <- lapply(a_imp_df[, covs], as.integer)
+a_shrt[, covs] <- lapply(a_shrt[, covs], as.integer)
 
 b_stan_dat <- list(
   I = nrow(a_shrt),
   K = length(covs),
   r = a_shrt$arm_n_attr,
   N = a_shrt$arm_n,
-  dt = a_shrt$duration,
+  dt = a_shrt$pt,
   arm = as.integer(a_shrt$trttype),
   X = as.matrix(a_shrt[, covs])
 )

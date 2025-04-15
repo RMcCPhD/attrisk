@@ -96,4 +96,4 @@ f_pt <- e_bind %>%
   )
 
 # Save
-saveRDS(f_pt, "df_fu_n348.csv")
+saveRDS(f_pt, "processed_data/df_fu_n348.rds")
