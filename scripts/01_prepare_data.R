@@ -6,10 +6,10 @@ source("scripts/00_functions_packages_etc.R")
 a_imp_atc <- read_csv("created_metadata/atc.csv")
 a_imp_df <- read_csv("data/trials_n392_attrisk.csv")
 a_imp_ipd <- read_csv("data/attr_n86.csv")
+a_imp_fu <- read_csv("data/fu_ratio_n86.csv")
 
 # Remove glp1, sglt2 and dpp4 arms
 # Add treatment type
-# 350 trials (267 agg, 83 ipd)
 b_id_arms <- a_imp_df %>% 
   select(-c(unq_drugs, atc, drug_name:dose)) %>% 
   mutate(
@@ -37,18 +37,20 @@ b_id_arms <- a_imp_df %>%
       TRUE ~ "ac"
     ))
 
-# 267 agg, 83 ipd with placebo and/or ac arms
+# 350 trials (267 agg, 83 ipd)
 b_id_arms %>% count(trial_id, source) %>% count(source)
 
 # Prepare IPD counts
 c_prp_ipd <- a_imp_ipd %>% 
+  mutate(collapsed = strsplit(collapsed, " AND ")) %>% 
+  unnest(collapsed) %>% 
+  select(-length) %>% 
   separate(
-    collapsed, 
-    into = c("trttype", "n", "arm_n_attr", "compl"), 
+    collapsed,
+    into = c("trttype", "n", "arm_n_attr", "compl"),
     sep = " "
   ) %>% 
   mutate(across(trttype:compl, ~ gsub("\\b\\w+=", "", .))) %>% 
-  select(-length, -compl) %>% 
   mutate(
     source = "ipd",
     across(n:arm_n_attr, as.numeric)
@@ -58,8 +60,11 @@ c_prp_ipd <- a_imp_ipd %>%
     arm_n = n
   )
 
+# 86 trials
+c_prp_ipd %>% count(trial_id)
+
 # All there (83/86)
-sum(c_prp_ipd$trial_id %in% b_id_arms$trial_id[b_id_arms$source == "ipd"])
+sum(unique(c_prp_ipd$trial_id) %in% b_id_arms$trial_id[b_id_arms$source == "ipd"])
 
 c_add_ipd <- b_id_arms %>% 
   filter(!trial_id %in% c_prp_ipd$trial_id) %>% 
