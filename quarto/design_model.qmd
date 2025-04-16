@@ -194,25 +194,29 @@ The following section demonstrates some results from fitting the model specified
 knitr::include_graphics("trace.png")
 ```
 
-```{r pairs plot}
-knitr::include_graphics("pairs.png")
+```{r stat plot}
+knitr::include_graphics("stat.jpg")
 ```
 
-```{r ppc}
+```{r ppc plot}
 knitr::include_graphics("ppc.jpg")
+```
+
+```{r ppc plot2}
+knitr::include_graphics("int.jpg")
 ```
 
 ### Predictions
 
-We can use model estimates to make predictions about attrition rates based on trial design features. We will make predictions by passing the summarised mean model parameters to the Gompertz hazard function.
+We can use model estimates to make predictions about attrition rates based on trial design features. The following predictive example was made by passing the summarised mean Gompertz parameters from the fitted model to the Gompertz hazard function.
 
 ```{r makedata2}
 library(flexsurv)
 
 df2 <- tibble(
   time = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18),
-  a = rep(-0.083376916, 18),
-  b = rep(exp(0.01626271), 18),
+  a = rep(-0.777, 18),
+  b = rep(exp(0.388), 18),
 )
 
 df2_haz <- df2 %>% 

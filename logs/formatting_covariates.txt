@@ -1,0 +1,90 @@
+# Sample size - <250 - >=250-<500 - >=500-<750 - >=750-<1000 - >=1000
+Variable: n 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  129.0   292.0   448.0   557.6   663.0  4364.0
+
+
+# Arm size - <100 - >=100-<200 - >=200-<300 - >=300
+Variable: arm_n 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   36.0   108.0   159.0   209.6   244.0  1393.0
+
+# Duration - 
+Variable: duration 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   2.00   24.00   24.00   28.53   26.00  234.00 
+
+
+# Treatment type - fine as is
+  var Freq
+1   0  122
+2   1  247
+
+
+# Number of arms - 2, 3, 4, >4
+  var Freq
+1   2  197 - dummy
+2   3   91 - dummy
+3   4   55 - dummy
+4   5    7 - everything else as one
+5   6    7
+6   7    7
+7   9    2
+8  10    1
+9  12    2
+
+
+# Phase - 3, 4
+Variable: phase_3 
+  var Freq
+1   0   32
+2   1  337
+Variable: phase_4 
+  var Freq
+1   0  340
+2   1   29
+Variable: phase_notapp 
+  var Freq
+1   0  366
+2   1    3
+
+
+# Blinding - fine as is
+Variable: double 
+  var Freq
+1   0  173
+2   1  196
+Variable: open_label 
+  var Freq
+1   0  311
+2   1   58
+Variable: quadruple 
+  var Freq
+1   0  288
+2   1   81
+Variable: triple 
+  var Freq
+1   0  335
+2   1   34
+
+
+# N facilities - <=100 - >100-<=200 - >200
+Variable: n_facilities 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00   35.00   70.00   86.58  116.00  577.00 
+
+
+# N POMS - 1 - 2 - 3 - >3
+Variable: n_poms 
+  var Freq
+1   1  298
+2   2   38
+3   3   22
+4   4    5
+5   5    4
+6   6    2
+
+
+# Regions - fine as is
+
+

@@ -32,6 +32,20 @@ nn_ratio <- function(row, ipd) {
   
 }
 
+# Function to produce a tidy count of each variable, informing coding
+# Contingency for dummy variables, summary for numeric
+tidy_sum <- function(df, var_name) {
+  var <- df[[var_name]]
+  cat("Variable:", var_name, "\n")
+  if (is.integer(var)) {
+    tbl <- table(var) %>% as.data.frame()
+    print(tbl)
+  } else if (is.numeric(var)) {
+    tbl <- summary(var)
+    print(tbl)
+  } else {NA}
+}
+
 # Function for covariate posterior predictive checks
 plot_subgroup_ppcs <- function(y, yrep, covariate_df, covariate_names, stat = "mean") {
   stopifnot(length(y) == ncol(yrep))

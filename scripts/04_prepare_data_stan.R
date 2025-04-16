@@ -9,101 +9,96 @@ source("scripts/00_functions_packages_etc.R")
 a_imp_df <- readRDS("processed_data/df_fu_n348.rds")
 glimpse(a_imp_df)
 
-# Inspecting variables to determine cut-offs
-summary(a_imp_df$n)
-summary(a_imp_df$n_arms)
-summary(a_imp_df$n_facilities)
-summary(a_imp_df$n_regions)
-summary(a_imp_df$duration)
-summary(a_imp_df$n_poms)
+# Removing n regions as it's redundant (same thing is achieved with
+# multiple regions being 1)
+b_rm <- a_imp_df %>% 
+  select(-n_regions) %>% 
+  mutate(
+    across(c(trttype:triple, n_poms:eastern_mediterranean_region), as.integer)
+  )
+
+# Summarise variables
+covs <- names(b_rm[c(3, 4, 7, 11:27)])
+for (var in covs) {tidy_sum(b_rm, var)}
 
 # Create dummy variables
-a_dmy <- a_imp_df %>% 
+a_dmy <- b_rm %>% 
   mutate(
     
-    # Sample size (<500 - 500-<750 - >=750)
-    n_500 = if_else(n < 500, 1, 0),
+    # Sample size (<250 - >=250-<500, >=500-<750 - >=750-<1000 - >=1000)
+    n_250 = if_else(n < 250, 1, 0),
+    n_500 = if_else(n >= 250 & n < 500, 1, 0),
     n_750 = if_else(n >= 500 & n < 750, 1, 0),
-    n_abv = if_else(n >= 750, 1, 0),
+    n_1000 = if_else(n >= 750 & n < 1000, 1, 0),
+    n_abv = if_else(n >= 1000, 1, 0),
     
-    # Number of arms (2 - 3 - >3)
+    # Arm size (<100 - >=100-<200 - >=200-<300 - >=300)
+    arm_100 = if_else(arm_n < 100, 1, 0),
+    arm_200 = if_else(arm_n >=100 & arm_n < 200, 1, 0),
+    arm_300 = if_else(arm_n >= 200 & arm_n < 300, 1, 0),
+    arm_abv = if_else(arm_n >= 300, 1, 0),
+    
+    # Trial duration (<6m - >=6m-<1yr - >=1yr)
+    dur_6m = if_else(duration < 26, 1, 0),
+    dur_1yr = if_else(duration >= 26 & duration < 52, 1, 0),
+    dur_abv = if_else(duration >= 52, 1, 0),
+    
+    # Number of arms (2 - 3 - 4 - >4)
     arm_2 = if_else(n_arms == 2, 1, 0),
     arm_3 = if_else(n_arms == 3, 1, 0),
-    arm_abv = if_else(n_arms > 3, 1, 0),
+    arm_4 = if_else(n_arms == 4, 1, 0),
+    arm_abv = if_else(n_arms > 4, 1, 0),
     
-    # Number of sites (<100 vs >= 100)
-    site_100 = if_else(n_facilities < 100, 1, 0),
+    # Phase (3)
+    p3 = if_else(phase_3 == 1, 1, 0),
     
-    # Number of regions (1 or >=1)
-    reg_1 = if_else(n_regions == 1, 1, 0),
-
-    # Trial duration (<6m - >=6m)
-    dur_6m = if_else(duration < 26, 1, 0),
+    # Blinding (double - triple - quadruple - open label)
+    bdbl = double,
+    btrip = triple,
+    bquad = quadruple,
+    bol = open_label,
     
-    # Number of primary outcomes (1 - >= 1)
+    # N facilities (<200)
+    f_200 = if_else(n_facilities < 200, 1, 0),
+    
+    # N poms (1 - 2 - 3 - >3)
     pom_1 = if_else(n_poms == 1, 1, 0),
+    pom_2 = if_else(n_poms == 2, 1, 0),
+    pom_3 = if_else(n_poms == 3, 1, 0),
+    pom_abv = if_else(n_poms >3, 1, 0),
+    
+    # Regions (am - eur - wpac - afr - sea - em)
+    reg_am = region_of_the_americas,
+    reg_eur = european_region,
+    reg_wpac = western_pacific_region,
+    reg_afr = african_region,
+    reg_sea = south_east_asia_region,
+    reg_em = eastern_mediterranean_region
     
   )
 
-# Shorten names
-# Remove phase 4 or other (either phase 3 or not for model stability)
-# Remove region counts and just use WHO regions instead (same thing)
-a_shrt <- a_dmy %>% 
-  rename(
-    p3 = phase_3,
-    p4 = phase_4,
-    po = phase_notapp,
-    b_dlb = double,
-    b_ol = open_label,
-    b_q = quadruple,
-    b_t = triple,
-    reg_am = region_of_the_americas,
-    reg_eur = european_region,
-    reg_pac = western_pacific_region,
-    reg_afr = african_region,
-    reg_sea = south_east_asia_region,
-    reg_med = eastern_mediterranean_region
-  ) %>% 
-  select(
-    trial_id, arm_n, arm_n_attr, pt, trttype, p3, p4, po,
-    starts_with("b_"),
-    starts_with("reg_"), 
-    everything()
-  ) %>% 
-  select(-c(source:n_regions)) %>% 
-  select(-c(
-    p4, po, reg_1
-  )) %>% 
-  rename(b_dbl = b_dlb)
-
-glimpse(a_shrt)
-
-for (i in seq_along(a_shrt)) {
-  nm <- names(a_shrt[i])
-  print(nm)
-  sum <- table(a_shrt[i])
-  print(sum)
-}
+glimpse(a_dmy)
 
 # Check for collinearity between dummy variables
 # Model falls over and suspect this
-X_dummies <- a_shrt %>% select(trttype:pom_1)
-X_cor <- cor(as.matrix(X_dummies))
+# Removed phase 4 and additional n facilities variables as there was high
+# collinearity
+X_dummies <- a_dmy %>% select(n_250:reg_em)
+X_mat <- as.matrix(X_dummies)
+X_cor <- cor(X_mat, method = "pearson")
 X_high_cor <- which(abs(X_cor) > 0.8 & lower.tri(X_cor), arr.ind = TRUE)
 colnames(X_dummies)[unique(c(X_high_cor[,1], X_high_cor[,2]))]
 
-covs <- names(a_shrt[-c(1:5)])
-
-a_shrt[, covs] <- lapply(a_shrt[, covs], as.integer)
+covs <- names(a_dmy[c(28:58)])
 
 b_stan_dat <- list(
-  I = nrow(a_shrt),
+  I = nrow(a_dmy),
   K = length(covs),
-  r = a_shrt$arm_n_attr,
-  N = a_shrt$arm_n,
-  dt = a_shrt$pt,
-  arm = as.integer(a_shrt$trttype),
-  X = as.matrix(a_shrt[, covs])
+  r = a_dmy$arm_n_attr,
+  N = a_dmy$arm_n,
+  dt = a_dmy$pt,
+  arm = as.integer(a_dmy$trttype),
+  X = as.matrix(a_dmy[, covs])
 )
 
 glimpse(b_stan_dat)
