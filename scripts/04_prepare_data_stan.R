@@ -22,7 +22,7 @@ covs <- names(b_rm[c(3, 4, 7, 11:27)])
 for (var in covs) {tidy_sum(b_rm, var)}
 
 # Create dummy variables
-a_dmy <- b_rm %>% 
+c_dmy <- b_rm %>% 
   mutate(
     
     # Sample size (<250 - >=250-<500, >=500-<750 - >=750-<1000 - >=1000)
@@ -33,10 +33,10 @@ a_dmy <- b_rm %>%
     n_abv = if_else(n >= 1000, 1, 0),
     
     # Arm size (<100 - >=100-<200 - >=200-<300 - >=300)
-    arm_100 = if_else(arm_n < 100, 1, 0),
-    arm_200 = if_else(arm_n >=100 & arm_n < 200, 1, 0),
-    arm_300 = if_else(arm_n >= 200 & arm_n < 300, 1, 0),
-    arm_abv = if_else(arm_n >= 300, 1, 0),
+    arm_100 = if_else(n < 100, 1, 0),
+    arm_200 = if_else(n >= 100 & n < 200, 1, 0),
+    arm_300 = if_else(n >= 200 & n < 300, 1, 0),
+    arm_abv = if_else(n >= 300, 1, 0),
     
     # Trial duration (<6m - >=6m-<1yr - >=1yr)
     dur_6m = if_else(duration < 26, 1, 0),
@@ -49,8 +49,10 @@ a_dmy <- b_rm %>%
     arm_4 = if_else(n_arms == 4, 1, 0),
     arm_abv = if_else(n_arms > 4, 1, 0),
     
-    # Phase (3)
+    # Phase (3 - 4)
     p3 = if_else(phase_3 == 1, 1, 0),
+    p4 = if_else(phase_4 == 1, 1, 0),
+    po = if_else(phase_notapp == 1, 1, 0),
     
     # Blinding (double - triple - quadruple - open label)
     bdbl = double,
@@ -58,8 +60,10 @@ a_dmy <- b_rm %>%
     bquad = quadruple,
     bol = open_label,
     
-    # N facilities (<200)
-    f_200 = if_else(n_facilities < 200, 1, 0),
+    # N facilities (<100 - >=100-<200 - >=200)
+    f_100 = if_else(n_facilities < 100, 1, 0),
+    f_200 = if_else(n_facilities >= 100 & n_facilities < 200, 1, 0),
+    f_abv = if_else(n_facilities >= 200, 1, 0),
     
     # N poms (1 - 2 - 3 - >3)
     pom_1 = if_else(n_poms == 1, 1, 0),
@@ -77,28 +81,16 @@ a_dmy <- b_rm %>%
     
   )
 
-glimpse(a_dmy)
-
-# Check for collinearity between dummy variables
-# Model falls over and suspect this
-# Removed phase 4 and additional n facilities variables as there was high
-# collinearity
-X_dummies <- a_dmy %>% select(n_250:reg_em)
-X_mat <- as.matrix(X_dummies)
-X_cor <- cor(X_mat, method = "pearson")
-X_high_cor <- which(abs(X_cor) > 0.8 & lower.tri(X_cor), arr.ind = TRUE)
-colnames(X_dummies)[unique(c(X_high_cor[,1], X_high_cor[,2]))]
-
-covs <- names(a_dmy[c(28:58)])
+covs <- names(c_dmy[c(28:62)])
 
 b_stan_dat <- list(
-  I = nrow(a_dmy),
+  I = nrow(c_dmy),
   K = length(covs),
-  r = a_dmy$arm_n_attr,
-  N = a_dmy$arm_n,
-  dt = a_dmy$pt,
-  arm = as.integer(a_dmy$trttype),
-  X = as.matrix(a_dmy[, covs])
+  r = c_dmy$arm_n_attr,
+  N = c_dmy$arm_n,
+  dt = c_dmy$pt,
+  arm = as.integer(c_dmy$trttype),
+  X = as.matrix(c_dmy[, covs])
 )
 
 glimpse(b_stan_dat)

@@ -20,8 +20,7 @@ df <- tibble(
   trial_id = c(1, 1, 2, 2),
   r = c(25, 31, 73, 91),
   N = c(100, 101, 203, 204),
-  t = c(26, 24, 52, 48),
-  py = c(625, 832, 3452, 4265),
+  py = c(0.482, 0.482, 0.563, 0.563),
   arm_type = c("Placebo", "Active", "Active", "Placebo"),
   blinding = c("Double", "Double", "Triple", "Triple"),
   phase = c(3L, 3L, 4L, 4L),
@@ -33,20 +32,22 @@ df %>% knitr::kable()
 
 -   r - Attrition event count
 -   N - Number of participants in arm
--   t - Trial duration in weeks
--   py - Person-years of follow-up time
+-   py - Mean person-time in years
 
-We settled on a set of covariates with low collinearity that facilitated model stability. All covariates were dummy coded, with levels within categorical groupings (e.g. blinding) one-hot encoded. We will include the following covariates:
+We settled on a set of covariates with that facilitated model stability. All covariates were dummy coded, with levels within categorical groupings (e.g. blinding) one-hot encoded. 
 
+We will include the following covariates (1 = yes, 0 = no):
+
+-   Sample size (\<250, \>=250-\<500, \>=500-\<750, \>=750-\<1000, \>=1000)
+-   Arm size ()
 -   Treatment arm type: 1 = placebo, 0 = active comparator
--   Phase 3: 1 = yes, 0 = no
--   Blinding (double, triple, quadruple, open-label): 1 = yes, 0 = no
--   WHO regions involved (Europe, Americas, Pacific, SE Asia, African, Eastern Med): 1 = yes, 0 = no
--   Sample size (\<500, 500-\<750, \>=750): 1 = yes, 0 = no
--   Number of arms (2, 3, \>3): 1 = yes, 0 = no
--   Number of sites (\<100): 1 = yes, 0 = no
--   Duration (\<6mths): 1 = yes, 0 = no
--   Single primary outcome: 1 = yes, 0 = no
+-   Phase 3
+-   Blinding (double, triple, quadruple, open-label)
+-   WHO regions involved (Europe, Americas, WPac, SEA, African, EMed)
+-   Number of arms (2, 3, \>3)
+-   Number of sites (\<100)
+-   Duration (\<6mths)
+-   Single primary outcome
 
 ## Model description
 
