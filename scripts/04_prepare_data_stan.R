@@ -25,6 +25,8 @@ for (var in covs) {tidy_sum(b_rm, var)}
 c_dmy <- b_rm %>% 
   mutate(
     
+    duration = duration/52,
+    
     # Sample size (<250 - >=250-<500, >=500-<750 - >=750-<1000 - >=1000)
     n_250 = if_else(n < 250, 1, 0),
     n_500 = if_else(n >= 250 & n < 500, 1, 0),
@@ -88,7 +90,7 @@ b_stan_dat <- list(
   K = length(covs),
   r = c_dmy$arm_n_attr,
   N = c_dmy$arm_n,
-  dt = c_dmy$pt,
+  dt = c_dmy$duration,
   arm = as.integer(c_dmy$trttype),
   X = as.matrix(c_dmy[, covs])
 )
