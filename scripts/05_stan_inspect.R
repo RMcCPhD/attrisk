@@ -2,8 +2,12 @@
 # Inspect outputs
 source("scripts/00_functions_packages_etc.R")
 
+library(shinystan)
+
 # Import model fit from MARS
 a_fit <- readRDS("outputs/fit2.rds")
+
+shinystan::launch_shinystan(a_fit)
 
 # Import counts
 a_imp_df <- readRDS("processed_data/stan_dat.rds")
@@ -120,33 +124,3 @@ for (name in names(ppc_plots)) {
   ggsave(path, plot, width = 6, height = 4, unit = "in")
   print(plot)
 }
-
-# Extract posterior samples
-posterior_samples <- as_draws_df(a_fit)
-posterior_summary <- summarise_draws(posterior_samples, default_summary_measures())
-
-posterior_summary <- summarise_draws(
-  posterior_samples,
-  measures = list(
-    mean = mean,
-    median = median,
-    q5 = ~quantile(.x, 0.05),
-    q95 = ~quantile(.x, 0.95)
-  )
-)
-
-# Summarise gompertz parameters
-sum_params <- posterior_summary %>% 
-  filter(grepl("^a\\[|^b\\[", variable)) %>% 
-  mutate(
-    variable = gsub("\\[|\\]", "", variable),
-    variable = gsub("[0-9]", "", variable)
-  ) %>% 
-  group_by(variable) %>% 
-  reframe(mean = mean(measures.mean))
-
-# Save
-saveRDS(posterior_samples, "outputs/posterior_samples.rds")
-saveRDS(posterior_summary, "outputs/posterior_sum.rds")
-write_csv(posterior_summary, "outputs/posterior_sum.csv")
-write_csv(sum_params, "outputs/gomp_sum.csv")

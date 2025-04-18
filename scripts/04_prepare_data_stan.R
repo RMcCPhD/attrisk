@@ -24,9 +24,7 @@ for (var in covs) {tidy_sum(b_rm, var)}
 # Create dummy variables
 c_dmy <- b_rm %>% 
   mutate(
-    
-    duration = duration/52,
-    
+
     # Sample size (<250 - >=250-<500, >=500-<750 - >=750-<1000 - >=1000)
     n_250 = if_else(n < 250, 1, 0),
     n_500 = if_else(n >= 250 & n < 500, 1, 0),
@@ -54,7 +52,7 @@ c_dmy <- b_rm %>%
     # Phase (3 - 4)
     p3 = if_else(phase_3 == 1, 1, 0),
     p4 = if_else(phase_4 == 1, 1, 0),
-    po = if_else(phase_notapp == 1, 1, 0),
+    #po = if_else(phase_notapp == 1, 1, 0),
     
     # Blinding (double - triple - quadruple - open label)
     bdbl = double,
@@ -79,11 +77,18 @@ c_dmy <- b_rm %>%
     reg_wpac = western_pacific_region,
     reg_afr = african_region,
     reg_sea = south_east_asia_region,
-    reg_em = eastern_mediterranean_region
+    reg_em = eastern_mediterranean_region,
     
-  )
+    duration = duration/52
+    
+  ) %>% 
+  mutate(across(n_250:reg_em, as.integer))
 
-covs <- names(c_dmy[c(28:62)])
+# Check frequencies among dummy variables
+covs <- names(c_dmy[c(28:61)])
+for (var in covs) {tidy_sum(c_dmy, var)}
+
+covs <- names(c_dmy[c(28:61)])
 
 b_stan_dat <- list(
   I = nrow(c_dmy),
