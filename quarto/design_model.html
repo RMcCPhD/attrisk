@@ -127,22 +127,32 @@ window.Quarto = {
 
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>We will construct a design stage model using aggregate-level data to predict attrition rates based on trial design features while accounting for differences in trial duration. The model will be similar to that described in NICE Technical Support Document 3 (3.2. Rate data: Binomial likelihood and cloglog link) for modelling rates where event times are not available.</p>
+<p>We will construct a design stage model to predict attrition rates based on trial design features while accounting for differences in trial duration. We will construct the initial model using aggregate-level data for non-experimental arms (i.e.&nbsp;placebo, active comparator) to facilitate generalisability across trials of different index conditions. The model will be similar to that described in NICE Technical Support Document 3 (3.2. Rate data: Binomial likelihood and cloglog link) for modelling rates where event times are not available.</p>
 </section>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 23%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: right;">trial_id</th>
 <th style="text-align: right;">r</th>
 <th style="text-align: right;">N</th>
-<th style="text-align: right;">py</th>
+<th style="text-align: right;">dur</th>
 <th style="text-align: left;">arm_type</th>
-<th style="text-align: left;">blinding</th>
-<th style="text-align: right;">phase</th>
+<th style="text-align: right;">double_blind</th>
+<th style="text-align: right;">triple_blind</th>
 <th style="text-align: left;">other_covariates</th>
 </tr>
 </thead>
@@ -151,40 +161,40 @@ window.Quarto = {
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">25</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.482</td>
+<td style="text-align: right;">0.50</td>
 <td style="text-align: left;">Placebo</td>
-<td style="text-align: left;">Double</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">31</td>
 <td style="text-align: right;">101</td>
-<td style="text-align: right;">0.482</td>
+<td style="text-align: right;">0.50</td>
 <td style="text-align: left;">Active</td>
-<td style="text-align: left;">Double</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">73</td>
 <td style="text-align: right;">203</td>
-<td style="text-align: right;">0.563</td>
+<td style="text-align: right;">0.25</td>
 <td style="text-align: left;">Active</td>
-<td style="text-align: left;">Triple</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: left;">…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">91</td>
 <td style="text-align: right;">204</td>
-<td style="text-align: right;">0.563</td>
+<td style="text-align: right;">0.25</td>
 <td style="text-align: left;">Placebo</td>
-<td style="text-align: left;">Triple</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: left;">…</td>
 </tr>
 </tbody>
@@ -194,20 +204,21 @@ window.Quarto = {
 <ul>
 <li>r - Attrition event count</li>
 <li>N - Number of participants in arm</li>
-<li>t - Trial duration in weeks</li>
-<li>py - Person-years of follow-up time</li>
+<li>dur - Trial duration in years</li>
 </ul>
-<p>We settled on a set of covariates with low collinearity that facilitated model stability. All covariates were dummy coded, with levels within categorical groupings (e.g.&nbsp;blinding) one-hot encoded. We will include the following covariates:</p>
+<p>All covariates will be dummy coded, with levels within categorical groupings (e.g.&nbsp;blinding) one-hot encoded.</p>
+<p>We will include the following covariates (1 = yes, 0 = no):</p>
 <ul>
-<li>Treatment arm type: 1 = placebo, 0 = active comparator</li>
-<li>Phase 3: 1 = yes, 0 = no</li>
-<li>Blinding (double, triple, quadruple, open-label): 1 = yes, 0 = no</li>
-<li>WHO regions involved (Europe, Americas, Pacific, SE Asia, African, Eastern Med): 1 = yes, 0 = no</li>
-<li>Sample size (&lt;500, 500-&lt;750, &gt;=750): 1 = yes, 0 = no</li>
-<li>Number of arms (2, 3, &gt;3): 1 = yes, 0 = no</li>
-<li>Number of sites (&lt;100): 1 = yes, 0 = no</li>
-<li>Duration (&lt;6mths): 1 = yes, 0 = no</li>
-<li>Single primary outcome: 1 = yes, 0 = no</li>
+<li>Sample size (&lt;250, &gt;=250-&lt;500, &gt;=500-&lt;750, &gt;=750-&lt;1000, &gt;=1000)</li>
+<li>Arm size (&lt;100, &gt;=100-&lt;200, &gt;=200-&lt;300, &gt;=300)</li>
+<li>Treatment arm type (placebo - 1, active comparator - 0)</li>
+<li>Trial duration (&lt;6m, &gt;=6m-&lt;1yr, &gt;=1yr)</li>
+<li>Number of arms (2, 3, 4, &gt;4)</li>
+<li>Phase (3, 4)</li>
+<li>Blinding (double, triple, quadruple, open-label)</li>
+<li>Number of facilities (&lt;100, &gt;=100-&lt;200, &gt;=200)</li>
+<li>Number of primary outcomes (1, 2, 3, &gt;3)</li>
+<li>WHO regions involved (Europe, Americas, WPac, SEA, African, EMed)</li>
 </ul>
 </section>
 <section id="model-description" class="level2">
@@ -223,10 +234,10 @@ r_{ij} \sim \text{Binomial}(N_{ij}, \theta_{ij}) \\
 <span class="math display">\[\begin{aligned}
 F(t_{ij}) &amp;= 1 - \exp \left(-\frac{b_{ij}}{a_{ij}} \exp(a_{ij} t_{ij}) \right),
 \end{aligned}\]</span>
-<p>where <span class="math inline">\(a \geq 0\)</span> is the shape parameter and <span class="math inline">\(b \geq 0\)</span> is the rate parameter for trial <span class="math inline">\(i\)</span>, with both parameters constrained to be positive.</p>
-<p>We initially explored including covariates on both <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, but this specification resulted in convergence issues and model instability. Therefore, we will allow <span class="math inline">\(a\)</span> to vary by arm-trial combination without adjustment, and place covariates on <span class="math inline">\(b\)</span> via a log-linear function with a random intercept:</p>
+<p>where <span class="math inline">\(a \geq 0\)</span> is the shape parameter and <span class="math inline">\(b \geq 0\)</span> is the rate parameter, with both parameters constrained to be positive.</p>
+<p>We initially explored placing covariates on both <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, but this specification resulted in convergence issues and model instability. Therefore, we will allow <span class="math inline">\(a\)</span> to vary by arm-trial combination without adjustment and place covariates on <span class="math inline">\(b\)</span> with a random intercept:</p>
 <span class="math display">\[\begin{aligned}
-b_{ij} = \exp(\beta_{0ij} + \beta_{1ij}X_{1ij} + \dots + \beta_{kij}X_{kij} + u_{ij}),
+b_{ij} = \exp(\beta_{0ij} + \beta_{1ij}X_{1ij} + \dots + \beta_{kij}X_{kij}),
 \end{aligned}\]</span>
 <p>where <span class="math inline">\(\beta_{0ij}\)</span> is a random intercept representing the baseline log-hazard for arm <span class="math inline">\(j\)</span> in trial <span class="math inline">\(i\)</span>, <span class="math inline">\(X_{1ij} \dots X_{kij}\)</span> are the covariates and <span class="math inline">\(\beta_{1ij} \dots \beta_{kij}\)</span> are the corresponding regression coefficients.</p>
 </section>
@@ -237,7 +248,7 @@ b_{ij} = \exp(\beta_{0ij} + \beta_{1ij}X_{1ij} + \dots + \beta_{kij}X_{kij} + u_
 \beta_k = z_k \cdot \tau \cdot \lambda_k
 \end{aligned}\]</span>
 <p>where <span class="math inline">\(z_k\)</span> is a latent standard normal variable, <span class="math inline">\(\tau\)</span> is a shrinkage factor applied to all coefficients (i.e.&nbsp;global) and <span class="math inline">\(\lambda_k\)</span> is a covariate-specific (i.e.&nbsp;local) shrinkage factor.</p>
-<p>This approach is similar to the Horseshoe prior, allowing most covariates to be shrunk towards zero while permitting a small number of coefficients with strong signals to “escape” shrinkage. This approach assumes that only a subset of covariates will have any meaningful effects, which we believe is reasonable given the moderate number of covariates we will include.</p>
+<p>This approach is similar to the Horseshoe prior, allowing most covariates to be shrunk towards zero while a small number of coefficients with strong signals “escape” shrinkage. This approach assumes that only a subset of covariates will have any meaningful effects, which we believe is feasible given the moderate number of covariates we will include.</p>
 <p>As our primary interest is the effect of trial design features on attrition at the arm-level (placebo and active comparator), we will exclude treatment arm type from shrinkage and assign it a separate weakly informative prior.</p>
 </section>
 <section id="priors" class="level3">
@@ -248,13 +259,8 @@ b_{ij} = \exp(\beta_{0ij} + \beta_{1ij}X_{1ij} + \dots + \beta_{kij}X_{kij} + u_
 \end{aligned}\]</span>
 <p>For shrinkage parameters, we will specify a weakly informative prior for <span class="math inline">\(z_k\)</span> and a half-Student-<span class="math inline">\(t\)</span> for local and global shrinkage:</p>
 <span class="math display">\[\begin{aligned}
-z_k &amp;\sim \text{Normal}(0, 1),
-\end{aligned}
-\begin{aligned}
-\tau &amp;\sim t^+(3, 0, 1),
-\end{aligned}
-\begin{aligned}
-\lambda_k &amp;\sim t^+(3, 0, 1).
+z_k &amp;\sim \text{Normal}(0, 1) \\
+\tau, \lambda_k &amp;\sim t^+(3, 0, 1) \\
 \end{aligned}\]</span>
 <p>The heavily-tailed half-student-<span class="math inline">\(t\)</span> will encourage weaker coefficients to be shrunk towards zero.</p>
 </section>
@@ -266,34 +272,34 @@ z_k &amp;\sim \text{Normal}(0, 1),
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K; <span class="co">// Number of covariates</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; r[I]; <span class="co">// Observed attrition events per trial</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N[I]; <span class="co">// Number of participants per trial</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] dt; <span class="co">// Time in weeks per trial</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] dt; <span class="co">// Time in years</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] arm; <span class="co">// Treatment arm (1 = placebo, 0 = active)</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[I, K] X; <span class="co">// Covariates</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> mu1; <span class="co">// Intercept</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> a_raw; <span class="co">// Raw shape parameter</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta_arm;</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] a_raw; <span class="co">// Raw shape parameter</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_a; <span class="co">// SD of shape variation across trials</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] z;</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau; <span class="co">// Global shrinkage factor</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[K] lambda; <span class="co">// Local shrinkage factor</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> a = a_raw;</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] beta = z .* tau .* lambda;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta_arm;</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] z;</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; tau; <span class="co">// Global shrinkage factor</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[K] lambda; <span class="co">// Local shrinkage factor</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] a = a_raw * sigma_a; <span class="co">// Trial-specific shape</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] beta = z .* tau .* lambda; <span class="co">// Coefficient with shrinkage factors applied</span></span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] b = exp(mu1 + arm * beta_arm + X * beta); <span class="co">// Rate</span></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] p;</span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> exponent = a * dt[i];</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> time_part = (fabs(a) &lt; <span class="fl">1e-6</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> exponent = a[i] * dt[i];</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> time_part = (fabs(a[i]) &lt; <span class="fl">1e-6</span>)</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>      ? dt[i]</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      : expm1(exponent) / a;</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      : expm1(exponent) / a[i];</span>
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    p[i] = <span class="dv">1</span> - exp(-b[i] * time_part); <span class="co">// Gompertz CDF</span></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  }</span>
@@ -302,56 +308,99 @@ z_k &amp;\sim \text{Normal}(0, 1),
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  mu1 ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  a_raw ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  beta_arm ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  z ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  lambda ~ student_t(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Local scale</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  tau ~ student_t(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Global scale</span></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  r ~ binomial(N, p);</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] r_new;</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] p_new;</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> shrinkage_effective_params = sum(lambda ./ sqrt(<span class="dv">1</span> + lambda.^<span class="dv">2</span>));</span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> exponent = a * dt[i];</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> time_part = (fabs(a) &lt; <span class="fl">1e-6</span>)</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>      ? dt[i]</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>      : expm1(exponent) / a;</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    p_new[i] = <span class="dv">1</span> - exp(-b[i] * time_part);</span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    r_new[i] = binomial_rng(N[i], p_new[i]);</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> rate = exp(mu1); <span class="co">// Baseline hazard</span></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  sigma_a ~ normal(<span class="dv">0</span>,<span class="dv">1</span>);</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  beta_arm ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  z ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  lambda ~ normal(<span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Local scale</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  tau ~ normal(<span class="dv">0</span>, <span class="dv">1</span>); <span class="co">// Global scale</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  r ~ binomial(N, p);</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] r_new;</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[I] p_new;</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> shrinkage_effective_params = sum(lambda ./ sqrt(<span class="dv">1</span> + lambda.^<span class="dv">2</span>));</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I) {</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> exponent = a[i] * dt[i];</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> time_part = (fabs(a[i]) &lt; <span class="fl">1e-6</span>) <span class="co">// Safely approximate a if close to 0</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>      ? dt[i] <span class="co">// Reduce to exponential if 0</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>      : expm1(exponent) / a[i]; <span class="co">// Otherwise use full expression</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    p_new[i] = <span class="dv">1</span> - exp(-b[i] * time_part);</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    r_new[i] = binomial_rng(N[i], p_new[i]);</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> rate = exp(mu1); <span class="co">// Baseline hazard</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="model-performance-and-predictions" class="level2">
 <h2 class="anchored" data-anchor-id="model-performance-and-predictions">Model performance and predictions</h2>
-<p>The following section demonstrates some results from fitting the model specified in the previous section and plans for predictive applications.</p>
+<p>The following section demonstrates the results of fitting the model specified in the previous section and plans for predictive applications.</p>
 <section id="diagnostics-and-posterior-predictive-checks" class="level3">
 <h3 class="anchored" data-anchor-id="diagnostics-and-posterior-predictive-checks">Diagnostics and posterior predictive checks</h3>
+<p>Summary of rhat values for main parameters (a, b, coefficients, intercept, rate)</p>
 <div class="cell">
 <div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="trace.png" class="img-fluid figure-img"></p>
-</figure>
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">parameter</th>
+<th style="text-align: right;">median</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">a</td>
+<td style="text-align: right;">1.0008616</td>
+<td style="text-align: right;">0.9997458</td>
+<td style="text-align: right;">1.006012</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">a_raw</td>
+<td style="text-align: right;">0.9998892</td>
+<td style="text-align: right;">0.9995177</td>
+<td style="text-align: right;">1.001641</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">b</td>
+<td style="text-align: right;">1.0001920</td>
+<td style="text-align: right;">0.9996000</td>
+<td style="text-align: right;">1.004137</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta</td>
+<td style="text-align: right;">1.0007112</td>
+<td style="text-align: right;">0.9997153</td>
+<td style="text-align: right;">1.004439</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">beta_arm</td>
+<td style="text-align: right;">1.0020163</td>
+<td style="text-align: right;">1.0020163</td>
+<td style="text-align: right;">1.002016</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mu</td>
+<td style="text-align: right;">1.0010162</td>
+<td style="text-align: right;">0.9998381</td>
+<td style="text-align: right;">1.004178</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rate</td>
+<td style="text-align: right;">1.0009758</td>
+<td style="text-align: right;">0.9998397</td>
+<td style="text-align: right;">1.004272</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="stat.jpg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
+<p>Comparing observed and predicted attrition count distributions</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -361,19 +410,183 @@ z_k &amp;\sim \text{Normal}(0, 1),
 </div>
 </div>
 </div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="int.jpg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
 </section>
 <section id="predictions" class="level3">
 <h3 class="anchored" data-anchor-id="predictions">Predictions</h3>
-<p>We can use model estimates to make predictions about attrition rates based on trial design features. The following predictive example was made by passing the summarised mean Gompertz parameters from the fitted model to the Gompertz hazard function.</p>
+<p>We can use model estimates to make predictions about attrition rates based on trial design features.</p>
+<p>For example, we will take a trial with the following features:</p>
+<ul>
+<li>250 participants receiving placebo, 89 do not complete the trial</li>
+<li>Trial is 26 weeks (0.5 years) long</li>
+<li>Parallel-design (experimental vs placebo), phase 3 trial</li>
+<li>Sample size of 500 (250 per arm)</li>
+<li>Double-blinding, conducted across 80 facilities in European region</li>
+<li>Had a single primary outcome (e.g.&nbsp;change in HbA1c)</li>
+</ul>
+<p>Beta values for each covariate with shrinkage applied are:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">cov_name</th>
+<th style="text-align: right;">beta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">trttype</td>
+<td style="text-align: right;">-0.1757573</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">n_250</td>
+<td style="text-align: right;">0.0742175</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">n_500</td>
+<td style="text-align: right;">0.0299236</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">n_750</td>
+<td style="text-align: right;">-0.0444799</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">n_1000</td>
+<td style="text-align: right;">-0.0005484</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">n_abv</td>
+<td style="text-align: right;">-0.0910748</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arm_100</td>
+<td style="text-align: right;">-0.0010468</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">arm_200</td>
+<td style="text-align: right;">0.0235891</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arm_300</td>
+<td style="text-align: right;">0.0203333</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">arm_abv</td>
+<td style="text-align: right;">0.2013826</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">dur_6m</td>
+<td style="text-align: right;">0.1224155</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dur_1yr</td>
+<td style="text-align: right;">-0.0877381</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">dur_abv</td>
+<td style="text-align: right;">-0.0483322</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">arm_2</td>
+<td style="text-align: right;">-0.0101631</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arm_3</td>
+<td style="text-align: right;">-0.0465912</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">arm_4</td>
+<td style="text-align: right;">-0.0406594</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">p3</td>
+<td style="text-align: right;">-0.2986258</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">p4</td>
+<td style="text-align: right;">0.1366066</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bdbl</td>
+<td style="text-align: right;">-0.0209456</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">btrip</td>
+<td style="text-align: right;">-0.0313284</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bquad</td>
+<td style="text-align: right;">0.2569833</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bol</td>
+<td style="text-align: right;">-0.1150473</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">f_100</td>
+<td style="text-align: right;">0.0029113</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">f_200</td>
+<td style="text-align: right;">-0.0129889</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">f_abv</td>
+<td style="text-align: right;">-0.0017865</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pom_1</td>
+<td style="text-align: right;">-0.0080718</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pom_2</td>
+<td style="text-align: right;">0.2841148</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pom_3</td>
+<td style="text-align: right;">-0.0507432</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pom_abv</td>
+<td style="text-align: right;">-0.1780021</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reg_am</td>
+<td style="text-align: right;">0.6292061</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reg_eur</td>
+<td style="text-align: right;">-0.2471196</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reg_wpac</td>
+<td style="text-align: right;">-0.0900437</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reg_afr</td>
+<td style="text-align: right;">0.0584269</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reg_sea</td>
+<td style="text-align: right;">0.0648901</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reg_em</td>
+<td style="text-align: right;">-0.2108154</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We will take the mean <span class="math inline">\(a\)</span> (-2.18) and baseline log-hazard rate (-0.784) across all trials for this example.</p>
+<p><span class="math inline">\(b\)</span> can be calculated as:</p>
+<span class="math display">\[\begin{aligned}
+b_{ij} = \exp(-0.784 + 1 \cdot -0.1758 + 1 \cdot 0.0299 + 1 \cdot 0.0203 \\
++ 1 \cdot 0.1224 + 1 \cdot -0.0102 + 1 \cdot -0.2986 + 1 \cdot -0.0209 \\
++ 1 \cdot 0.0029 + 1 \cdot -0.0081 + 1 \cdot -0.2471), \\
+b_{ij} = 0.1746
+\end{aligned}\]</span>
+<p>Using <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, we can then estimate the hazard rate over time for this trial as follows:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>

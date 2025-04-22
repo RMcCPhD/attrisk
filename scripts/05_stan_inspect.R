@@ -5,63 +5,24 @@ source("scripts/00_functions_packages_etc.R")
 library(shinystan)
 
 # Import model fit from MARS
-a_fit <- readRDS("outputs/fit2.rds")
+a_fit <- readRDS("outputs/fit.rds")
 
-shinystan::launch_shinystan(a_fit)
+# shinystan::launch_shinystan(a_fit)
 
 # Import counts
 a_imp_df <- readRDS("processed_data/stan_dat.rds")
 
-# Summarise
-b_sum <- summary(a_fit)$summary %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var = "parameter")
-
-# saveRDS(b_sum, "outputs/fit2_sum.rds")
-
-# Check visual convergence
-plot_trace <- traceplot(a_fit, pars = c("sigma_a", "beta_arm", "mu1", "rate"))
-plot_trace
-
-ggsave(
-  "outputs/trace.png",
-  plot_trace,
-  width = 8,
-  height = 4,
-  unit = "in"
-)
-
-plot_trace2 <- traceplot(a_fit, pars = c("beta"))
-plot_trace2
-
-ggsave(
-  "outputs/trace_betas.png",
-  plot_trace2,
-  width = 8,
-  height = 4,
-  unit = "in"
-)
-
-# Check Rhat
-summary(b_sum[grepl("beta", b_sum$parameter),]$Rhat)
-summary(b_sum[grepl("a", b_sum$parameter),]$Rhat)
-summary(b_sum[grepl("b", b_sum$parameter),]$Rhat)
-
-summary(a_fit)$summary[c("sigma_a", "beta_arm", "mu1", "rate"), "Rhat"]
-summary(a_fit)$summary[c("sigma_a", "beta_arm", "mu1", "rate"), "n_eff"]
-
 # Check pairs
-# pos_array <- as.array(a_fit)
-# plot_pairs <- mcmc_pairs(pos_array, pars = c("mu1", "beta_arm", "rate"))
-# plot_pairs
-# 
-# ggsave(
-#   "outputs/pairs.png",
-#   plot_pairs,
-#   width = 6,
-#   height = 6,
-#   unit = "in"
-# )
+pos_array <- as.array(a_fit)
+plot_pairs <- mcmc_pairs(pos_array, pars = c("b"))
+
+ggsave(
+  "outputs/pairs_b.png",
+  plot_pairs,
+  width = 10,
+  height = 10,
+  unit = "in"
+)
 
 # Check counts
 plot_ppc <- ppc_dens_overlay(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:369, ])
