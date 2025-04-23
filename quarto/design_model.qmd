@@ -122,9 +122,13 @@ data {
 }
 
 parameters {
-  real mu1; // Intercept
+  real mu1_mean; // Global baseline log-hazard
+  vector[I] mu1_raw; // Raw baseline log-hazard
+  real<lower=0> sigma_mu1; // Baseline log-hazard variation
+  
+  real a_mean; // Global shape parameter
   vector[I] a_raw; // Raw shape parameter
-  real<lower=0> sigma_a; // SD of shape variation across trials
+  real<lower=0> sigma_a; // Shape variation
   
   real beta_arm;
   vector[K] z;
@@ -133,29 +137,32 @@ parameters {
 }
 
 transformed parameters {
-  vector[I] a = a_raw * sigma_a; // Trial-specific shape
+  vector[I] mu1 = mu1_mean + mu1_raw * sigma_mu1; // Trial-specific baseline log-hazard
+  vector[I] a = a_mean + a_raw * sigma_a; // Trial-specific shape
   vector[K] beta = z .* tau .* lambda; // Coefficient with shrinkage factors applied
   
-  vector[I] b = exp(mu1 + arm * beta_arm + X * beta); // Rate
+  vector[I] b;
   vector[I] p;
 
   for (i in 1:I) {
+    b[i] = exp(mu1[i] + arm[i] * beta_arm + dot_product(X[i], beta)); // Rate
     real exponent = a[i] * dt[i];
-    real time_part = (fabs(a[i]) < 1e-6)
-      ? dt[i]
-      : expm1(exponent) / a[i];
-    
+    real time_part = (fabs(a[i]) < 1e-6) ? dt[i] : expm1(exponent) / a[i];
     p[i] = 1 - exp(-b[i] * time_part); // Gompertz CDF
   }
 }
 
 model {
-  mu1 ~ normal(0, 1);
+  mu1_mean ~ normal(0, 1);
+  mu1_raw ~ normal(0, 1);
+  sigma_mu1 ~ normal(0, 1);
+  
+  a_mean ~ normal(0, 1);
   a_raw ~ normal(0, 1);
-  sigma_a ~ normal(0,1);
+  sigma_a ~ normal(0, 1);
+  
   beta_arm ~ normal(0, 1);
   z ~ normal(0, 1);
-  
   lambda ~ normal(0, 1); // Local scale
   tau ~ normal(0, 1); // Global scale
 
@@ -165,6 +172,9 @@ model {
 generated quantities {
   vector[I] r_new;
   vector[I] p_new;
+  vector[I] rate = exp(mu1); // Baseline hazard  
+  real mean_rate = mean(rate); // Summary of baseline hazard (Mean, SD)
+  real sd_rate = sd(rate);
   
   real shrinkage_effective_params = sum(lambda ./ sqrt(1 + lambda.^2));
 
@@ -176,8 +186,6 @@ generated quantities {
     p_new[i] = 1 - exp(-b[i] * time_part);
     r_new[i] = binomial_rng(N[i], p_new[i]);
   }
-
-  real rate = exp(mu1); // Baseline hazard
 }
 ```
 
@@ -237,7 +245,7 @@ b_{ij} = \exp(-0.784 + 1 \cdot -0.1758 + 1 \cdot 0.0299 + 1 \cdot 0.0203 \\
 b_{ij} = 0.1746
 \end{aligned}
 
-Using $a$ and $b$, we can then estimate the hazard rate over time for this trial as follows:
+Using $a$ and $b$, we can then estimate the hazard rate and cumulative hazard over time:
 
 ```{r makedata2}
 library(flexsurv)
@@ -253,6 +261,10 @@ df2_haz <- df2 %>%
     haz = pmap_dbl(
       list(time, a, b),
       ~ hgompertz(x = ..1, shape = ..2, rate = ..3)
+    ),
+    chaz = pmap_dbl(
+      list(time, a, b),
+      ~ Hgompertz(x = ..1, shape = ..2, rate = ..3)
     )
   )
 
@@ -264,6 +276,15 @@ plot <- df2_haz %>%
   labs(x = "Trial duration in weeks", y = "Hazard rate")
 
 print(plot)
+
+plot2 <- df2_haz %>% 
+  ggplot(aes(x = time, y = chaz)) +
+  geom_line() +
+  scale_x_continuous(n.breaks = 6) +
+  theme_bw() +
+  labs(x = "Trial duration in weeks", y = "Cumulative hazard")
+
+print(plot2)
 ```
 
 ### Prediction with uncertainty
