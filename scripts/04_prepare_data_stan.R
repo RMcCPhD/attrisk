@@ -84,6 +84,9 @@ c_dmy <- b_rm %>%
   ) %>% 
   mutate(across(n_250:reg_em, as.integer))
 
+# Save
+saveRDS(c_dmy, "processed_data/dat_covars.rds")
+
 # Check frequencies among dummy variables
 covs <- names(c_dmy[c(28:61)])
 for (var in covs) {tidy_sum(c_dmy, var)}
