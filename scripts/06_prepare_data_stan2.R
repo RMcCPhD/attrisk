@@ -25,26 +25,61 @@ b_trttype <- a_imp_vars %>%
     )
   )
 
-# Join based on grouping variables
-a_imp_df %>% filter(trial_id %in% b_trttype$trial_id) %>% count(trial_id, trttype)
-b_trttype %>% count(trial_id, trttype)
+# Collapse variables
+# Weighted mean for age, bmi, hba1c and t2dur
+# Sum counts for male
+b_clp <- b_trttype %>% 
+  group_by(trial_id, trttype, arm_label) %>% 
+  reframe(
+    n = sum(n),
+    age = sum(age * n) / sum(n),
+    bmi = sum(bmi * n) / sum(n),
+    t2dur = sum(t2dur * n) / sum(n),
+    hba1c = sum(hba1c * n) / sum(n),
+    male = sum(male)
+  ) %>% 
+  ungroup() %>% 
+  distinct()
 
-c_join <- a_imp_df %>% 
-  select(trial_id, arm_n, trttype) %>% 
+# Check trials with more than 1 arm that no duplicates remain
+b_clp %>%
+  count(trial_id) %>%
+  filter(n > 1) %>%
+  select(trial_id) %>%
+  inner_join(b_clp) %>%
+  View()
+
+# Join covariates with aggregate groups
+c_join <- a_imp_df %>%
+  select(trial_id, trttype, arm_n) %>% 
   left_join(
-    b_trttype %>% 
-      rename(var_arm_n = n) %>% 
-      select(trial_id, trttype, arm_label, var_arm_n, age:male)
+    b_clp %>% select(trial_id, var_n = n, trttype, age:male)
   )
 
-# Get groups with many-to-many joins to manually resolve these
+# Get groups with many-to-many joins to resolve these
 d_pre <- a_imp_df %>% count(trial_id, trttype, name = "pre")
 d_post <- c_join %>% count(trial_id, trttype, name = "post")
 d_join <- full_join(d_pre, d_post) %>% mutate(diff = if_else(pre != post, 1, 0))
-d_check <- d_join %>% filter(diff == 1) %>% select(trial_id)
+d_check <- d_join %>% filter(diff == 1) %>% select(trial_id, trttype)
 
-# Save to manually address
-c_join %>%
-  filter(trial_id %in% d_check$trial_id) %>%
-  arrange(trial_id) %>% 
-  write_csv("scratch_data/fix_many_joins_vars.csv")
+# Manually resolve 4 many-to-many joins (multiple active comparators)
+# Easily identified from arm_n
+# c_join %>% 
+#   inner_join(d_check) %>% 
+#   arrange(trial_id) %>% 
+#   write_csv("scratch_data/fix_many_joins_vars.csv")
+
+# Resolved using ctgov, arm_n identified between treatment arms
+e_fix <- read_csv("scratch_data/fixed_many_joins_vars.csv")
+
+e_fixed <- c_join %>% 
+  filter(!(trial_id %in% e_fix$trial_id)) %>% 
+  full_join(e_fix)
+
+# Fixed, can now find NAs across variables where possible
+# If not, add back in median
+e_fixed %>% count(trial_id)
+e_fixed %>% reframe(across(everything(), ~ sum(is.na(.))))
+
+write_csv(e_fixed, "processed_data/df_stan2_covars.csv")
+
