@@ -320,3 +320,6 @@ z_ready <- l_join %>%
 
 # Save
 write_csv(z_ready, "processed_data/data_both_models.csv")
+
+# Check low male
+z_ready_fixes %>% filter(male_prop <= 0.3324176) %>% 
