@@ -39,11 +39,11 @@ b_design_stan <- list(
 glimpse(b_design_stan)
 
 # Save
-saveRDS(b_design_stan, "processed_data/design_stan_data.rds")
+write_rds(b_design_stan, "processed_data/design_stan_data.rds")
 
 # Trial sub-model dataset
 names(a_imp_df)
-c_covs <- names(a_imp_df[c(9:48)])
+c_covs <- names(a_imp_df[c(10:48)])
 
 c_trial_stan <- list(
   I = nrow(a_imp_df),
@@ -55,4 +55,4 @@ c_trial_stan <- list(
   X = as.matrix(a_imp_df[, c_covs])
 )
 
-saveRDS(c_trial_stan, "processed_data/trialsub_stan_data.rds")
+write_rds(c_trial_stan, "processed_data/trialsub_stan_data.rds")
