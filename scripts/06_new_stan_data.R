@@ -38,7 +38,7 @@ c_covs <- names(b_drop_ref[c(15:39)])
 
 c_design_stan <- list(
   I = nrow(b_drop_ref),
-  K = length(b_drop_ref),
+  K = length(c_covs),
   r = b_drop_ref$arm_n_attr,
   N = b_drop_ref$arm_n,
   dt = b_drop_ref$duration,
@@ -57,13 +57,15 @@ d_covs <- names(b_drop_ref[c(10:39)])
 
 d_trial_stan <- list(
   I = nrow(b_drop_ref),
-  K = length(c_covs),
+  K = length(d_covs),
   r = b_drop_ref$arm_n_attr,
   N = b_drop_ref$arm_n,
   dt = b_drop_ref$duration,
   arm = as.integer(b_drop_ref$trttype),
   X = as.matrix(b_drop_ref[, d_covs])
 )
+
+glimpse(d_trial_stan)
 
 write_rds(d_trial_stan, "processed_data/trialsub_stan_data.rds")
 
