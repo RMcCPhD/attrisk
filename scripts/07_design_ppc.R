@@ -3,131 +3,68 @@
 source("scripts/00_functions_packages_etc.R")
 
 # Import data for predictive checks
-a_imp_df <- readRDS("processed_data/trialsub_stan_data.rds")
+a_imp_df <- readRDS("processed_data/design_stan_data.rds")
 
 # Import model fit from MARS
-a_fit <- readRDS("outputs/design_model/design_fit.rds")
+a_fit <- readRDS("outputs/design_fit.rds")
+
+# Get summarised draws
+a_draws <- as_draws_df(a_fit)
+a_sum_draws <- summarise_draws(a_draws)
 
 # Convergence ## ---------------------------------------------------------------
 
-# Summarise rhat and ess
-b_conv_sum <- summary(a_fit)$summary[, "Rhat"] %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var = "parameter") %>% 
-  rename(rhat = ".") %>% 
-  mutate(
-    og_parameter = parameter,
-    parameter = gsub("\\[|\\]", "", parameter),
-    parameter = gsub("[0-9]", "", parameter)
-  ) %>% 
-  group_by(parameter) %>% 
+# Split draw into a separate column
+b_sum <- a_sum_draws %>% 
+  mutate(variable = gsub("\\[[0-9,]+\\]", "", variable)) %>% 
+  group_by(variable) %>% 
+  mutate(draw = case_when(n() == 1 ~ NA, TRUE ~ row_number())) %>% 
+  select(variable, draw, everything()) %>% 
+  ungroup()
+
+b_sum_conv <- b_sum %>% 
+  group_by(variable) %>% 
   reframe(
     n = n(),
-    # min_rhat = min(rhat, na.rm = T),
-    # max_rhat = max(rhat, na.rm = T),
-    mean_rhat = mean(rhat, na.rm = T),
-    # med_rhat = median(rhat, na.rm = T)
-  ) %>% 
-  left_join(
-    summary(a_fit)$summary[, "n_eff"] %>% 
-      as.data.frame() %>% 
-      rownames_to_column(var = "parameter") %>% 
-      rename(ess = ".") %>% 
-      mutate(
-        og_parameter = parameter,
-        parameter = gsub("\\[|\\]", "", parameter),
-        parameter = gsub("[0-9]", "", parameter)
-      ) %>% 
-      group_by(parameter) %>% 
-      reframe(
-        n = n(),
-        # min_ess = min(ess, na.rm = T),
-        # max_ess = max(ess, na.rm = T),
-        mean_ess = mean(ess, na.rm = T),
-        # med_ess = median(ess, na.rm = T)
-      )
+    mean_rhat = mean(rhat, na.rm = TRUE),
+    mean_ess = mean(ess_bulk, na.rm = TRUE)
   )
 
-# Trace plots for global parameters
-b_conv_sum$parameter[b_conv_sum$n == 1]
-b_vars <- c(
-  "a_mean", "beta_arm", "lp__", "mean_rate", "mu1_mean", "sd_rate",
-  "shrinkage_effective_params", "sigma_a", "sigma_mu1", "tau"
-)
-b_trace <- mcmc_trace(as.array(a_fit), pars = b_vars)
-
-
-# Extract posterior samples
-posterior_samples <- as_draws_df(a_fit)
-posterior_summary <- summarise_draws(posterior_samples, default_summary_measures())
-
-posterior_summary <- summarise_draws(
-  posterior_samples,
-  measures = list(
-    mean = mean,
-    median = median,
-    q5 = ~quantile(.x, 0.05),
-    q97.5 = ~quantile(.x, 0.975)
+# Trace plots - global parameters (e.g. shrinkage, random effects)
+trace_global <- traceplot(
+  a_fit, 
+  pars = c(
+    "lp__", "mean_rate", "sd_rate",
+    "sigma_a", "a_mean", "sigma_mu1", "mu1_mean",
+    "tau", "lambda", "shrinkage_effective_params"
   )
 )
 
-rhat_summary <- summary(a_fit)$summary[, "Rhat"] %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var = "parameter") %>% 
-  rename(rhat = ".") %>% 
-  mutate(
-    parameter = gsub("\\[|\\]", "", parameter),
-    parameter = gsub("[0-9]", "", parameter)
-  ) %>% 
-  group_by(parameter) %>% 
-  reframe(
-    n = n(),
-    min_rhat = min(rhat, na.rm = T),
-    max_rhat = max(rhat, na.rm = T),
-    mean_rhat = mean(rhat, na.rm = T),
-    med_rhat = median(rhat, na.rm = T)
-  )
+# Trace plots - latent mean for beta shrinkage
+trace_z <- traceplot(a_fit, pars = "z")
 
-ess_summary <- summary(a_fit)$summary[, "n_eff"] %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var = "parameter") %>% 
-  rename(rhat = ".") %>% 
-  mutate(
-    parameter = gsub("\\[|\\]", "", parameter),
-    parameter = gsub("[0-9]", "", parameter)
-  ) %>% 
-  group_by(parameter) %>% 
-  reframe(
-    n = n(),
-    min_rhat = min(rhat, na.rm = T),
-    max_rhat = max(rhat, na.rm = T),
-    mean_rhat = mean(rhat, na.rm = T),
-    med_rhat = median(rhat, na.rm = T)
-  )
+# Trace plots - local shrinkage
+trace_lambda <- traceplot(a_fit, pars = "lambda")
+
+# Trace plots - betas
+trace_beta <- traceplot(a_fit, pars = c("beta_arm", "beta"))
+
+# Trace plots - first 50 of primary parameters
+trace_a <- traceplot(a_fit, pars = c("beta_arm", "beta"))
+
+# Posterior checks -------------------------------------------------------------
+
+# Compare distribution of attrition counts
+plot_ppc <- ppc_dens_overlay(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:361, ])
+plot_ppc
+
+plot_int <- ppc_intervals(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:361, ])
+plot_int
 
 # Check pairs
 pos_array <- as.array(a_fit)
 plot_pairs <- mcmc_pairs(pos_array, pars = c("beta"))
-
-ggsave(
-  "outputs/pairs_b.png",
-  plot_pairs,
-  width = 10,
-  height = 10,
-  unit = "in"
-)
-
-# Check counts
-plot_ppc <- ppc_dens_overlay(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:369, ])
-plot_ppc
-
-ggsave(
-  "outputs/ppc.jpg",
-  plot_ppc,
-  width = 6,
-  height = 4,
-  unit = "in"
-)
+plot_pairs
 
 plot_stat <- ppc_stat(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:369, ])
 plot_stat
@@ -139,9 +76,6 @@ ggsave(
   height = 4,
   unit = "in"
 )
-
-plot_int <- ppc_intervals(a_imp_df$r, as.matrix(a_fit, pars = "r_new")[1:369, ])
-plot_int
 
 ggsave(
   "outputs/int.jpg",
