@@ -22,37 +22,57 @@ a_imp_df <- read_csv("processed_data/data_both_models.csv") %>%
 a_imp_df %>% count(trial_id)
 glimpse(a_imp_df)
 
-# Design model dataset
-names(a_imp_df)
-b_covs <- names(a_imp_df[c(15:48)])
+# Drop a dummy variable in each group acting as a reference
+# Dropping most common
+a_imp_df %>% 
+  select(n_250:reg_em) %>% 
+  map_df(~ table(factor(.x, levels = c(0, 1))), .id = "variable") %>% 
+  print(n = 34)
 
-b_design_stan <- list(
-  I = nrow(a_imp_df),
-  K = length(b_covs),
-  r = a_imp_df$arm_n_attr,
-  N = a_imp_df$arm_n,
-  dt = a_imp_df$duration,
-  arm = as.integer(a_imp_df$trttype),
-  X = as.matrix(a_imp_df[, b_covs])
+b_drop_ref <- a_imp_df %>% 
+  select(-c(n_250, arm_100, dur_6m, arm_2, p3, bdbl, f_100, pom_1, reg_am))
+
+# Design model dataset
+names(b_drop_ref)
+c_covs <- names(b_drop_ref[c(15:39)])
+
+c_design_stan <- list(
+  I = nrow(b_drop_ref),
+  K = length(b_drop_ref),
+  r = b_drop_ref$arm_n_attr,
+  N = b_drop_ref$arm_n,
+  dt = b_drop_ref$duration,
+  arm = as.integer(b_drop_ref$trttype),
+  X = as.matrix(b_drop_ref[, c_covs])
 )
 
-glimpse(b_design_stan)
+glimpse(c_design_stan)
 
 # Save
-write_rds(b_design_stan, "processed_data/design_stan_data.rds")
+write_rds(c_design_stan, "processed_data/design_stan_data.rds")
 
 # Trial sub-model dataset
-names(a_imp_df)
-c_covs <- names(a_imp_df[c(10:48)])
+names(b_drop_ref)
+d_covs <- names(b_drop_ref[c(10:39)])
 
-c_trial_stan <- list(
-  I = nrow(a_imp_df),
+d_trial_stan <- list(
+  I = nrow(b_drop_ref),
   K = length(c_covs),
-  r = a_imp_df$arm_n_attr,
-  N = a_imp_df$arm_n,
-  dt = a_imp_df$duration,
-  arm = as.integer(a_imp_df$trttype),
-  X = as.matrix(a_imp_df[, c_covs])
+  r = b_drop_ref$arm_n_attr,
+  N = b_drop_ref$arm_n,
+  dt = b_drop_ref$duration,
+  arm = as.integer(b_drop_ref$trttype),
+  X = as.matrix(b_drop_ref[, d_covs])
 )
 
-write_rds(c_trial_stan, "processed_data/trialsub_stan_data.rds")
+write_rds(d_trial_stan, "processed_data/trialsub_stan_data.rds")
+
+write_csv(
+  a_imp_df %>% 
+    select(arm_n_attr, arm_n, duration, trttype, d_covs) %>% 
+    mutate(
+      I = 361,
+      K = 39
+    ), 
+  "processed_data/trialsub_stan_data.csv"
+)
