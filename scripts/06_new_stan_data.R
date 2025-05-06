@@ -16,8 +16,11 @@ a_imp_df <- read_csv("processed_data/data_both_models.csv") %>%
     age = as.numeric(scale(age)),
     bmi = as.numeric(scale(bmi)),
     t2dur = as.numeric(scale(t2dur)),
-    hba1c = as.numeric(scale(hba1c))
+    hba1c = as.numeric(scale(hba1c)),
+    across(c(male_prop, age, bmi, t2dur, hba1c), ~ . * 0.1)
   )
+
+hist(a_imp_df$male_prop)
 
 a_imp_df %>% count(trial_id)
 glimpse(a_imp_df)
