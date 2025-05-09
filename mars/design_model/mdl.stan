@@ -15,10 +15,10 @@ parameters {
   
   real a_mean; // Global shape parameter
   vector[I] a_raw; // Raw shape parameter
-  real<lower=0> sigma_a; // Shape variation
+  real <lower=0> sigma_a; // Shape variation
   
   real beta_arm;
-  vector[K] z;
+  vector[K] z; // Latent coefficient
   real<lower=0> tau; // Global shrinkage factor
   vector<lower=0>[K] lambda; // Local shrinkage factor
 }
@@ -26,7 +26,7 @@ parameters {
 transformed parameters {
   vector[I] mu1 = mu1_mean + mu1_raw * sigma_mu1; // Trial-specific baseline log-hazard
   vector[I] a = a_mean + a_raw * sigma_a; // Trial-specific shape
-  vector[K] beta = z .* tau .* lambda; // Coefficient with shrinkage factors applied
+  vector[K] beta = z .* tau .* lambda; // Coefficient with shrinkage applied
   
   vector[I] b;
   vector[I] p;
@@ -46,7 +46,7 @@ model {
   
   a_mean ~ normal(0, 1);
   a_raw ~ normal(0, 1);
-  sigma_a ~ normal(0, 1);
+  sigma_a ~ student_t(3, 0, 0.3); // Concentrates around 0
   
   beta_arm ~ normal(0, 1);
   z ~ normal(0, 1);

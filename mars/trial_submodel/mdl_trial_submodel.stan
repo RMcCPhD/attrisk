@@ -5,7 +5,7 @@ data {
   int<lower=0> N[I]; // Number of participants per trial
   vector[I] dt; // Time in years
   vector[I] arm; // Treatment arm (1 = placebo, 0 = active)
-  matrix[I, K] X; // Covariates
+  matrix[I, K] X; // Covariates (incl. scaled participant characteristics)
 }
 
 parameters {
@@ -15,7 +15,7 @@ parameters {
   
   real a_mean; // Global shape parameter
   vector[I] a_raw; // Raw shape parameter
-  real<lower=0> sigma_a; // Shape variation
+  real <lower=0> sigma_a; // Shape variation
   
   real beta_arm;
   vector[K] z;
@@ -46,7 +46,7 @@ model {
   
   a_mean ~ normal(0, 1);
   a_raw ~ normal(0, 1);
-  sigma_a ~ normal(0, 1);
+  sigma_a ~ student_t(3, 0, 0.3);
   
   beta_arm ~ normal(0, 1);
   z ~ normal(0, 1);
