@@ -1,5 +1,7 @@
 functions {
+  // Takes in b, a and dt
   vector gompertz_prob(vector b, vector a, vector dt) {
+    // Number of data points
     int I = rows(b);
     vector[I] p;
     for (i in 1:I) {
@@ -7,7 +9,7 @@ functions {
         // Limit case: Exponential model when a ≈ 0
         p[i] = 1 - exp(-b[i] * dt[i]);
       } else {
-        // General Gompertz model
+        // General Gompertz model if a != 0
         p[i] = 1 - exp(-b[i] / a[i] * (exp(a[i] * dt[i]) - 1));
       }
     }

@@ -19,9 +19,6 @@ a_imp_fmt <- a_imp_df %>%
     across(n_250:reg_em, ~ as.integer(.))
   )
 
-# Split into datasets
-b_trialsub <- a_imp_df
-
 # Design-stage -----------------------------------------------------------------
 
 # Remove perfectly collinear variables

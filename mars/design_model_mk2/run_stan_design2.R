@@ -17,7 +17,7 @@ options(mc.cores = parallel::detectCores())
 a_imp_dat <- readRDS("stan_dat.rds")
 
 # Compile stan model
-b_compile <- stan_model("mdl_int.stan")
+b_compile <- stan_model("mdl_design2.stan")
 
 # Fit model
 c_fit <- sampling(
@@ -30,7 +30,7 @@ c_fit <- sampling(
   control = list(adapt_delta = 0.99, max_treedepth = 15)
 )
 
-saveRDS(c_fit, "design_fit_int.rds")
+saveRDS(c_fit, "design2_fit.rds")
 
 # Summarise
 d_draws <- as_draws_df(c_fit)
@@ -67,3 +67,11 @@ ggsave("r_recovery.jpg", ppc_dens, width = 8, height = 8, units = "in")
 ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:361, ])
 ggsave("r_recovery2.jpg", ppc_int, width = 8, height = 8, units = "in")
 
+# Extract posterior estimates
+e_sum <- summarise_draws(
+  d_draws,
+  mean, median, sd,
+  ~ quantile(.x, probs = c(0.025, 0.975))
+)
+
+saveRDS(e_sum, "design2_sum_draws.rds")

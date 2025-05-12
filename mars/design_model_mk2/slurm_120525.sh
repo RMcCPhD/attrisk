@@ -17,4 +17,4 @@
 module load apps/R
 
 ############# MY CODE #############
-Rscript run_stan_int.R
+Rscript run_stan_design2.R
