@@ -24,7 +24,7 @@ c_fit <- sampling(
   b_compile,
   data = a_imp_dat,
   warmup = 1000,
-  iter = 3000,
+  iter = 4000,
   chains = 4,
   seed = 123,
   control = list(adapt_delta = 0.99, max_treedepth = 15)

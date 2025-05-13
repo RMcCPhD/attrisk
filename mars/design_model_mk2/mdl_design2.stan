@@ -1,15 +1,13 @@
 functions {
-  // Takes in b, a and dt
   vector gompertz_prob(vector b, vector a, vector dt) {
-    // Number of data points
     int I = rows(b);
     vector[I] p;
     for (i in 1:I) {
-      if (fabs(a[i]) < 1e-5) {
+      if (fabs(a[i]) < 1e-4) {
         // Limit case: Exponential model when a ≈ 0
         p[i] = 1 - exp(-b[i] * dt[i]);
       } else {
-        // General Gompertz model if a != 0
+        // General Gompertz model
         p[i] = 1 - exp(-b[i] / a[i] * (exp(a[i] * dt[i]) - 1));
       }
     }
@@ -47,10 +45,10 @@ transformed parameters {
   vector[I] a;                          // a for each row
   vector[I] b;                          // b for each row
   vector[I] p;                          // p for each row
-  vector[K] beta
+  vector[K] beta;
   
   mu1 = mu_mu1 + tau_mu1 * z_mu1;       // compute mu1
-  a = exp(mu_a + tau_a * z_a);          // allow a to vary around zero
+  a = mu_a + tau_a * z_a;               // compute a on real scale
   beta = z_beta .* (tau_beta * lambda_beta); // shrinkage applied to beta
   
   for (i in 1:I) { // Iteratively compute b
@@ -68,7 +66,7 @@ model {
   z_mu1 ~ normal(0, 1);
   
   mu_a ~ normal(0, 1);
-  tau_a ~ normal(0, 1);
+  tau_a ~ normal(0, 1);                 // Truncated automatically by <lower=0>
   z_a ~ normal(0, 1);
   
   beta_arm ~ normal(0, 1);
@@ -87,8 +85,8 @@ generated quantities {
   vector[I] b_out = b;
 
   for (i in 1:I) {
-    r_new[i] = binomial_rng(N[i], p_new[i]);
-    log_lik[i] = binomial_lpmf(r[i] | N[i], p_new[i]);
+    r_new[i] = binomial_rng(N[i], p[i]);
+    log_lik[i] = binomial_lpmf(r[i] | N[i], p[i]);
   }
 
   real mean_rate = mean(b);

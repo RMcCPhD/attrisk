@@ -41,14 +41,39 @@ b_res <- broom::tidy(b_fit) %>%
     uci = estimate + 1.96 * std.error
   )
 
-b_res %>% 
-  filter(!grepl("Intercept", term) & p.value < 0.05) %>% 
+plot_b_res <- b_res %>% 
+  filter(!grepl("Intercept", term)) %>% 
+  mutate(
+    term = if_else(term == "trttype", "trt_arm", term),
+    term = factor(
+      term,
+      levels = c("trt_arm", "n_250", "n_500", "n_750", "n_1000",
+                 "arm_200", "arm_300", "arm_abv", 
+                 "dur_6m", "dur_1yr", "arm_2", "arm_3",
+                 "p3", "bdbl", "btrip", "bquad",
+                 "f_100", "f_200", "pom_1", "pom_2", "pom_3",
+                 "reg_am", "reg_eur", "reg_wpac", "reg_afr",
+                 "reg_sea", "reg_em")
+    )
+  ) %>% 
   ggplot(aes(x = fct_rev(term), y = estimate, ymin = lci, ymax = uci)) +
   geom_point() +
   geom_linerange(position = position_dodge(width = 0.5)) +
   geom_hline(yintercept = 0, colour = "red") +
+  geom_hline(yintercept = 0.05, colour = "orange", linetype = "dashed") +
+  geom_hline(yintercept = -0.05, colour = "orange", linetype = "dashed") +
   theme_bw() +
-  coord_flip()
+  coord_flip() +
+  scale_y_continuous(n.breaks = 20) +
+  labs(y = "log-odds ratio", x = "covariate")
+
+ggsave(
+  "outputs/logreg_validation.png",
+  plot_b_res,
+  width = 8,
+  height = 8,
+  units = "in"
+)
 
 # Nest by treatment type, fit models
 b_nest <- b_design %>% 
@@ -91,6 +116,5 @@ c_plot_res <- c_res %>%
   coord_flip()
 
 c_plot_res
-
 
 # Trial submodel ---------------------------------------------------------------
