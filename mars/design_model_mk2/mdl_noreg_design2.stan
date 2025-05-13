@@ -34,10 +34,8 @@ parameters {
   real<lower=0> tau_a;                  // sd for log(a)
   vector[I] z_a;                        // standard normal latent a variables
   
-  real beta_arm;                        // arm coefficient
-  real<lower=0> tau_beta;               // global shrinkage factor
-  vector<lower=0>[K] lambda_beta;       // local shrinkage factor
-  vector[K] z_beta;                     // latent betas
+  real beta_arm;                        // arm beta
+  vector[K] beta;                       // covariate betas
 }
 
 transformed parameters {
@@ -45,11 +43,9 @@ transformed parameters {
   vector[I] a;                          // a for each row
   vector[I] b;                          // b for each row
   vector[I] p;                          // p for each row
-  vector[K] beta;
   
   mu1 = mu_mu1 + tau_mu1 * z_mu1;       // compute mu1
   a = mu_a + tau_a * z_a;               // compute a on real scale
-  beta = z_beta .* (tau_beta * lambda_beta); // shrinkage applied to beta
   
   for (i in 1:I) { // Iteratively compute b
     b[i] = exp(mu1[i] + arm[i] * beta_arm + dot_product(X[i], beta));
@@ -70,9 +66,7 @@ model {
   z_a ~ normal(0, 1);
   
   beta_arm ~ normal(0, 1);
-  tau_beta ~ normal(0, 1);
-  lambda_beta ~ normal(0, 1);
-  z_beta ~ normal(0, 1);
+  beta ~ normal(0, 1);
 
   // Likelihood
   r ~ binomial(N, p);
@@ -81,8 +75,6 @@ model {
 generated quantities {
   array[I] int r_new;
   vector[I] log_lik;
-  vector[I] a_out = a;
-  vector[I] b_out = b;
 
   for (i in 1:I) {
     r_new[i] = binomial_rng(N[i], p[i]);
