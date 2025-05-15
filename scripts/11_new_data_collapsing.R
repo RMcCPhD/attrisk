@@ -40,14 +40,14 @@ b_fmt <- a_imp_df %>%
 glimpse(b_fmt)
 
 # Collapse dummy groups into ordinal variables
-#' Sample size: 1 = <250, 2 = 250-499, 3 = 500-749, 4 = 750-999, 5 = >=1000
-#' Arm size: 1 = <100, 2 = 100-199, 3 = 200-299, 4 = >=300
-#' Duration: 1 = <6m, 2 = 6m - <1yr, 3 = >=1yr
-#' Number of arms: 1 = 2, 2 = 3, 3 = 4, 4 = >4
-#' Phase: 1 = 3, 2 = 4, 3 = Other
-#' Blinding: 1 = Open-label, 2 = Double, 3 = Triple, 4 = Quadruple
-#' Number of facilities: 1 = <100, 2 = 100-199, 3 = >=200
-#' Primary outcomes: 1 = 1, 2 = 2, 3 = 3, 4 = >3
+#' Sample size: 0 = <250, 1 = 250-499, 2 = 500-749, 3 = 750-999, 4 = >=1000
+#' Arm size: 0 = <100, 1 = 100-199, 2 = 200-299, 3 = >=300
+#' Duration: 0 = <6m, 1 = 6m - <1yr, 2 = >=1yr
+#' Number of arms: 0 = 2, 1 = 3, 2 = 4, 3 = >4
+#' Phase: 0 = 3, 1 = 4, 2 = Other
+#' Blinding: 0 = Open-label, 1 = Double, 2 = Triple, 3 = Quadruple
+#' Number of facilities: 0 = <100, 1 = 100-199, 2 = >=200
+#' Primary outcomes: 0 = 1, 1 = 2, 2 = 3, 3 = >3
 
 covs <- names(b_fmt[c(15:48)])
 for (var in covs) {tidy_sum(b_fmt, var)}
@@ -55,57 +55,64 @@ for (var in covs) {tidy_sum(b_fmt, var)}
 c_clp <- b_fmt %>% 
   mutate(
     clp_n = case_when(
-      n_250 == 1L ~ 1L,
-      n_500 == 1L ~ 2L,
-      n_750 == 1L ~ 3L,
-      n_1000 == 1L ~ 4L,
-      n_abv == 1L ~ 5L
+      n_250 == 1L ~ 0L,
+      n_500 == 1L ~ 1L,
+      n_750 == 1L ~ 2L,
+      n_1000 == 1L ~ 3L,
+      n_abv == 1L ~ 4L
     ),
     clp_arm_n = case_when(
-      arm_100 == 1L ~ 1L,
-      arm_200 == 1L ~ 2L,
-      arm_300 == 1L ~ 3L,
-      arm_abv == 1L ~ 4L
+      arm_100 == 1L ~ 0L,
+      arm_200 == 1L ~ 1L,
+      arm_300 == 1L ~ 2L,
+      arm_abv == 1L ~ 3L
     ),
     clp_dur = case_when(
-      dur_6m == 1L ~ 1L,
-      dur_1yr == 1L ~ 2L,
-      dur_abv == 1L ~ 3L
+      dur_6m == 1L ~ 0L,
+      dur_1yr == 1L ~ 1L,
+      dur_abv == 1L ~ 2L
     ),
     clp_arms = case_when(
-      arm_2 == 1L ~ 1L,
-      arm_3 == 1L ~ 2L,
-      arm_4 == 1L ~ 3L,
+      arm_2 == 1L ~ 0L,
+      arm_3 == 1L ~ 1L,
+      arm_4 == 1L ~ 2L,
     ),
-    clp_phase = case_when(
-      p3 == 1L ~ 1L,
-      p4 == 1L ~ 2L,
-    ),
-    clp_blind = case_when(
-      bol == 1L ~ 1L,
-      bdbl == 1L ~ 2L,
-      btrip == 1L ~ 3L,
-      bquad == 1L ~ 4L
-    ),
+    # clp_phase = case_when(
+    #   p3 == 1L ~ 0L,
+    #   p4 == 1L ~ 1L,
+    # ),
+    # clp_blind = case_when(
+    #   bol == 1L ~ 0L,
+    #   bdbl == 1L ~ 1L,
+    #   btrip == 1L ~ 2L,
+    #   bquad == 1L ~ 3L
+    # ),
     clp_fac = case_when(
-      f_100 == 1L ~ 1L,
-      f_200 == 1L ~ 2L,
-      f_abv == 1L ~ 3L
-    ),
-    clp_pom = case_when(
-      pom_1 == 1L ~ 1L,
-      pom_2 == 1L ~ 2L,
-      pom_3 == 1L ~ 3L,
-      pom_abv == 1L ~ 4L
+      f_100 == 1L ~ 0L,
+      f_200 == 1L ~ 1L,
+      f_abv == 1L ~ 2L
     )
+    # clp_pom = case_when(
+    #   pom_1 == 1L ~ 0L,
+    #   pom_2 == 1L ~ 1L,
+    #   pom_3 == 1L ~ 2L,
+    #   pom_abv == 1L ~ 3L
+    # )
   )
 
 # Select variables
+# Add additional dummy variables
 d_vars <- c_clp %>% 
   select(
     trial_id:duration, male_prop:hba1c, 
+    p3, p4, 
+    bdbl, btrip, bquad, bol, pom_1, pom_2, pom_3, pom_abv,
     contains(c("clp", "reg"))
-  )
+  ) %>% 
+  mutate(
+    po = if_else(p3 == 0L & p4 == 0L, 1L, 0L)
+  ) %>% 
+  select(trial_id:p4, po, everything())
 
 glimpse(d_vars)
 d_vars %>% reframe(across(male_prop:reg_em, ~ sum(is.na(.))))
@@ -117,45 +124,49 @@ d_imp_orig <- read_csv("processed_data/df_stan_n348.csv")
 d_fix <- d_vars %>% 
   left_join(
     d_imp_orig %>% 
-      select(trial_id,  contains("phase"), n_arms) %>% 
+      select(trial_id, n_arms) %>% 
       distinct()
   ) %>% 
   group_by(trial_id) %>% 
-  fill(c(phase_3, phase_4, phase_notapp, n_arms), .direction = "downup") %>% 
+  fill(n_arms, .direction = "downup") %>% 
   ungroup() %>% 
   mutate(
     clp_arm_n = case_when(
-      is.na(clp_arm_n) & arm_n < 250 ~ 1L,
-      is.na(clp_arm_n) & arm_n >= 250 & arm_n < 500 ~ 2L,
-      is.na(clp_arm_n) & arm_n >= 500 & arm_n < 750 ~ 3L,
-      is.na(clp_arm_n) & arm_n >= 750 & arm_n < 1000 ~ 4L,
-      is.na(clp_arm_n) & arm_n >= 1000 ~ 5L,
+      is.na(clp_arm_n) & arm_n < 250 ~ 0L,
+      is.na(clp_arm_n) & arm_n >= 250 & arm_n < 500 ~ 1L,
+      is.na(clp_arm_n) & arm_n >= 500 & arm_n < 750 ~ 2L,
+      is.na(clp_arm_n) & arm_n >= 750 & arm_n < 1000 ~ 3L,
+      is.na(clp_arm_n) & arm_n >= 1000 ~ 4L,
       TRUE ~ clp_arm_n
     ),
     clp_arms = case_when(
-      is.na(clp_arms) & n_arms == 2 ~ 1L,
-      is.na(clp_arms) & n_arms == 3 ~ 2L,
-      is.na(clp_arms) & n_arms == 4 ~ 3L,
-      is.na(clp_arms) & n_arms > 4 ~ 4L,
+      is.na(clp_arms) & n_arms == 2 ~ 0L,
+      is.na(clp_arms) & n_arms == 3 ~ 1L,
+      is.na(clp_arms) & n_arms == 4 ~ 2L,
+      is.na(clp_arms) & n_arms > 4 ~ 3L,
       TRUE ~ clp_arms
-    ),
-    clp_phase = case_when(
-      is.na(clp_phase) ~ 3L,
-      TRUE ~ clp_phase
     )
+    # clp_phase = case_when(
+    #   is.na(clp_phase) ~ 2L,
+    #   TRUE ~ clp_phase
+    # )
   ) %>% 
-  select(-c(phase_3:n_arms))
+  # Removing covariates that add unnecessary complexity or have no
+  # credible effect estimate
+  select(-n_arms, -p4, -po)
 
 d_fix %>% reframe(across(male_prop:reg_em, ~ sum(is.na(.))))
 glimpse(d_fix)
 
+# write_csv(d_fix, "processed_data/new_cov_formatting.csv")
+
 # Frequency check before saving
-covs <- names(d_fix[c(7, 14:27)])
+covs <- names(d_fix[c(7, 14:33)])
 for (var in covs) {tidy_sum(d_fix, var)}
 
 # Save as design and trial sub model sets
 names(d_fix)
-e_covs <- names(d_fix[c(14:27)]) # 14 covariates
+e_covs <- names(d_fix[c(14:33)]) # 20 covariates
 
 e_design <- list(
   I = nrow(d_fix),
@@ -170,16 +181,16 @@ e_design <- list(
 saveRDS(e_design, "mars/design_model_mk2/stan_dat_clp.rds")
 
 names(d_fix)
-f_covs <- names(d_fix[c(9:27)]) # 19 covariates
+f_covs <- names(d_fix[c(9:33)]) # 25 covariates
 
 f_trial <- list(
   I = nrow(d_fix),
-  K = length(d_covs),
+  K = length(f_covs),
   r = d_fix$arm_n_attr,
   N = d_fix$arm_n,
   dt = d_fix$duration,
   arm = as.integer(d_fix$trttype),
-  X = as.matrix(d_fix[, d_covs])
+  X = as.matrix(d_fix[, f_covs])
 )
 
 saveRDS(f_trial, "mars/trial_sm_mk2/stan_dat_clp.rds")
