@@ -9,7 +9,7 @@ library(bayesplot)
 library(tidybayes)
 library(posterior)
 library(loo)
-#library(brms)
+library(brms)
 
 # Function for covariate posterior predictive checks
 plot_subgroup_ppcs <- function(y, yrep, covariate_df, covariate_names, stat = "mean") {
