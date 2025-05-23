@@ -54,21 +54,73 @@ b_tidy_rates %>%
   labs(x = "Estimates (rate as log-rate)", y = "Density")
 
 b_tidy_rates %>% 
+  ggplot(aes(x = rate, y = shape)) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Log-rate", y = "Shape")
+
+
+# Scaled plots
+plot_density <- b_tidy_rates %>% 
+  ggplot(aes(x = rate_scaled, y = shape_scaled)) +
+  geom_density_2d() +
+  theme_bw() +
+  labs(x = "Log-rate", y = "Shape")
+
+ggsave(
+  "mpes/plot_density.png",
+  plot_density,
+  height = 4,
+  width = 4,
+  units = "in"
+)
+
+plot_cor <- b_tidy_rates %>% 
+  ggplot(aes(x = rate_scaled, y = shape_scaled)) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Log-rate", y = "Shape")
+
+ggsave(
+  "mpes/plot_cor.png",
+  plot_cor,
+  height = 4,
+  width = 4,
+  units = "in"
+)
+
+plot_density_gomp <- b_tidy_rates %>% 
   gather("parameter", "est", rate_scaled, shape_scaled) %>% 
+  mutate(
+    parameter = case_match(
+      parameter, 
+      "rate_scaled" ~ "rate", "shape_scaled" ~ "shape"
+    )
+  ) %>% 
   ggplot(aes(x = est)) +
   geom_density() +
   facet_wrap(~parameter, scales = "free") +
   theme_bw() +
   labs(x = "Estimates (rate as log-rate)", y = "Density")
 
-b_tidy_rates %>% 
-  ggplot(aes(x = rate, y = shape)) +
-  geom_point() +
-  theme_bw() +
-  labs(x = "Log-rate", y = "Shape")
+ggsave(
+  "mpes/plot_density_gomp.png",
+  plot_density_gomp,
+  height = 4,
+  width = 4,
+  units = "in"
+)
 
-b_tidy_rates %>% 
-  ggplot(aes(x = rate_scaled, y = shape_scaled)) +
-  geom_point() +
-  theme_bw() +
-  labs(x = "Log-rate", y = "Shape")
+plot_residuals <- b_tidy_rates %>% 
+  ggplot(aes(x = residual)) +
+  geom_density() +
+  theme_bw() + 
+  labs(x = "Residual deviance", y = "Density")
+
+ggsave(
+  "mpes/plot_residuals.png",
+  plot_residuals,
+  height = 4,
+  width = 4,
+  units = "in"
+)
