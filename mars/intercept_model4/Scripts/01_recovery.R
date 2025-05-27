@@ -2,21 +2,21 @@
 source("mars/intercept_model4/scripts/00_config_functions_packages.R")
 
 # Import data, model fit and posterior summaries
-a_imp_df <- readRDS("mars/intercept_model4/stan_dat.rds")
-a_imp_sum <- readRDS("mars/intercept_model4/outputs/int_sum_draws.rds")
+a_imp_df <- readRDS("mars/intercept_model2/stan_dat.rds")
+a_imp_sum <- readRDS("mars/intercept_model2/outputs/closest/int2_sum_draws.rds")
 
 # Build a simulated dataset
 set.seed(123)
 
-N <- 224
+N <- 361
 z_b <- rnorm(N)
-b_mu1 <- -1.42
-tau_mu1 <- 0.54
+b_mu1 <- rnorm(N, mean = -1.42, sd = 0.54)
+tau_mu1 <- rnorm(N, mean = 0.54, sd = 1.08)
 b_log_sim <- b_mu1 + tau_mu1 * z_b
 
 z_a <- rnorm(N)
-a_mu1 <- 0
-tau_mu1 <- 1
+a_mu1 <- rnorm(N, mean = -3.85, sd = 1.31)
+tau_mu1 <- rnorm(N, mean = 1.31, sd = 2.62)
 a_sim <- a_mu1 + tau_mu1 * z_a
 
 dt <- a_imp_df$dt
@@ -35,7 +35,7 @@ r <- rbinom(N, size = n, prob = p)
 sim_data <- data.frame(
   trial = 1:N,
   a_raw = a_sim,
-  b_log = b_log_sim,
+  b_log = b_rate_sim,
   dt = dt,
   N = n,
   r = r
@@ -69,9 +69,11 @@ cor(sim_data$b_log, sim_data$b_log_recovered)
 sim_data %>% 
   ggplot(aes(x = a_raw, y = a_recovered)) +
   geom_point(alpha = 0.6) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "a_simulated", y = "a_recovered")
 
 sim_data %>% 
   ggplot(aes(x = b_log, y = b_log_recovered)) +
   geom_point(alpha = 0.6) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "b_simulated", y = "b_recovered")
