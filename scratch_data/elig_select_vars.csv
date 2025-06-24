@@ -21,7 +21,7 @@ renal_function_range,225,0.642857143,
 renal_function_unit,225,0.642857143,
 sbp,252,0.72,
 bp_unit,240,0.685714286,
-carers,0,0,1
+carers,0,0,
 alcohol_and_drugs,0,0,1
 heart_failure,12,0.034285714,1
 non_cardiovascular_comorbidities,0,0,1
