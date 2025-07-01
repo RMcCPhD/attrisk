@@ -13,7 +13,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --ntasks-per-node=1
 
-############# LOADING MODULES (optional) #############
+############# LOADING MODULES #############
 module load apps/R
 
 ############# MY CODE #############
