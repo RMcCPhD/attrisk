@@ -1,4 +1,6 @@
 
+# SAVE PLOTS TOMORROW
+
 source("scripts/00_config.R")
 library(tidyverse)
 
@@ -195,15 +197,18 @@ plot_partials_fct <- f_partials_df %>%
 g_conduct_df <- e_join_chars %>% select(-source)
 
 # Prepare model formula
-z_covars2 <- paste0(names(g_conduct_df[7:9, 11:32]), collapse = " + ")
+z_covars2_names <- names(g_conduct_df[c(10:34)])
+z_covars2 <- paste0(names(g_conduct_df[10:34]), collapse = " + ")
 z_fml2 <- as.formula(paste0("shape ~ rate + ", z_covars2))
 
 # Fit linear model
-# Rate, maximum age (eligibility), maximium bmi (eligibility), phase and 
-# blinding predict shape
+# Same design predictors
 # No baseline characteristic predicts shape
 g_mdl <- lm(z_fml2, data = g_conduct_df)
 summary(g_mdl)
+
+# Diagnostics
+g_diag <- broom::glance(g_mdl)
 
 # Tidy outputs
 g_res <- broom::tidy(g_mdl) %>% 
@@ -212,8 +217,8 @@ g_res <- broom::tidy(g_mdl) %>%
     uci = estimate + 1.96 * std.error
   )
 
-# Plot
-g_res %>% 
+# Plot coefficients
+plot_coefs2 <- g_res %>% 
   filter(!term == "(Intercept)") %>% 
   mutate(
     term = as.factor(term),
@@ -228,5 +233,77 @@ g_res %>%
   geom_hline(yintercept = 0, colour = "red") +
   labs(x = NULL, y = "Coefficient (95% CI)")
 
-# Diagnostics
-g_diag <- broom::glance(g_mdl)
+# Get predicted shape and residuals
+g_resid <- broom::augment(g_mdl) %>% 
+  as_tibble() %>% 
+  rename(
+    shape_pred = .fitted,
+    resid = .resid
+  ) %>% 
+  select(shape, rate, shape_pred, resid)
+
+# Plot residuals
+plot_resid <- g_resid %>% 
+  ggplot(aes(x = resid)) + 
+  geom_density() + 
+  theme_bw() +
+  labs(x = "Model residuals", y = "Density")
+
+# Predicted vs observed
+plot_pred_obs <- g_resid %>% 
+  ggplot(aes(x = shape_pred, y = shape)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, colour = "red", linetype = "dashed") +
+  theme_bw() +
+  labs(x = "Predicted shape", y = "Observed shape")
+
+# Residuals vs predicted
+plot_pred_resid <- g_resid %>% 
+  ggplot(aes(x = shape_pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "red") +
+  theme_bw() +
+  labs(x = "Predicted shape", y = "Residuals")
+
+# Partial dependence data (joining covariates to augment df)
+g_partials_df <- g_resid %>% 
+  cbind(g_conduct_df %>% select(trial_id)) %>% 
+  as_tibble() %>% 
+  left_join(g_conduct_df) %>% 
+  distinct()
+
+# Partial dependence of shape on covariates - continuous (duration)
+plot_partials_cont <- g_partials_df %>% 
+  select(shape_pred, where(is.double)) %>% 
+  pivot_longer(c(duration, male_prop:egfr_mean)) %>% 
+  ggplot(aes(x = shape_pred, y = value)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = "Predicted shape", y = NULL)
+
+# Partial dependence of shape on covariates - factors
+plot_partials_fct <- g_partials_df %>% 
+  select(shape_pred, where(is.factor)) %>% 
+  pivot_longer(trial_size:arm_size) %>% 
+  ggplot(aes(x = shape_pred, y = value)) +
+  stat_summary(fun = mean, geom = "point") +
+  stat_summary(fun = mean, geom = "line", group = 1) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = "Predicted shape", y = NULL)  +
+  coord_flip()
+
+# Partial dependence of shape on covariates - binary
+plot_partials_fct <- g_partials_df %>% 
+  select(shape_pred, where(is.integer)) %>% 
+  pivot_longer(trttype:reg_em) %>% 
+  ggplot(aes(x = shape_pred, y = value)) +
+  geom_point(position = position_jitter(width = 0.1)) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = "Predicted shape", y = NULL)  +
+  coord_flip()
