@@ -10,10 +10,11 @@ a_imp_mdl_conduct <- read_csv("outputs/model_shape/conduct/lm_res.csv")
 # Design data ------------------------------------------------------------------
 
 # Remove baseline characteristics
-b_design_df <- a_imp_df %>% select(-c(male_prop:egfr_mean))
+b_design_df <- a_imp_df %>% 
+  select(-c(contains("dbl"), bmi_lower:bmi_upper, male_prop:egfr_mean))
 
 # Create model matrix for predictors
-b_vars <- names(b_design_df[9:27])
+b_vars <- names(b_design_df[9:25])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
 b_design_mat <- model.matrix(b_fml, data = b_design_df)[, -1]
 
@@ -48,10 +49,10 @@ saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 # Conduct data -----------------------------------------------------------------
 
 # Keep baseline characteristics
-c_conduct_df <- a_imp_df
+c_conduct_df <- a_imp_df %>% select(-c(contains("dbl"), bmi_lower:bmi_upper))
 
 # Create model matrix for predictors
-c_vars <- names(c_conduct_df[9:33])
+c_vars <- names(c_conduct_df[9:31])
 c_fml <- as.formula(paste0("~ ", paste0(c_vars, collapse = " + ")))
 c_conduct_mat <- model.matrix(c_fml, data = c_conduct_df)[, -1]
 

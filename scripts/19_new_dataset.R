@@ -149,6 +149,8 @@ g_attr_fixed %>%
 # Age upper: 0 = 80, 1 = no limit
 # Min bmi: 0 = Underweight/healthy (<25), 1 = Obese and above (>=25)
 # Max bmi: 0 = Obese (<40), 1 = Morbidly obese (>=40)
+# Reduced ordinal for number of arms
+# 1 - 2 arms, 2 - 3 arms, 3 - 4 arms, 4 - >4 arms
 h_tidy <- g_attr_fixed %>% 
   rename(
     age_lower_dbl = age_lower,
@@ -170,6 +172,12 @@ h_tidy <- g_attr_fixed %>%
     max_bmi = case_when(
       as.numeric(str_extract(bmi_upper, "[0-9]+")) <= 40 ~ 0L,
       TRUE ~ 1L
+    ),
+    n_arms = case_when(
+      n_arms == 2 ~ 1L,
+      n_arms == 3 ~ 2L,
+      n_arms == 4 ~ 3L,
+      TRUE ~ 4L
     )
   ) %>% 
   select(

@@ -129,7 +129,7 @@ plot_shape_bin <- f_df %>%
 # Factors/ordinal
 plot_shape_fct <- f_df %>% 
   select(shape, where(is.factor)) %>% 
-  pivot_longer(bmi_lower:n_arms) %>% 
+  pivot_longer(bmi_lower:blinding) %>% 
   ggplot(aes(x = value, y = shape)) + 
   stat_summary(fun = mean, geom = "point") +
   stat_summary(fun = mean, geom = "line", group = 1) +
