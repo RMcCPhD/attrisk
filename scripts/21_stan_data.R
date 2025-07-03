@@ -31,6 +31,7 @@ b_coefs_mat <- model.matrix(b_coefs_fml, data = b_design_coefs)[-1]
 colnames(b_design_mat)
 b_coefs_names
 
+# Prepare STAN data
 b_design_stan <- list(
   I = nrow(b_design_df),
   K = ncol(b_design_mat),
@@ -40,6 +41,9 @@ b_design_stan <- list(
   B = b_coefs_mat,
   X = b_design_mat
 )
+
+# Save
+saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 
 # Conduct data -----------------------------------------------------------------
 
@@ -65,6 +69,7 @@ c_coefs_mat <- model.matrix(c_coefs_fml, data = c_conduct_coefs)[-1]
 colnames(c_conduct_mat)
 c_coefs_names
 
+# Prepare STAN data
 c_conduct_stan <- list(
   I = nrow(c_conduct_df),
   K = ncol(c_conduct_mat),
@@ -74,3 +79,6 @@ c_conduct_stan <- list(
   B = c_coefs_mat,
   X = c_conduct_mat
 )
+
+# Save
+saveRDS(c_conduct_stan, "processed_data/latest_stan_conduct.rds")

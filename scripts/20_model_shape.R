@@ -1,7 +1,5 @@
 
 # Model shape on trial covariates for design and conduct models
-# Outputs for gompertz distributions and correlation, model results, diagnostics
-# and plots
 source("scripts/00_config.R")
 library(tidyverse)
 
@@ -67,7 +65,7 @@ plot_gomp <- d_join_mdl %>%
   labs(x = "Estimates (rate as log-rate)", y = "Density")
 
 # Correlation between rate and shape
-# -0.453
+# -0.4
 cor(d_join_mdl$shape, d_join_mdl$rate, method = "pearson")
 
 # Contour plot with scatter of shape and rate
@@ -95,14 +93,87 @@ ggsave(
   units = "in"
 )
 
+# Plot shape against covariates ------------------------------------------------
+
+# Add shape and rate
+f_df <- a_imp_df %>% inner_join(d_join_mdl)
+
+# Continuous variables
+# Age limits clearly banded
+# Lower - 18 or >=18
+# Upper - 80 or no upper limit
+plot_shape_dbl <- f_df %>% 
+  select(shape, where(is.double)) %>% 
+  select(-c(n:attr, rate)) %>% 
+  pivot_longer(duration:egfr_mean) %>% 
+  ggplot(aes(x = value, y = shape)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = TRUE) +
+  scale_x_continuous(n.breaks = 10) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = NULL, y = "Shape")
+
+# Binary
+plot_shape_bin <- f_df %>% 
+  select(shape, where(is.integer)) %>% 
+  pivot_longer(trttype:one_pom) %>% 
+  ggplot(aes(x = value, y = shape)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = TRUE) +
+  scale_x_continuous(n.breaks = 2) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = NULL, y = "Shape")
+
+# Factors/ordinal
+plot_shape_fct <- f_df %>% 
+  select(shape, where(is.factor)) %>% 
+  pivot_longer(bmi_lower:n_arms) %>% 
+  ggplot(aes(x = value, y = shape)) + 
+  stat_summary(fun = mean, geom = "point") +
+  stat_summary(fun = mean, geom = "line", group = 1) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  labs(x = NULL, y = "Shape")
+
+# Save
+ggsave(
+  "outputs/model_shape/shape_vs_dbl.png",
+  plot_shape_dbl,
+  width = 14,
+  height = 8,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/shape_vs_bin.png",
+  plot_shape_bin,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/shape_vs_fct.png",
+  plot_shape_fct,
+  width = 12,
+  height = 4,
+  units = "in"
+)
+
 # Design model -----------------------------------------------------------------
 
 # Data
-f_design_df <- e_join_chars %>% select(-c(source, male_prop, contains("mean")))
+f_design_df <- e_join_chars %>% 
+  select(-c(
+    source, male_prop, bmi_lower:bmi_upper, contains(c("mean", "dbl"))
+  ))
 
 # Prepare model formula
-z_covars_names <- names(f_design_df[c(10:28)])
-z_covars <- paste0(names(f_design_df[c(10:28)]), collapse = " + ")
+z_covars_names <- names(f_design_df[c(10:26)])
+z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ rate + ", z_covars))
 
 # Fit linear model
@@ -169,45 +240,6 @@ plot_pred_resid <- f_resid %>%
   theme_bw() +
   labs(x = "Predicted shape", y = "Residuals")
 
-# Partial dependence data (joining covariates to augment df)
-f_partials_df <- f_resid %>% 
-  cbind(f_design_df %>% select(trial_id)) %>% 
-  as_tibble() %>% 
-  left_join(f_design_df) %>% 
-  distinct()
-
-# Partial dependence of shape on covariates - continuous (duration)
-plot_partials_cont <- f_partials_df %>% 
-  ggplot(aes(x = shape_pred, y = duration)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_bw() +
-  labs(x = "Predicted shape", y = "Trial duration (years)")
-
-# Partial dependence of shape on covariates - factors
-plot_partials_fct <- f_partials_df %>% 
-  select(shape_pred, where(is.factor)) %>% 
-  pivot_longer(trial_size:arm_size) %>% 
-  ggplot(aes(x = shape_pred, y = value)) +
-  stat_summary(fun = mean, geom = "point") +
-  stat_summary(fun = mean, geom = "line", group = 1) +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
-  facet_wrap(~name, scales = "free") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = NULL)  +
-  coord_flip()
-
-# Partial dependence of shape on covariates - binary
-plot_partials_bin <- f_partials_df %>% 
-  select(shape_pred, where(is.integer)) %>% 
-  pivot_longer(trttype:reg_em) %>% 
-  ggplot(aes(x = shape_pred, y = value)) +
-  geom_point(position = position_jitter(width = 0.1)) +
-  geom_smooth(method = "lm", se = TRUE) +
-  facet_wrap(~name, scales = "free") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = NULL)
-
 # Save results
 write_csv(f_res, "outputs/model_shape/design/lm_res.csv")
 write_csv(f_diag, "outputs/model_shape/design/lm_diags.csv")
@@ -245,38 +277,26 @@ ggsave(
   units = "in"
 )
 
-ggsave(
-  "outputs/model_shape/design/05_partials_dbl.png",
-  plot_partials_cont,
-  width = 6,
-  height = 6,
-  units = "in"
-)
+# Fit model without blinding
+z_covars_anova <- gsub("\\+ blinding ", "", z_covars)
+z_fml_anova <- as.formula(paste0("shape ~ rate + ", z_covars_anova))
+f_mdl2 <- lm(z_fml_anova, data = f_design_df)
+summary(f_mdl2)
 
-ggsave(
-  "outputs/model_shape/design/06_partials_fct.png",
-  plot_partials_fct,
-  width = 6,
-  height = 6,
-  units = "in"
-)
-
-ggsave(
-  "outputs/model_shape/design/07_partials_binary.png",
-  plot_partials_bin,
-  width = 10,
-  height = 10,
-  units = "in"
-)
+# ANOVA test - significance
+# Including blinding significantly improves model fit (quadruple)
+f_anova <- anova(f_mdl2, f_mdl)
+summary(f_anova)
 
 # Conduct model ----------------------------------------------------------------
 
 # Data
-g_conduct_df <- e_join_chars %>% select(-source)
+g_conduct_df <- e_join_chars %>% 
+  select(-c(source, bmi_lower:bmi_upper, contains("dbl")))
 
 # Prepare model formula
-z_covars2_names <- names(g_conduct_df[c(10:34)])
-z_covars2 <- paste0(names(g_conduct_df[10:34]), collapse = " + ")
+z_covars2_names <- names(g_conduct_df[c(10:32)])
+z_covars2 <- paste0(z_covars2_names, collapse = " + ")
 z_fml2 <- as.formula(paste0("shape ~ rate + ", z_covars2))
 
 # Fit linear model
@@ -343,49 +363,6 @@ plot_pred_resid <- g_resid %>%
   theme_bw() +
   labs(x = "Predicted shape", y = "Residuals")
 
-# Partial dependence data (joining covariates to augment df)
-g_partials_df <- g_resid %>% 
-  cbind(g_conduct_df %>% select(trial_id)) %>% 
-  as_tibble() %>% 
-  left_join(g_conduct_df) %>% 
-  distinct()
-
-# Partial dependence of shape on covariates - continuous (duration)
-plot_partials_cont <- g_partials_df %>% 
-  select(shape_pred, where(is.double)) %>% 
-  pivot_longer(c(duration, male_prop:egfr_mean)) %>% 
-  ggplot(aes(x = shape_pred, y = value)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE) +
-  facet_wrap(~name, scales = "free") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = NULL)
-
-# Partial dependence of shape on covariates - factors
-plot_partials_fct <- g_partials_df %>% 
-  select(shape_pred, where(is.factor)) %>% 
-  pivot_longer(trial_size:arm_size) %>% 
-  ggplot(aes(x = shape_pred, y = value)) +
-  stat_summary(fun = mean, geom = "point") +
-  stat_summary(fun = mean, geom = "line", group = 1) +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
-  facet_wrap(~name, scales = "free") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = NULL)  +
-  coord_flip()
-
-# Partial dependence of shape on covariates - binary
-plot_partials_bin <- g_partials_df %>% 
-  select(shape_pred, where(is.integer)) %>% 
-  pivot_longer(trttype:reg_em) %>% 
-  ggplot(aes(x = shape_pred, y = value)) +
-  geom_point(position = position_jitter(width = 0.1)) +
-  geom_smooth(method = "lm", se = TRUE) +
-  facet_wrap(~name, scales = "free") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = NULL)  +
-  coord_flip()
-
 # Save results
 write_csv(g_res, "outputs/model_shape/conduct/lm_res.csv")
 write_csv(g_diag, "outputs/model_shape/conduct/lm_diags.csv")
@@ -423,26 +400,13 @@ ggsave(
   units = "in"
 )
 
-ggsave(
-  "outputs/model_shape/conduct/05_partials_dbl.png",
-  plot_partials_cont,
-  width = 6,
-  height = 6,
-  units = "in"
-)
+# Fit model without blinding
+z_covars2_anova <- gsub("\\+ blinding ", "", z_covars2)
+z_fml2_anova <- as.formula(paste0("shape ~ rate + ", z_covars2_anova))
+g_mdl2 <- lm(z_fml2_anova, data = g_conduct_df)
+summary(g_mdl2)
 
-ggsave(
-  "outputs/model_shape/conduct/06_partials_fct.png",
-  plot_partials_fct,
-  width = 6,
-  height = 6,
-  units = "in"
-)
-
-ggsave(
-  "outputs/model_shape/conduct/07_partials_binary.png",
-  plot_partials_bin,
-  width = 10,
-  height = 10,
-  units = "in"
-)
+# ANOVA test - significance
+# Including blinding significantly improves model fit (quadruple)
+g_anova <- anova(g_mdl2, g_mdl)
+summary(g_anova)
