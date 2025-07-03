@@ -58,31 +58,31 @@ e_factors <- d_tidy %>%
 f_attr <- e_factors %>% 
   select(-attr) %>% 
   left_join(
-    read_csv("data/trials_n420.csv") %>% 
+    read_csv("data/trials_n392_attrisk.csv") %>% 
       select(trial_id, atc = atc_new, attr = arm_n_attr) %>% 
       mutate(atc = if_else(atc != "placebo", substr(atc, 1, 5), atc))
   ) %>%
   select(source:arm_n, attr, everything())
 
-# Manually fix where many-to-many were introduced
+# Manually fix where many-to-many were introduced or NA attr
 f_attr %>% 
   group_by(trial_id, arm_id) %>% 
   reframe(n = n()) %>% 
   filter(n > 1)
 
-# f_attr %>% 
-#   group_by(trial_id, arm_id) %>% 
-#   filter(any(n() > 1)) %>% 
-#   write_csv("scratch_data/fix_many_to_many_attr.csv")
+# f_attr %>%
+#   group_by(trial_id, arm_id) %>%
+#   filter(any(n() > 1) | is.na(attr)) %>%
+#   write_csv("scratch_data/fix_many_to_many_na_attr.csv")
 
 # Join fixes
 g_attr_fixed <- f_attr %>% 
   anti_join(
-    read_csv("scratch_data/fixed_many_to_many_attr.csv") %>% 
+    read_csv("scratch_data/fixed_many_to_many_na_attr.csv") %>% 
       select(trial_id, arm_id)
   ) %>% 
   full_join(
-    read_csv("scratch_data/fixed_many_to_many_attr.csv")
+    read_csv("scratch_data/fixed_many_to_many_na_attr.csv")
   ) %>% 
   arrange(trial_id, trttype)
 
@@ -133,6 +133,11 @@ h_add <- g_attr_fixed %>%
   ) %>% 
   select(-n_facilities) %>% 
   mutate(across(c(trttype, sites:phase, reg_am:reg_em), as.integer))
+
+h_add %>% 
+  reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+  pivot_longer(everything(), names_to = "var", values_to = "na") %>% 
+  filter(na != 0)
 
 # Save
 # saveRDS(h_add, "processed_data/latest_dataset.rds")
