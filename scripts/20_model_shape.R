@@ -1,6 +1,7 @@
 
-# SAVE PLOTS TOMORROW
-
+# Model shape on trial covariates for design and conduct models
+# Outputs for gompertz distributions and correlation, model results, diagnostics
+# and plots
 source("scripts/00_config.R")
 library(tidyverse)
 
@@ -76,6 +77,23 @@ plot_contour <- d_join_mdl %>%
   geom_point(aes(x = rate, y = shape)) +
   theme_bw() +
   labs(x = "Log-rate", y = "Shape")
+
+# Save plots
+ggsave(
+  "outputs/model_shape/gomp_params_dist.png",
+  plot_gomp,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/gomp_params_contour.png",
+  plot_contour,
+  width = 6,
+  height = 6,
+  units = "in"
+)
 
 # Design model -----------------------------------------------------------------
 
@@ -180,7 +198,7 @@ plot_partials_fct <- f_partials_df %>%
   coord_flip()
 
 # Partial dependence of shape on covariates - binary
-plot_partials_fct <- f_partials_df %>% 
+plot_partials_bin <- f_partials_df %>% 
   select(shape_pred, where(is.integer)) %>% 
   pivot_longer(trttype:reg_em) %>% 
   ggplot(aes(x = shape_pred, y = value)) +
@@ -188,8 +206,68 @@ plot_partials_fct <- f_partials_df %>%
   geom_smooth(method = "lm", se = TRUE) +
   facet_wrap(~name, scales = "free") +
   theme_bw() +
-  labs(x = "Predicted shape", y = NULL)  +
-  coord_flip()
+  labs(x = "Predicted shape", y = NULL)
+
+# Save results
+write_csv(f_res, "outputs/model_shape/design/lm_res.csv")
+write_csv(f_diag, "outputs/model_shape/design/lm_diags.csv")
+write_csv(f_resid, "outputs/model_shape/design/lm_pred_resid.csv")
+
+ggsave(
+  "outputs/model_shape/design/01_lm_res_coefs.png",
+  plot_coefs,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/02_lm_residuals.png",
+  plot_resid,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/03_lm_obs_pred_shape.png",
+  plot_pred_obs,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/04_lm_pred_resid.png",
+  plot_pred_resid,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/05_partials_dbl.png",
+  plot_partials_cont,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/06_partials_fct.png",
+  plot_partials_fct,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/07_partials_binary.png",
+  plot_partials_bin,
+  width = 10,
+  height = 10,
+  units = "in"
+)
 
 # Conduct model ----------------------------------------------------------------
 
@@ -297,7 +375,7 @@ plot_partials_fct <- g_partials_df %>%
   coord_flip()
 
 # Partial dependence of shape on covariates - binary
-plot_partials_fct <- g_partials_df %>% 
+plot_partials_bin <- g_partials_df %>% 
   select(shape_pred, where(is.integer)) %>% 
   pivot_longer(trttype:reg_em) %>% 
   ggplot(aes(x = shape_pred, y = value)) +
@@ -307,3 +385,64 @@ plot_partials_fct <- g_partials_df %>%
   theme_bw() +
   labs(x = "Predicted shape", y = NULL)  +
   coord_flip()
+
+# Save results
+write_csv(g_res, "outputs/model_shape/conduct/lm_res.csv")
+write_csv(g_diag, "outputs/model_shape/conduct/lm_diags.csv")
+write_csv(g_resid, "outputs/model_shape/conduct/lm_pred_resid.csv")
+
+ggsave(
+  "outputs/model_shape/conduct/01_lm_res_coefs.png",
+  plot_coefs,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/02_lm_residuals.png",
+  plot_resid,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/03_lm_obs_pred_shape.png",
+  plot_pred_obs,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/04_lm_pred_resid.png",
+  plot_pred_resid,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/05_partials_dbl.png",
+  plot_partials_cont,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/06_partials_fct.png",
+  plot_partials_fct,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/conduct/07_partials_binary.png",
+  plot_partials_bin,
+  width = 10,
+  height = 10,
+  units = "in"
+)
