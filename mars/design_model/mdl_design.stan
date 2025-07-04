@@ -61,9 +61,9 @@ model {
   tau_mu1 ~ normal(0, 1);               // truncated normal via <lower=0>
   z_mu1 ~ normal(0, 1);
   
-  // Hierarchical horseshoe prior for beta shrinkage
-  tau_beta ~ cauchy(0, 1);
-  lambda_beta ~ cauchy(0, 1);
+  // Hierarchical global-local gaussian prior for beta shrinkage
+  tau_beta ~ normal(0, 1);
+  lambda_beta ~ normal(0, 1);
   z_beta ~ normal(0, 1);
   
   // Likelihood
