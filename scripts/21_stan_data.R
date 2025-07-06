@@ -52,13 +52,13 @@ saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 c_conduct_df <- a_imp_df %>% select(-c(contains("dbl"), bmi_lower:bmi_upper))
 
 # Create model matrix for predictors
-c_vars <- names(c_conduct_df[9:31])
+c_vars <- names(c_conduct_df[c(9:27, 29)])
 c_fml <- as.formula(paste0("~ ", paste0(c_vars, collapse = " + ")))
 c_conduct_mat <- model.matrix(c_fml, data = c_conduct_df)[, -1]
 
 # Prepare conduct coefficients
 c_conduct_coefs <- a_imp_mdl_conduct %>% 
-  filter(!(term %in% c("(Intercept)", "rate"))) %>% 
+  filter(!(term %in% c("(Intercept)", "rate", "hba1c_mean", "sbp_mean", "egfr_mean"))) %>% 
   select(term, estimate) %>% 
   pivot_wider(names_from = "term", values_from = "estimate")
 

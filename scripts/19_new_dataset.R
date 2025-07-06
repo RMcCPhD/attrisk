@@ -180,7 +180,8 @@ h_tidy <- g_attr_fixed %>%
       n_arms == 4 ~ 3L,
       TRUE ~ 4L
     ),
-    n_facilities = log(n_facilities)
+    n_facilities = log(n_facilities),
+    across(c(hba1c_mean, sbp_mean:egfr_mean), ~ log(.))
   ) %>% 
   select(
     source:age_upper_dbl, age_lower:age_upper, bmi_lower:bmi_upper, 
