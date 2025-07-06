@@ -149,8 +149,9 @@ g_attr_fixed %>%
 # Age upper: 0 = 80, 1 = no limit
 # Min bmi: 0 = Underweight/healthy (<25), 1 = Obese and above (>=25)
 # Max bmi: 0 = Obese (<40), 1 = Morbidly obese (>=40)
-# Reduced ordinal for number of arms
+# Reduced ordinal for number of arms and facilities
 # 1 - 2 arms, 2 - 3 arms, 3 - 4 arms, 4 - >4 arms
+# Log-transformed number of facilities
 h_tidy <- g_attr_fixed %>% 
   rename(
     age_lower_dbl = age_lower,
@@ -178,7 +179,8 @@ h_tidy <- g_attr_fixed %>%
       n_arms == 3 ~ 2L,
       n_arms == 4 ~ 3L,
       TRUE ~ 4L
-    )
+    ),
+    n_facilities = log(n_facilities)
   ) %>% 
   select(
     source:age_upper_dbl, age_lower:age_upper, bmi_lower:bmi_upper, 
@@ -194,44 +196,3 @@ h_tidy %>%
 
 # Save
 # saveRDS(h_tidy, "processed_data/latest_dataset.rds")
-
-# Move this to 21_stan_data.R
-# Additional covariates and tidying
-# Male proportion instead of n
-# Add factors for trial size, arm size and number of sites
-# Trial size - small (<200), moderate (200-499), large(>=500)
-# Arm size - small (<100), moderate (100-250), large (>=250)
-# Sites - binary (0 = <100, 1 = >=100)
-h_add <- g_attr_fixed %>% 
-  mutate(
-    male_prop = male_n/arm_n,
-    trial_size = case_when(
-      n < 200 ~ "small",
-      n >= 200 & n < 500 ~ "moderate",
-      n >= 500 ~ "large"
-    ),
-    trial_size = factor(
-      trial_size,
-      levels = c("small", "moderate", "large")
-    ),
-    arm_size = case_when(
-      arm_n < 100 ~ "small",
-      arm_n >= 100 & arm_n < 250 ~ "moderate",
-      arm_n >= 250 ~ "large"
-    ),
-    arm_size = factor(
-      arm_size,
-      levels = c("small", "moderate", "large")
-    ),
-    sites = if_else(n_facilities < 100, 0L, 1L)
-  ) %>% 
-  select(
-    source:class, n:attr,
-    trttype, duration, trial_size:sites,
-    everything()
-  ) %>% 
-  select(
-    source:n_poms, male_prop, age10_mean:egfr_mean
-  ) %>% 
-  select(-n_facilities) %>% 
-  mutate(across(c(trttype, sites:phase, reg_am:reg_em), as.integer))
