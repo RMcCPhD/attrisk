@@ -2,6 +2,7 @@
 # Model shape on trial covariates for design and conduct models
 source("scripts/00_config.R")
 library(tidyverse)
+library(glmnet)
 
 # Import dataset
 a_imp_df <- readRDS("processed_data/latest_dataset.rds")
@@ -176,7 +177,18 @@ z_covars_names <- names(f_design_df[c(10:26)])
 z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ rate + ", z_covars))
 
-# Fit linear model
+# Fit shape model with shrinkage
+# Get coefficients from cross-validation at optimal lambda
+z_cv_fml <- as.formula(paste0("~ ", z_covars))
+design_X <- model.matrix(z_cv_fml, data = f_design_df)[, -1]
+design_y <- f_design_df$shape
+
+cv_fit <- cv.glmnet(design_X, design_y, alpha = 1)
+plot(cv_fit)
+design_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1,])
+saveRDS(design_betas, "outputs/model_shape/design/lm_res_shrinkage.rds")
+
+# Fit linear model without shrinkage to explore
 # Rate, maximum age (eligibility), maximium bmi (eligibility), phase and 
 # quadruple blinding (compared to open-label) predict shape
 f_mdl <- lm(z_fml, data = f_design_df)
@@ -298,6 +310,17 @@ g_conduct_df <- e_join_chars %>%
 z_covars2_names <- names(g_conduct_df[c(10:32)])
 z_covars2 <- paste0(z_covars2_names, collapse = " + ")
 z_fml2 <- as.formula(paste0("shape ~ rate + ", z_covars2))
+
+# Fit shape model with shrinkage
+# Get coefficients from cross-validation at optimal lambda
+z_cv_fml <- as.formula(paste0("~ ", z_covars2))
+conduct_X <- model.matrix(z_cv_fml, data = g_conduct_df)[, -1]
+conduct_y <- g_conduct_df$shape
+
+cv_fit <- cv.glmnet(conduct_X, conduct_y, alpha = 1)
+plot(cv_fit)
+conduct_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1,])
+saveRDS(conduct_betas, "outputs/model_shape/conduct/lm_res_shrinkage.rds")
 
 # Fit linear model
 # Same design predictors
