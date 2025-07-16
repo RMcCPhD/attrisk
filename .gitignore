@@ -5,4 +5,5 @@
 old/
 zold/
 outputs/
-*.rds
+processed_data/*.rds
+

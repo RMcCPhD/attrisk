@@ -45,6 +45,8 @@ b_design_stan <- list(
   X = b_design_mat
 )
 
+str(b_design_stan)
+
 # Save
 saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 
@@ -76,12 +78,16 @@ c_coefs_mat <- model.matrix(c_coefs_fml, data = c_coefs_beta)[-1]
 c_conduct_stan <- list(
   I = nrow(c_conduct_df),
   K = ncol(c_conduct_mat),
+  K2 = length(c_coefs_mat),
   r = c_conduct_df$attr,
   N = c_conduct_df$arm_n,
   dt = c_conduct_df$duration,
   B = c_coefs_mat,
-  X = c_conduct_mat
+  X = c_conduct_mat,
+  X2 = c_coefs_mat
 )
+
+str(c_conduct_stan)
 
 # Save
 saveRDS(c_conduct_stan, "processed_data/latest_stan_conduct.rds")
