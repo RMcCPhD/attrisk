@@ -2,6 +2,14 @@
 source("scripts/00_config.R")
 library(tidyverse)
 
+# Function to quickly check for NAs
+check_nas <- function(df) {
+  df %>% 
+    reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+    pivot_longer(everything()) %>% 
+    filter(value > 0)
+}
+
 # Import aggregated trial design features and eligibility
 a_imp_df <- read_csv("processed_data/definitive_dataset_with_elig.csv")
 
@@ -195,5 +203,59 @@ h_tidy %>%
   pivot_longer(everything(), names_to = "var", values_to = "na") %>% 
   filter(na != 0)
 
+# Collapse by arm --------------------------------------------------------------
+
+# Isolate counts and baseline characteristics
+i_vars <- h_tidy %>% select(trial_id, atc:trttype, male_prop:egfr_mean)
+
+# Collapse arm counts
+i_clp_arms <- i_vars %>% 
+  select(trial_id:trttype) %>% 
+  group_by(trial_id, class) %>% 
+  mutate(arm_n = sum(arm_n)) %>% 
+  distinct() %>% 
+  ungroup() %>% 
+  mutate(
+    attr = if_else(trial_id == "NCT00313313", 82, attr),
+    attr_prop = attr/arm_n
+  )
+
+# Collapse baseline characteristics
+i_clp_bl <- i_vars %>% 
+  group_by(trial_id, class) %>% 
+  reframe(
+    total_n = sum(arm_n),
+    male_prop = weighted.mean(male_prop, arm_n),
+    across(c(age10_mean:egfr_mean), ~ weighted.mean(.x, arm_n))
+  ) %>% 
+  select(-total_n)
+
+# Check distributions before and after collapse
+i_vars %>%
+  pivot_longer(contains("mean")) %>% 
+  ggplot(aes(x = value)) + 
+  geom_density() +
+  facet_wrap(~ name, scales = "free") +
+  theme_bw()
+
+i_clp_bl %>%
+  pivot_longer(contains("mean")) %>% 
+  ggplot(aes(x = value)) + 
+  geom_density() +
+  facet_wrap(~ name, scales = "free") +
+  theme_bw()
+
+# Combine collapsed rows
+i_join <- i_clp_arms %>% left_join(i_clp_bl)
+check_nas(i_join)
+
+# Join with trial design features
+j_join <- h_tidy %>% 
+  select(source:n, trttype:one_pom) %>% 
+  select(-arm_id) %>% 
+  distinct() %>% 
+  left_join(i_join) %>% 
+  select(source:n, arm_n:attr_prop, trttype:one_pom, everything())
+
 # Save
-# saveRDS(h_tidy, "processed_data/latest_dataset.rds")
+# saveRDS(j_join, "processed_data/latest_dataset.rds")

@@ -27,7 +27,7 @@ c_fit <- sampling(
   iter = 4000,
   chains = 4,
   seed = 123,
-  control = list(adapt_delta = 0.999, max_treedepth = 15)
+  control = list(adapt_delta = 0.9999, max_treedepth = 15)
 )
 
 saveRDS(c_fit, "conduct_fit.rds")

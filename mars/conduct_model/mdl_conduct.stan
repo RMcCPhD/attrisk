@@ -21,11 +21,13 @@ functions {
 data {
   int<lower=0> I;                       // number of data points (arms in trials)
   int<lower=0> K;                       // number of covariates
+  int<lower=0> K2;                      // number of covariates modelling shape
   array[I] int<lower=0> r;              // observed attrition counts
   array[I] int<lower=0> N;              // number of participants
   vector[I] dt;                         // total follow-up time in years
-  vector[K] B;                          // shape covariate coefficients
-  matrix[I, K] X;                       // covariate matrix
+  vector[K2] B;                         // shape covariate coefficients
+  matrix[I, K] X;                       // covariate matrix for rate
+  matrix[I, K2] X2;                     // covariate matrix for shape
 }
 
 parameters {
@@ -49,7 +51,7 @@ transformed parameters {
   vector[I] b = exp(mu1 + X * beta);      
   
   // a for each row (conditioned on b and covariates)
-  vector[I] a = b + X * B;       
+  vector[I] a = b + X2 * B;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          
