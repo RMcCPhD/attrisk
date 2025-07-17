@@ -7,6 +7,7 @@ library(tidybayes)
 library(posterior)
 library(rstan)
 
+# Import data (variable names, model outputs)
 a_imp_df <- colnames(readRDS("mars/design_model/latest_stan_design.rds")$X)
 a_imp_res <- readRDS("mars/design_model/outputs/design_sum_draws.rds")
 a_imp_mdl <- readRDS("mars/design_model/outputs/design_fit.rds")
@@ -63,4 +64,28 @@ ggsave(
 )
 
 # Plot betas for rate
+betas <- a_imp_res %>% 
+  filter(grepl("^beta\\[", variable)) %>% 
+  separate(variable, into = c("beta", "order"), sep = "\\[") %>% 
+  mutate(order = gsub("\\]", "", order)) %>% 
+  cbind(data.frame(var = a_imp_df)) %>% 
+  select(var, everything())
 
+betas_plot <- betas %>% 
+  ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(var))) +
+  geom_point() +
+  geom_linerange() +
+  geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
+  scale_x_continuous(n.breaks = 15) +
+  theme_bw() +
+  labs(x = "Mean point estimate (95% credible interval", y = NULL)
+
+betas_plot
+
+ggsave(
+  "mars/design_model/outputs/rate_betas.png",
+  betas_plot,
+  width = 8,
+  height = 8,
+  units = "in"
+)
