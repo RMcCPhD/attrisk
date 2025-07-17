@@ -30,8 +30,6 @@ ggsave(
 )
 
 # Trace plots for covariate betas
-a_imp_df
-
 trace_beta <- traceplot(
   a_imp_mdl, 
   pars = "beta"

@@ -61,3 +61,6 @@ ggsave(
   height = 10,
   units = "in"
 )
+
+# Plot betas for rate
+
