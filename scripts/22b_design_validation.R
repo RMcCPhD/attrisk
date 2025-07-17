@@ -27,12 +27,22 @@ a_imp_df_hocv <- readRDS("mars/design_hocv/design_ho.rds")
 
 # Import design HOCV stan data
 a_imp_stan_hocv <- readRDS("mars/design_hocv/design_hocv.rds")
+a_imp_ho_ids <- read_csv("created_metadata/ho_trials_arms.csv")
 
 # Get draws df and save for future use (imported above)
 # b_draws_df <- as_draws_df(a_imp_mdl)
 # saveRDS(b_draws_df, "mars/design_model/outputs/design_draws.rds")
 # b_draws_df_hocv <- as_draws_df(a_imp_mdl_hocv)
 # saveRDS(b_draws_df_hocv, "mars/design_hocv/outputs/design_hocv_draws.rds")
+
+# LOO for HOCV model - Fails, most are k > 0.7
+# Issues caused by hierarchical structure, highly influential observations
+# will cause it to fail if removed, dependence on >1 hierarchical prior
+# a_loo_loglik <- extract_log_lik(a_imp_mdl_hocv, "log_lik", merge_chains = FALSE)
+# a_loo_eff <- relative_eff(exp(a_loo_loglik), cores = 2)
+# a_loo <- loo(a_loo_loglik, r_eff = a_loo_eff, cores = 2, method = "sis")
+# print(a_loo)
+# plot(a_loo)
 
 # Hold-out cross-validation ----------------------------------------------------
 
@@ -153,8 +163,39 @@ dim(b_ho_pred_attr)
 # 5. Get attrition predictions and tidy summary
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
-# Get tidy dataset of held-out attrition predictions
-b_ho_tidy <- as_tibble(b_ho_pred_attr)
+# Get tidy dataset of held-out attrition predictions with groups
+b_ho_tidy <- as_tibble(t(b_ho_pred_attr)) %>% 
+  mutate(iter = row_number()) %>% 
+  pivot_longer(V1:V33)
+  
+# Get names
+b_ho_tidy_names <- a_imp_ho_ids %>% 
+  mutate(name = paste0("V", seq(1:33))) %>% 
+  group_by(trial_id, class, trttype) %>% 
+  mutate(row = row_number()) %>% 
+  ungroup()
+
+# Add names
+b_ho_names <- b_ho_tidy_names %>% left_join(b_ho_tidy)
+
+# Get summary
+b_ho_sum <- b_ho_names %>% 
+  group_by(trial_id, trttype, class, row) %>% 
+  reframe(
+    mean = mean(value),
+    q2.5 = quantile(value, 0.025), 
+    q97.5 = quantile(value, 0.975)
+  )
+
+# Add observed attrition
+b_ho_obs <- b_ho_sum %>% 
+  left_join(
+    a_imp_df %>% 
+      select(trial_id, class, trttype, arm_n, attr, attr_prop) %>% 
+      group_by(trial_id, class, trttype) %>% 
+      mutate(row = row_number()) %>% 
+      ungroup()
+  )
 
 # Get summary values as matrix
 b_ho_sum <- apply(

@@ -257,5 +257,28 @@ j_join <- h_tidy %>%
   left_join(i_join) %>% 
   select(source:n, arm_n:attr_prop, trttype:one_pom, everything())
 
+# Identify trials with multiple arms to collapse doses (i.e. two biguanides
+# with different doses)
+k_multiarm <- j_join %>% 
+  group_by(trial_id) %>% 
+  filter(length(unique(trttype)) > 1) %>% 
+  group_by(trial_id, trttype) %>% 
+  mutate(attr = sum(attr)) %>% 
+  select(-attr_prop) %>% 
+  distinct() %>% 
+  ungroup()
+
+# Join everything
+# Recalculate attr_prop
+l_join <- j_join %>% 
+  filter(!trial_id %in% k_multiarm$trial_id) %>% 
+  full_join(k_multiarm) %>% 
+  select(-attr_prop) %>% 
+  mutate(attr_prop = attr/arm_n) %>% 
+  select(trial_id:attr, attr_prop, everything())
+
+l_join %>% count(trial_id, source) %>% count(source)
+check_nas(l_join)
+
 # Save
-saveRDS(j_join, "processed_data/latest_dataset.rds")
+saveRDS(l_join, "processed_data/latest_dataset.rds")

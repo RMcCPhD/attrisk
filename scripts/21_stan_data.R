@@ -108,6 +108,12 @@ str(b_design_hocv_stan)
 # Remove 14 trials with >1 treatment arm
 b_keep14 <- b_design_hocv_df %>% filter(trial_id %in% mt1_trials)
 
+# Save trials and names for joining with held-out predictions
+write_csv(
+  b_keep14 %>% select(trial_id, class, trttype),
+  "created_metadata/ho_trials_arms.csv"
+)
+
 # Create model matrix for predictors
 b_vars <- names(b_keep14[9:25])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
