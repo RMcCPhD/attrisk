@@ -20,15 +20,6 @@ a_imp_df <- readRDS("processed_data/latest_dataset.rds")
 a_imp_mdl <- readRDS("mars/design_model/outputs/design_fit.rds")
 a_imp_draws <- readRDS("mars/design_model/outputs/design_draws.rds")
 
-# Import HOCV model outputs and held-out trials
-a_imp_mdl_hocv <- readRDS("mars/design_hocv/outputs/design_hocv_fit.rds")
-a_imp_draws_hocv <- readRDS("mars/design_hocv/outputs/design_hocv_draws.rds")
-a_imp_df_hocv <- readRDS("mars/design_hocv/design_ho.rds")
-
-# Import design HOCV stan data
-a_imp_stan_hocv <- readRDS("mars/design_hocv/design_hocv.rds")
-a_imp_ho_ids <- read_csv("created_metadata/ho_trials_arms.csv")
-
 # Get draws df and save for future use (imported above)
 # b_draws_df <- as_draws_df(a_imp_mdl)
 # saveRDS(b_draws_df, "mars/design_model/outputs/design_draws.rds")

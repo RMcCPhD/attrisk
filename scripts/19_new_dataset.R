@@ -275,7 +275,8 @@ l_join <- j_join %>%
   full_join(k_multiarm) %>% 
   select(-attr_prop) %>% 
   mutate(attr_prop = attr/arm_n) %>% 
-  select(trial_id:attr, attr_prop, everything())
+  select(trial_id:attr, attr_prop, everything()) %>% 
+  mutate(arm_n = if_else(trial_id == "NCT02897349", 102, arm_n))
 
 l_join %>% count(trial_id, source) %>% count(source)
 check_nas(l_join)

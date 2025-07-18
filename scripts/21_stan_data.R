@@ -48,7 +48,7 @@ b_design_stan <- list(
 str(b_design_stan)
 
 # Save
-# saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
+saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 
 # Conduct data -----------------------------------------------------------------
 
@@ -96,4 +96,4 @@ c_conduct_stan <- list(
 str(c_conduct_stan)
 
 # Save
-# saveRDS(c_conduct_stan, "processed_data/latest_stan_conduct.rds")
+saveRDS(c_conduct_stan, "processed_data/latest_stan_conduct.rds")
