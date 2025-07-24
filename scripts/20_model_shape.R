@@ -3,6 +3,7 @@
 source("scripts/00_config.R")
 library(tidyverse)
 library(glmnet)
+set.seed(123)
 
 # Import dataset
 a_imp_df <- readRDS("processed_data/latest_dataset.rds")
@@ -173,20 +174,26 @@ f_design_df <- e_join_chars %>%
   ))
 
 # Prepare model formula
-z_covars_names <- names(f_design_df[c(10:26)])
+z_covars_names <- names(f_design_df[c(3, 10:26)])
 z_covars <- paste0(z_covars_names, collapse = " + ")
-z_fml <- as.formula(paste0("shape ~ rate + ", z_covars))
+z_fml <- as.formula(paste0("shape ~ ", z_covars))
 
-# Fit shape model with shrinkage
-# Get coefficients from cross-validation at optimal lambda
+# Construct glmnet formula and design matrices
 z_cv_fml <- as.formula(paste0("~ ", z_covars))
 design_X <- model.matrix(z_cv_fml, data = f_design_df)[, -1]
 design_y <- f_design_df$shape
 
+# Fit linear model with shrinkage via glmnet
 cv_fit <- cv.glmnet(design_X, design_y, alpha = 1)
 plot(cv_fit)
-design_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1,])
-saveRDS(design_betas, "outputs/model_shape/design/lm_res_shrinkage.rds")
+
+# Get betas with lowest lambda
+design_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1, ])
+
+# Get residual standard deviation
+cv_pred <- predict(cv_fit, newx = design_X, s = "lambda.min")
+cv_resid <- design_y - cv_pred
+cv_resid_sd <- sqrt(mean(cv_resid^2))
 
 # Fit linear model without shrinkage to explore
 # Rate, maximum age (eligibility), maximium bmi (eligibility), phase and 
@@ -194,7 +201,21 @@ saveRDS(design_betas, "outputs/model_shape/design/lm_res_shrinkage.rds")
 f_mdl <- lm(z_fml, data = f_design_df)
 summary(f_mdl)
 
-# Diagnostics
+# Compute residual standard dev to compare to RMSE from glmnet residuals
+f_resid <- residuals(f_mdl)
+f_n <- length(f_resid)
+f_p <- length(coef(f_mdl))
+f_resid_sd <- sqrt(sum(f_resid^2) / (f_n - f_p))
+
+# Save
+glm_res <- list(
+  betas = design_betas,
+  resid_sd = f_resid_sd
+)
+
+saveRDS(glm_res, "outputs/model_shape/design/lm_res_shrinkage.rds")
+
+# Diagnostics for linear model
 f_diag <- broom::glance(f_mdl)
 
 # Tidy outputs
@@ -307,20 +328,26 @@ g_conduct_df <- e_join_chars %>%
   select(-c(source, bmi_lower:bmi_upper, contains("dbl")))
 
 # Prepare model formula
-z_covars2_names <- names(g_conduct_df[c(10:32)])
+z_covars2_names <- names(g_conduct_df[c(3, 10:32)])
 z_covars2 <- paste0(z_covars2_names, collapse = " + ")
-z_fml2 <- as.formula(paste0("shape ~ rate + ", z_covars2))
+z_fml2 <- as.formula(paste0("shape ~ ", z_covars2))
 
-# Fit shape model with shrinkage
-# Get coefficients from cross-validation at optimal lambda
+# Construct glmnet formula and conduct matrices
 z_cv_fml <- as.formula(paste0("~ ", z_covars2))
 conduct_X <- model.matrix(z_cv_fml, data = g_conduct_df)[, -1]
 conduct_y <- g_conduct_df$shape
 
-cv_fit <- cv.glmnet(conduct_X, conduct_y, alpha = 1)
-plot(cv_fit)
-conduct_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1,])
-saveRDS(conduct_betas, "outputs/model_shape/conduct/lm_res_shrinkage.rds")
+# Fit linear model with shrinkage via glmnet
+cv_fit2 <- cv.glmnet(conduct_X, conduct_y, alpha = 1)
+plot(cv_fit2)
+
+# Get betas with lowest lambda
+conduct_betas <- as.numeric(coef(cv_fit2, s = "lambda.min")[-1,])
+
+# Get residual standard deviation
+cv_pred2 <- predict(cv_fit2, newx = conduct_X, s = "lambda.min")
+cv_resid2 <- conduct_y - cv_pred2
+cv_resid_sd2 <- sqrt(mean(cv_resid2^2))
 
 # Fit linear model
 # Same design predictors
@@ -328,7 +355,21 @@ saveRDS(conduct_betas, "outputs/model_shape/conduct/lm_res_shrinkage.rds")
 g_mdl <- lm(z_fml2, data = g_conduct_df)
 summary(g_mdl)
 
-# Diagnostics
+# Compute residual standard dev to compare to RMSE from glmnet residuals
+g_resid <- residuals(g_mdl)
+g_n <- length(g_resid)
+g_p <- length(coef(g_mdl))
+g_resid_sd <- sqrt(sum(g_resid^2) / (g_n - g_p))
+
+# Save
+glm_res2 <- list(
+  betas = conduct_betas,
+  resid_sd = g_resid_sd
+)
+
+saveRDS(glm_res2, "outputs/model_shape/conduct/lm_res_shrinkage.rds")
+
+# Diagnostics for linear model
 g_diag <- broom::glance(g_mdl)
 
 # Tidy outputs

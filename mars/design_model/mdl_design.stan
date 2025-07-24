@@ -24,7 +24,9 @@ data {
   array[I] int<lower=0> r;              // observed attrition counts
   array[I] int<lower=0> N;              // number of participants
   vector[I] dt;                         // total follow-up time in years
-  vector[K] B;                          // shape covariate coefficients
+  vector[I] lp;                         // covariate linear predictor for shape
+  real beta_rate;                       // rate beta from linear model of shape
+  real resid_sd;                        // residual SD from linear model of shape
   matrix[I, K] X;                       // covariate matrix
 }
 
@@ -49,7 +51,7 @@ transformed parameters {
   vector[I] b = exp(mu1 + X * beta);      
   
   // a for each row (conditioned on b and covariates)
-  vector[I] a = b + X * B;       
+  vector[I] a = b * beta_rate + lp + resid_sd;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          

@@ -20,29 +20,36 @@ b_vars <- names(b_design_df[9:25])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
 b_design_mat <- model.matrix(b_fml, data = b_design_df)[, -1]
 
-# Prepare design coefficients
+# Prepare design coefficients to get names
 b_design_coefs <- a_imp_mdl_design_nm %>% 
-  filter(!(term %in% c("(Intercept)", "rate"))) %>% 
+  filter(!(term %in% c("(Intercept)"))) %>% 
   select(term, estimate) %>% 
   pivot_wider(names_from = "term", values_from = "estimate")
 
 b_coefs_names <- names(b_design_coefs)
 b_coefs_fml <- as.formula(paste0("~ ", paste0(b_coefs_names, collapse = " + ")))
 
-b_coefs_beta <- tibble(term = b_coefs_names, estimate = a_imp_mdl_design) %>% 
+b_coefs_beta <- tibble(term = b_coefs_names, estimate = a_imp_mdl_design$betas) %>% 
   pivot_wider(names_from = "term", values_from = "estimate")
 
 b_coefs_mat <- model.matrix(b_coefs_fml, data = b_coefs_beta)[-1]
 
+# Create linear predictor
+b_lp <- as.vector(b_design_mat %*% b_coefs_mat[2:20])
+b_resid_sd <- a_imp_mdl_design$resid_sd
+
 # Prepare STAN data
+# Shape modelled as  shape ~ rate * rate_beta + covars * glm betas + resid_sd
 b_design_stan <- list(
-  I = nrow(b_design_df),
-  K = ncol(b_design_mat),
-  r = b_design_df$attr,
-  N = b_design_df$arm_n,
-  dt = b_design_df$duration,
-  B = b_coefs_mat,
-  X = b_design_mat
+  I = nrow(b_design_df),        # Number of arms
+  K = ncol(b_design_mat),       # Number of covariates
+  r = b_design_df$attr,         # Arm-level attrition counts
+  N = b_design_df$arm_n,        # Arm n
+  dt = b_design_df$duration,    # Total trial duration
+  lp = b_lp,                    # Linear predictor for shape
+  beta_rate = b_coefs_mat[1],   # Rate beta for shape model
+  resid_sd = b_resid_sd,        # Lm residual SD (uncertainty for shape model)
+  X = b_design_mat              # Design covariate matrix
 )
 
 str(b_design_stan)
