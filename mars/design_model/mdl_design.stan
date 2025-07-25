@@ -47,11 +47,13 @@ transformed parameters {
   // beta with shrinkage
   vector[K] beta = tau_beta * lambda_beta .* z_beta;
   
-  // b for each row (exp of mu1)
+  // linear predictor for log-rate
+  // exponentiate to get b for each row
   vector[I] b = exp(mu1 + X * beta);      
   
-  // a for each row (conditioned on b and covariates)
-  vector[I] a = b * beta_rate + lp + resid_sd;       
+  // a for each row (conditioned on log-rate, linear predictor and residual SD)
+  // parameters from shape model fit externally
+  vector[I] a = b + lp + resid_sd;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          

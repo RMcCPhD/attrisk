@@ -2,6 +2,7 @@
 # Model shape on trial covariates for design and conduct models
 source("scripts/00_config.R")
 library(tidyverse)
+library(flexsurv)
 library(glmnet)
 set.seed(123)
 
@@ -54,7 +55,18 @@ sum(c_tidy_rates$trial_id %in% z_ipd_trials)
 # Join model datasets, 76 trials
 d_join_mdl <- b_mdl_res %>% full_join(c_tidy_rates)
 
+# Test
+# d_join_mdl %>% 
+#   mutate(
+#     t = map(trial_id, ~ seq(0, 1, by = 0.1)),
+#     gomp = map2(shape, rate, ~ hgompertz(seq(0, 1, by = 0.1), shape = .x, rate = exp(.y)))
+#   ) %>% 
+#   unnest(c(t, gomp)) %>% 
+#   ggplot(aes(x = t, y = gomp, group = trial_id)) +
+#   geom_line()
+
 # Join characteristics
+# Transform rate
 e_join_chars <- d_join_mdl %>% left_join(a_imp_df)
 
 # Plot distributions
@@ -68,10 +80,10 @@ plot_gomp <- d_join_mdl %>%
 
 # Correlation between rate and shape
 # -0.4
-cor(d_join_mdl$shape, d_join_mdl$rate, method = "pearson")
+cor(e_join_chars$shape, e_join_chars$rate, method = "pearson")
 
 # Contour plot with scatter of shape and rate
-plot_contour <- d_join_mdl %>% 
+plot_contour <- e_join_chars %>% 
   ggplot(aes(x = rate, y = shape)) +
   geom_density_2d() +
   geom_point(aes(x = rate, y = shape)) +
@@ -98,7 +110,7 @@ ggsave(
 # Plot shape against covariates ------------------------------------------------
 
 # Add shape and rate
-f_df <- a_imp_df %>% inner_join(d_join_mdl)
+f_df <- a_imp_df %>% inner_join(e_join_chars)
 
 # Continuous variables
 # Age limits clearly banded
@@ -193,7 +205,9 @@ design_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1, ])
 # Get residual standard deviation
 cv_pred <- predict(cv_fit, newx = design_X, s = "lambda.min")
 cv_resid <- design_y - cv_pred
-cv_resid_sd <- sqrt(mean(cv_resid^2))
+cv_n <- length(cv_resid)
+cv_p <- length(coef(cv_fit))
+cv_resid_sd <- sqrt(sum(cv_resid^2) / (cv_n - cv_p))
 
 # Fit linear model without shrinkage to explore
 # Rate, maximum age (eligibility), maximium bmi (eligibility), phase and 
@@ -210,7 +224,7 @@ f_resid_sd <- sqrt(sum(f_resid^2) / (f_n - f_p))
 # Save
 glm_res <- list(
   betas = design_betas,
-  resid_sd = f_resid_sd
+  resid_sd = cv_resid_sd
 )
 
 saveRDS(glm_res, "outputs/model_shape/design/lm_res_shrinkage.rds")
@@ -347,7 +361,9 @@ conduct_betas <- as.numeric(coef(cv_fit2, s = "lambda.min")[-1,])
 # Get residual standard deviation
 cv_pred2 <- predict(cv_fit2, newx = conduct_X, s = "lambda.min")
 cv_resid2 <- conduct_y - cv_pred2
-cv_resid_sd2 <- sqrt(mean(cv_resid2^2))
+cv_n2 <- length(cv_pred2)
+cv_p2 <- length(coef(cv_fit2))
+cv_resid_sd2 <- sqrt(sum(cv_resid2^2) / (cv_n2 - cv_p2))
 
 # Fit linear model
 # Same design predictors
@@ -364,7 +380,7 @@ g_resid_sd <- sqrt(sum(g_resid^2) / (g_n - g_p))
 # Save
 glm_res2 <- list(
   betas = conduct_betas,
-  resid_sd = g_resid_sd
+  resid_sd = cv_resid_sd2
 )
 
 saveRDS(glm_res2, "outputs/model_shape/conduct/lm_res_shrinkage.rds")

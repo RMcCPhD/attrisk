@@ -19,6 +19,9 @@ a_imp_bl <- read_csv("processed_data/participant_chars_imputed_scaled.csv")
 # Import eligibility
 a_imp_elig <- read_csv("processed_data/elig_tidy.csv")
 
+# Import trial durations
+a_imp_dur <- read_csv("scratch_data/add_duration.csv")
+
 # Prepare eligibility
 # Replacing NAs
 # BMI NAs = no limits, set to >=20 - <=45
@@ -281,5 +284,18 @@ l_join <- j_join %>%
 l_join %>% count(trial_id, source) %>% count(source)
 check_nas(l_join)
 
+# Add duration
+m_dur <- l_join %>% 
+  left_join(a_imp_dur %>% rename(dur_new = duration)) %>% 
+  mutate(
+    duration = dur_new/52,
+    duration = case_when(
+      is.na(duration) & trial_id == "NCT02730377" ~ 2,
+      is.na(duration) & trial_id == "NCT02911948" ~ 0.5,
+      TRUE ~ duration
+    )
+  ) %>% 
+  select(-dur_new)
+
 # Save
-saveRDS(l_join, "processed_data/latest_dataset.rds")
+saveRDS(m_dur, "processed_data/latest_dataset.rds")
