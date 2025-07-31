@@ -38,6 +38,8 @@ parameters {
   real<lower=0> tau_beta;               // global shrinkage factor
   vector<lower=0>[K] lambda_beta;       // local shrinkage factor
   vector[K] z_beta;                     // latent normal betas
+  
+  vector[I] error;                      // uncertainty parameter for shape
 }
 
 transformed parameters {
@@ -51,9 +53,9 @@ transformed parameters {
   // exponentiate to get b for each row
   vector[I] b = exp(mu1 + X * beta);      
   
-  // a for each row (conditioned on log-rate, linear predictor and residual SD)
+  // a for each row (conditioned on log-rate, linear predictor and error)
   // parameters from shape model fit externally
-  vector[I] a = b + lp + resid_sd;       
+  vector[I] a = mu1 * beta_rate + lp + error;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          
@@ -69,6 +71,9 @@ model {
   tau_beta ~ normal(0, 1);
   lambda_beta ~ normal(0, 1);
   z_beta ~ normal(0, 1);
+  
+  // Normal prior for error, scale is residual sd from linear model of shape
+  error ~ normal(0, resid_sd);
   
   // Likelihood
   r ~ binomial(N, p);
