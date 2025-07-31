@@ -191,19 +191,20 @@ z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ ", z_covars))
 
 # Construct glmnet formula and design matrices
+set.seed(123)
 z_cv_fml <- as.formula(paste0("~ ", z_covars))
 design_X <- model.matrix(z_cv_fml, data = f_design_df)[, -1]
 design_y <- f_design_df$shape
 
 # Fit linear model with shrinkage via glmnet
-cv_fit <- cv.glmnet(design_X, design_y, alpha = 1)
+cv_fit <- cv.glmnet(design_X, design_y)
 plot(cv_fit)
 
 # Get betas with lowest lambda
-design_betas <- as.numeric(coef(cv_fit, s = "lambda.min")[-1, ])
+design_betas <- as.numeric(coef(cv_fit, s = "lambda.1se")[-1, ])
 
 # Get residual standard deviation
-cv_pred <- predict(cv_fit, newx = design_X, s = "lambda.min")
+cv_pred <- predict(cv_fit, newx = design_X, s = "lambda.1se")
 cv_resid <- design_y - cv_pred
 cv_n <- length(cv_resid)
 cv_p <- length(coef(cv_fit))

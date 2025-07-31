@@ -50,19 +50,21 @@ transformed parameters {
   vector[K] beta = tau_beta * lambda_beta .* z_beta;
   
   // linear predictor for log-rate
-  // exponentiate to get b for each row
-  vector[I] b = exp(mu1 + X * beta);      
+  vector[I] log_b = mu1 + X * beta;
+  
+  // exponentiate to get b
+  vector[I] b = exp(log_b);      
   
   // a for each row (conditioned on log-rate, linear predictor and error)
   // parameters from shape model fit externally
-  vector[I] a = mu1 * beta_rate + lp + error;       
+  vector[I] a = log_b * beta_rate + lp + error;         
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          
 }
 
 model {
-  // b has a log-normal prior via exp(mu1 + X * beta)
+  // Hierarchical log-normal prior for log-rate
   mu_mu1 ~ normal(0, 1);
   tau_mu1 ~ normal(0, 1);               // truncated normal via <lower=0>
   z_mu1 ~ normal(0, 1);
