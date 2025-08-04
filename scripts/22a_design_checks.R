@@ -43,7 +43,7 @@ ggsave(
   units = "in"
 )
 
-# Trace plots - first 56 of shape and rate
+# Trace plots of Gompertz parameters - first 56 of shape and rate
 trace_a <- traceplot(a_imp_mdl, pars = paste0("a[", 1:56, "]"))
 trace_b <- traceplot(a_imp_mdl, pars = paste0("b[", 1:56, "]"))
 
@@ -58,6 +58,26 @@ ggsave(
 ggsave(
   "mars/design_model/outputs/trace_b.png", 
   trace_b, 
+  width = 15, 
+  height = 10,
+  units = "in"
+)
+
+# Trace plots of predicted attrition probabilities and counts (first 56)
+trace_p <- traceplot(a_imp_mdl, pars = paste0("p[", 1:56, "]"))
+trace_r <- traceplot(a_imp_mdl, pars = paste0("r_new[", 1:56, "]"))
+
+ggsave(
+  "mars/design_model/outputs/trace_p.png", 
+  trace_p, 
+  width = 15, 
+  height = 10,
+  units = "in"
+)
+
+ggsave(
+  "mars/design_model/outputs/trace_r.png", 
+  trace_r, 
   width = 15, 
   height = 10,
   units = "in"

@@ -186,12 +186,11 @@ f_design_df <- e_join_chars %>%
   ))
 
 # Prepare model formula
-z_covars_names <- names(f_design_df[c(3, 10:26)])
+z_covars_names <- names(f_design_df[c(3, 10:27)])
 z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ ", z_covars))
 
 # Construct glmnet formula and design matrices
-set.seed(123)
 z_cv_fml <- as.formula(paste0("~ ", z_covars))
 design_X <- model.matrix(z_cv_fml, data = f_design_df)[, -1]
 design_y <- f_design_df$shape

@@ -162,7 +162,7 @@ g_attr_fixed %>%
 # Max bmi: 0 = Obese (<40), 1 = Morbidly obese (>=40)
 # Reduced ordinal for number of arms and facilities
 # 1 - 2 arms, 2 - 3 arms, 3 - 4 arms, 4 - >4 arms
-# Log-transformed number of facilities
+# Log-transformed number of facilities and sample size
 h_tidy <- g_attr_fixed %>% 
   rename(
     age_lower_dbl = age_lower,
@@ -191,12 +191,13 @@ h_tidy <- g_attr_fixed %>%
       n_arms == 4 ~ 3L,
       TRUE ~ 4L
     ),
-    n_facilities = log(n_facilities),
+    n_log = n,
+    across(c(n_log, n_facilities), ~ log(.)),
     across(c(hba1c_mean, sbp_mean:egfr_mean), ~ log(.))
   ) %>% 
   select(
     source:age_upper_dbl, age_lower:age_upper, bmi_lower:bmi_upper, 
-    min_bmi:max_bmi, phase:n_facilities, one_pom,
+    min_bmi:max_bmi, n_log, phase:n_facilities, one_pom,
     male_prop, age10_mean:egfr_mean
   ) %>% 
   select(source:class, n:attr, trttype, everything())

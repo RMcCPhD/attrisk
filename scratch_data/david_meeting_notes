@@ -1,0 +1,17 @@
+        p[i,j] = 1 - exp(-b[i,j] / a[i,j] * (exp(a[i,j] * dt[i]) - 1));
+
+p <- mean(p)
+N <- sum(N[,j])
+ 
+  r ~ binomial(N, p);
+
+eq
+2 rates
+average != average weighted by n participants
+same for props 
+avg
+
+
+Summing avg risk
+- Covariates and coefs stay the same
+- Only change = lin
