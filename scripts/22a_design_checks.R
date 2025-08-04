@@ -22,7 +22,7 @@ trace_global <- traceplot(
 )
 
 ggsave(
-  "mars/design_model/outputs/trace_global.png", 
+  "outputs/design_model/ppc/trace_global.png", 
   trace_global, 
   width = 15, 
   height = 10,
@@ -36,7 +36,7 @@ trace_beta <- traceplot(
 )
 
 ggsave(
-  "mars/design_model/outputs/trace_beta.png", 
+  "outputs/design_model/ppc/trace_beta.png", 
   trace_beta, 
   width = 15, 
   height = 10,
@@ -48,7 +48,7 @@ trace_a <- traceplot(a_imp_mdl, pars = paste0("a[", 1:56, "]"))
 trace_b <- traceplot(a_imp_mdl, pars = paste0("b[", 1:56, "]"))
 
 ggsave(
-  "mars/design_model/outputs/trace_a.png", 
+  "outputs/design_model/ppc/trace_a.png", 
   trace_a, 
   width = 15, 
   height = 10,
@@ -56,7 +56,7 @@ ggsave(
 )
 
 ggsave(
-  "mars/design_model/outputs/trace_b.png", 
+  "outputs/design_model/ppc/trace_b.png", 
   trace_b, 
   width = 15, 
   height = 10,
@@ -68,7 +68,7 @@ trace_p <- traceplot(a_imp_mdl, pars = paste0("p[", 1:56, "]"))
 trace_r <- traceplot(a_imp_mdl, pars = paste0("r_new[", 1:56, "]"))
 
 ggsave(
-  "mars/design_model/outputs/trace_p.png", 
+  "outputs/design_model/ppc/trace_p.png", 
   trace_p, 
   width = 15, 
   height = 10,
@@ -76,7 +76,7 @@ ggsave(
 )
 
 ggsave(
-  "mars/design_model/outputs/trace_r.png", 
+  "outputs/design_model/ppc/trace_r.png", 
   trace_r, 
   width = 15, 
   height = 10,
@@ -103,7 +103,7 @@ betas_plot <- betas %>%
 betas_plot
 
 ggsave(
-  "mars/design_model/outputs/rate_betas.png",
+  "outputs/design_model/ppc/rate_betas.png",
   betas_plot,
   width = 8,
   height = 8,
