@@ -119,7 +119,7 @@ ggsave(
 
 # Observed variables (arms, counts)
 obs <- tibble(
-  iter = a_imp_df$I,
+  iter = 1L:362L,
   r = a_imp_df$r,
   N = a_imp_df$N
 )
@@ -155,9 +155,15 @@ auc_sum <- tibble(
   sd_auc   = sd(auc_vals),
   med_auc  = median(auc_vals),
   min_auc  = min(auc_vals),
-  max_auc  = max(auc_vals)
+  max_auc  = max(auc_vals),
+  lo_auc = quantile(auc_vals, 0.025),
+  hi_auc = quantile(auc_vals, 0.975)
 )
+
+# Mean AUC 0.731 - moderate discrimination
 auc_sum
+
+write_csv(auc_sum, "outputs/design_model/valid/auc_sum.csv")
 
 # Plot auc density
 auc_dens <- ggplot(tibble(auc = auc_vals), aes(x = auc)) +
@@ -194,7 +200,7 @@ roc_sum <- roc_df %>%
     q97.5 = quantile(tpr, 0.975),
   )
 
-# Plot roc
+# Plot roc - narrow confidence intervals indicative of accuracy
 roc_plot <- roc_sum %>% 
   ggplot(aes(x = fpr, y = median_tpr, ymin = q2.5, ymax = q97.5)) +
   geom_line() +
@@ -209,6 +215,91 @@ roc_plot <- roc_sum %>%
 ggsave(
   "outputs/design_model/valid/roc_plot.png",
   roc_plot,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+# Brier score ------------------------------------------------------------------
+
+# Join observed and predicted attrition probabilities
+# Add treatment type
+join_p <- obs %>% 
+  mutate(obs_p = r / N) %>% 
+  left_join(
+    pred_df %>% 
+      pivot_longer(everything()) %>% 
+      mutate(name = as.integer(str_extract(name, "\\d+"))) %>% 
+      rename(iter = name, p = value)
+  ) %>% 
+  left_join(
+    tibble(iter = 1L:362L, trttype = a_imp_df$X[,1])
+  )
+
+# Compute Brier score
+brier <- join_p %>%
+  group_by(iter) %>% 
+  reframe(brier = mean((obs_p - p)^2))
+
+# Repeat by arm
+brier_arm <- join_p %>%
+  group_by(iter, trttype) %>% 
+  reframe(brier = mean((obs_p - p)^2))
+
+# Summarise
+brier_sum <- brier %>% 
+  reframe(
+    mean_brier = mean(brier),
+    sd_brier = sd(brier),
+    med_brier = median(brier),
+    min_brier = min(brier),
+    max_brier = max(brier),
+    low_brier = quantile(brier, 0.025),
+    hi_brier = quantile(brier, 0.975)
+  )
+
+brier_sum_arm <- brier_arm %>% 
+  group_by(trttype) %>% 
+  reframe(
+    mean_brier = mean(brier),
+    sd_brier = sd(brier),
+    med_brier = median(brier),
+    min_brier = min(brier),
+    max_brier = max(brier),
+    low_brier = quantile(brier, 0.025),
+    hi_brier = quantile(brier, 0.975)
+  )
+
+write_csv(brier_sum, "outputs/design_model/valid/brier_sum.csv")
+write_csv(brier_sum_arm, "outputs/design_model/valid/brier_sum_arm.csv")
+
+# Plot density
+brier_plot <- brier %>% 
+  ggplot(aes(x = brier)) +
+  geom_density() +
+  theme_classic() +
+  scale_x_continuous(n.breaks = 6) +
+  labs(x = "Brier score", y = "Density")
+
+brier_arm_plot <- brier_arm %>% 
+  mutate(trttype = if_else(trttype == 0L, "Placebo", "Active")) %>% 
+  ggplot(aes(x = brier, fill = factor(trttype, levels = c("Placebo", "Active")))) +
+  geom_density(colour = "black", alpha = 0.3) +
+  theme_classic() +
+  scale_x_continuous(n.breaks = 6) +
+  labs(x = "Brier score", y = "Density", fill = "Treatment type")
+
+ggsave(
+  "outputs/design_model/valid/brier_dist.png",
+  brier_plot,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+ggsave(
+  "outputs/design_model/valid/brier_arm_dist.png",
+  brier_arm_plot,
   width = 8,
   height = 8,
   units = "in"
