@@ -5,7 +5,7 @@ library(tidyverse)
 # Function to quickly check for NAs
 check_nas <- function(df) {
   df %>% 
-    reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+    reframe(across(everything(), ~ sum(is.na(.)))) %>%
     pivot_longer(everything()) %>% 
     filter(value > 0)
 }
@@ -210,7 +210,17 @@ h_tidy %>%
 # Collapse by arm --------------------------------------------------------------
 
 # Isolate counts and baseline characteristics
-i_vars <- h_tidy %>% select(trial_id, atc:trttype, male_prop:egfr_mean)
+# Collapse multiarms into one (0 - placebo, 1 - ac, 2 - placebo/ac)
+i_vars <- h_tidy %>% 
+  select(trial_id, atc:trttype, male_prop:egfr_mean) %>% 
+  group_by(trial_id) %>% 
+  mutate(
+    trttype = case_when(
+      length(unique(trttype)) > 1 ~ 2L,
+      TRUE ~ trttype
+    )
+  ) %>% 
+  ungroup()
 
 # Collapse arm counts
 i_clp_arms <- i_vars %>% 
@@ -220,13 +230,30 @@ i_clp_arms <- i_vars %>%
   distinct() %>% 
   ungroup() %>% 
   mutate(
-    attr = if_else(trial_id == "NCT00313313", 82, attr),
-    attr_prop = attr/arm_n
+    n = if_else(trial_id == "NCT02897349", 206, n),
+    arm_n = if_else(trial_id == "NCT02897349", 102, arm_n),
+    attr = if_else(trial_id == "NCT00313313", 82, attr)
   )
+
+# Collapse counts by new trttype
+i_clp_trttype <- i_clp_arms %>% 
+  select(-c(atc, class)) %>% 
+  group_by(trial_id) %>% 
+  mutate(
+    trttype = case_when(
+      length(unique(trttype)) != 1 ~ 2L, 
+      TRUE ~ trttype
+    )
+  ) %>% 
+  group_by(trial_id, trttype) %>% 
+  mutate(across(arm_n:attr, ~ sum(.))) %>% 
+  distinct() %>% 
+  ungroup() %>% 
+  mutate(attr_prop = attr/arm_n)
 
 # Collapse baseline characteristics
 i_clp_bl <- i_vars %>% 
-  group_by(trial_id, class) %>% 
+  group_by(trial_id, trttype) %>% 
   reframe(
     total_n = sum(arm_n),
     male_prop = weighted.mean(male_prop, arm_n),
@@ -250,43 +277,25 @@ i_clp_bl %>%
   theme_bw()
 
 # Combine collapsed rows
-i_join <- i_clp_arms %>% left_join(i_clp_bl)
+i_join <- i_clp_trttype %>% left_join(i_clp_bl)
 check_nas(i_join)
 
 # Join with trial design features
-j_join <- h_tidy %>% 
-  select(source:n, trttype:one_pom) %>% 
-  select(-arm_id) %>% 
-  distinct() %>% 
-  left_join(i_join) %>% 
-  select(source:n, arm_n:attr_prop, trttype:one_pom, everything())
+j_join <- i_join %>% 
+  left_join(
+    h_tidy %>% 
+      select(-c(arm_id, atc, class, n:trttype, male_prop:egfr_mean)) %>% 
+      distinct()
+  ) %>% 
+  select(
+    source, trial_id:attr, attr_prop, trttype, duration:one_pom, everything()
+  )
 
-# Identify trials with multiple arms to collapse doses (i.e. two biguanides
-# with different doses)
-k_multiarm <- j_join %>% 
-  group_by(trial_id) %>% 
-  filter(length(unique(trttype)) > 1) %>% 
-  group_by(trial_id, trttype) %>% 
-  mutate(attr = sum(attr)) %>% 
-  select(-attr_prop) %>% 
-  distinct() %>% 
-  ungroup()
-
-# Join everything
-# Recalculate attr_prop
-l_join <- j_join %>% 
-  filter(!trial_id %in% k_multiarm$trial_id) %>% 
-  full_join(k_multiarm) %>% 
-  select(-attr_prop) %>% 
-  mutate(attr_prop = attr/arm_n) %>% 
-  select(trial_id:attr, attr_prop, everything()) %>% 
-  mutate(arm_n = if_else(trial_id == "NCT02897349", 102, arm_n))
-
-l_join %>% count(trial_id, source) %>% count(source)
-check_nas(l_join)
+j_join %>% count(trial_id, source) %>% count(source)
+check_nas(j_join)
 
 # Add duration
-m_dur <- l_join %>% 
+k_dur <- j_join %>% 
   left_join(a_imp_dur %>% rename(dur_new = duration)) %>% 
   mutate(
     duration = dur_new/52,
@@ -294,9 +303,10 @@ m_dur <- l_join %>%
       is.na(duration) & trial_id == "NCT02730377" ~ 2,
       is.na(duration) & trial_id == "NCT02911948" ~ 0.5,
       TRUE ~ duration
-    )
+    ),
+    n_log = log(n)
   ) %>% 
   select(-dur_new)
 
 # Save
-saveRDS(m_dur, "processed_data/latest_dataset.rds")
+saveRDS(k_dur, "processed_data/latest_dataset.rds")

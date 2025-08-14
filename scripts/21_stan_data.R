@@ -16,7 +16,7 @@ b_design_df <- a_imp_df %>%
   select(-c(contains("dbl"), bmi_lower:bmi_upper, male_prop:egfr_mean))
 
 # Create model matrix for predictors
-b_vars <- names(b_design_df[9:26])
+b_vars <- names(b_design_df[7:24])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
 b_design_mat <- model.matrix(b_fml, data = b_design_df)[, -1]
 
@@ -59,11 +59,13 @@ saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 
 # Conduct data -----------------------------------------------------------------
 
+# Come back to fixing this
+
 # Same dataset, bl characteristics not included as predictors here
 c_conduct_df <- b_design_df
 
 # Create model matrix for predictors
-c_vars <- names(c_conduct_df[c(9:25)])
+c_vars <- names(c_conduct_df[c(7:24)])
 c_fml <- as.formula(paste0("~ ", paste0(c_vars, collapse = " + ")))
 c_conduct_mat <- model.matrix(c_fml, data = c_conduct_df)[, -1]
 
