@@ -93,7 +93,7 @@ betas <- a_imp_res %>%
   filter(grepl("^beta\\[", variable)) %>% 
   separate(variable, into = c("beta", "order"), sep = "\\[") %>% 
   mutate(order = gsub("\\]", "", order)) %>% 
-  cbind(data.frame(var = a_imp_df)) %>% 
+  cbind(data.frame(var = colnames(a_imp_df$X))) %>% 
   select(var, everything())
 
 betas_plot <- betas %>% 
@@ -119,7 +119,7 @@ ggsave(
 
 # Observed variables (arms, counts)
 obs <- tibble(
-  iter = 1L:362L,
+  iter = 1L:344L,
   r = a_imp_df$r,
   N = a_imp_df$N
 )
@@ -160,7 +160,7 @@ auc_sum <- tibble(
   hi_auc = quantile(auc_vals, 0.975)
 )
 
-# Mean AUC 0.731 - moderate discrimination
+# Mean AUC 0.729 - moderate discrimination
 auc_sum
 
 write_csv(auc_sum, "outputs/design_model/valid/auc_sum.csv")
@@ -233,7 +233,7 @@ join_p <- obs %>%
       rename(iter = name, p = value)
   ) %>% 
   left_join(
-    tibble(iter = 1L:362L, trttype = a_imp_df$X[,1])
+    tibble(iter = 1L:344L, trttype = a_imp_df$X[,1])
   )
 
 # Compute Brier score
