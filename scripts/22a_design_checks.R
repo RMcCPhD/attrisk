@@ -6,12 +6,16 @@ library(bayesplot)
 library(tidybayes)
 library(posterior)
 library(rstan)
+library(pROC)
 
 # Import data (variable names, model outputs)
-a_imp_df <- colnames(readRDS("mars/design_model/latest_stan_design.rds")$X)
+# a_imp_df <- colnames(readRDS("mars/design_model/latest_stan_design.rds")$X)
+a_imp_df <- readRDS("mars/design_model/latest_stan_design.rds")
 a_imp_res <- readRDS("mars/design_model/outputs/design_sum_draws.rds")
 a_imp_mdl <- readRDS("mars/design_model/outputs/design_fit.rds")
 a_imp_rhat <- read_csv("mars/design_model/outputs/sum_rhat_ess.csv")
+
+# Trace plots ------------------------------------------------------------------
 
 # Trace plots for global parameters
 trace_global <- traceplot(
@@ -83,7 +87,8 @@ ggsave(
   units = "in"
 )
 
-# Plot betas for rate
+# Rate coefficients ------------------------------------------------------------
+
 betas <- a_imp_res %>% 
   filter(grepl("^beta\\[", variable)) %>% 
   separate(variable, into = c("beta", "order"), sep = "\\[") %>% 
@@ -105,6 +110,105 @@ betas_plot
 ggsave(
   "outputs/design_model/ppc/rate_betas.png",
   betas_plot,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+# AUC --------------------------------------------------------------------------
+
+# Observed variables (arms, counts)
+obs <- tibble(
+  iter = a_imp_df$I,
+  r = a_imp_df$r,
+  N = a_imp_df$N
+)
+
+# Get posterior draws for predicted attrition
+pred_draws <- as_draws_df(a_imp_mdl)
+pred_df <- pred_draws[, grepl("^p\\[", names(pred_draws)), drop = FALSE]
+
+# Sample posterior draws
+set.seed(123)
+draw_samples <- sample.int(nrow(pred_df), size = min(2000, nrow(pred_df)), replace = FALSE)
+
+# Build arm-level labels and scores from counts and probabilities
+build_lbls_scores <- function(p_vec, r, N) {
+  scores <- rep(p_vec, times = N)
+  labels <- unlist(Map(function(ri, Ni) c(rep(1L, ri), rep(0L, Ni - ri)), r, N), use.names = FALSE)
+  list(labels = labels, scores = scores)
+}
+
+# Compute roc and auc per posterior draw across arms
+roc_auc_lst <- map(draw_samples, function(did) {
+  p <- as.numeric(pred_df[did, ])
+  ls <- build_lbls_scores(p, obs$r, obs$N)
+  roc_obj <- roc(response = ls$labels, predictor = ls$scores, quiet = TRUE)
+  list(roc = roc_obj, auc = as.numeric(auc(roc_obj)))
+})
+
+# AUC summary
+auc_vals <- vapply(roc_auc_lst, `[[`, numeric(1), "auc")
+
+auc_sum <- tibble(
+  mean_auc = mean(auc_vals),
+  sd_auc   = sd(auc_vals),
+  med_auc  = median(auc_vals),
+  min_auc  = min(auc_vals),
+  max_auc  = max(auc_vals)
+)
+auc_sum
+
+# Plot auc density
+auc_dens <- ggplot(tibble(auc = auc_vals), aes(x = auc)) +
+  geom_density() +
+  theme_classic() +
+  scale_x_continuous(n.breaks = 6) +
+  labs(x = "AUC", y = "Density")
+
+ggsave(
+  "outputs/design_model/valid/auc_dist.png",
+  auc_dens,
+  width = 8,
+  height = 8,
+  units = "in"
+)
+
+# Aggregate roc across draws
+roc_df <- map_dfr(roc_auc_lst, function(x) {
+  data.frame(
+    fpr = 1 - x$roc$specificities,
+    tpr = x$roc$sensitivities
+  )
+}, .id = "draw")
+
+roc_sum <- roc_df %>%
+  mutate(
+    fpr_bin = cut(fpr, breaks = seq(0, 1, by = 0.01))
+  ) %>% 
+  group_by(fpr_bin) %>% 
+  reframe(
+    fpr = mean(as.numeric(gsub("\\((.+),.*", "\\1", fpr_bin))),
+    median_tpr = median(tpr),
+    q2.5 = quantile(tpr, 0.025),
+    q97.5 = quantile(tpr, 0.975),
+  )
+
+# Plot roc
+roc_plot <- roc_sum %>% 
+  ggplot(aes(x = fpr, y = median_tpr, ymin = q2.5, ymax = q97.5)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.3, fill = "steelblue") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "red") +
+  theme_classic() +
+  labs(
+    x = "False positive rate (1 - specificity)",
+    y = "True positive rate (sensitivity)"
+  )
+
+ggsave(
+  "outputs/design_model/valid/roc_plot.png",
+  roc_plot,
   width = 8,
   height = 8,
   units = "in"
