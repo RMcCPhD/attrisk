@@ -81,27 +81,3 @@ ggsave(
   units = "in"
 )
 
-
-
-
-
-# Fit model (doesn't seem to take in variance-covariance to perform
-# meta-analysis accounting for correlation between variables)
-
-# Take vcovs as list
-b_vcov <- a_imp_vcov$cov_matrix
-names(b_vcov) <- unique(a_imp_res$nct_id)
-
-b_fit <- brm(
-  formula = estimate ~ term + (term|gr(nct_id, cov = unlist(cov_matrix))),
-  data = a_imp_res %>% left_join(a_imp_vcov),
-  family = gaussian(link = "identity"),
-  chains = 4,
-  iter = 3000,
-  warmup = 1000,
-  cores = 4,
-  seed = 123,
-  backend = "rstan",
-  control = list(adapt_delta = 0.95)
-)
-

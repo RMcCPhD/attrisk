@@ -105,7 +105,11 @@ betas_plot <- betas %>%
   theme_bw() +
   labs(x = "Mean point estimate (95% credible interval", y = NULL)
 
-betas_plot
+a_imp_res %>% 
+  filter(grepl("^log_b\\[", variable)) %>% 
+  separate(variable, into = c("log_rate", "order"), sep = "\\[") %>% 
+  mutate(order = gsub("\\]", "", order)) %>% 
+  reframe(mean = mean(mean))
 
 ggsave(
   "outputs/design_model/ppc/rate_betas.png",
