@@ -4,25 +4,49 @@ library(tidyverse)
 library(multinma)
 set.seed(123)
 
-# Import pooled hazard ratios
-a_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds")
-
-# Import synthetic IPD
+# Import synthetic IPD and summaries
 a_imp_ipd <- readRDS("data/synth_ipd.rds")
+a_imp_sum <- readRDS("data/synth_ipd_sum.rds")
+a_imp_cat <- readRDS("data/synth_ipd_sum_cat.rds")
 
-# Format variables
+# Format race, nest data
 a_ipd_fmt <- a_imp_ipd %>% 
   mutate(
-    smoke = if_else(grepl("Former", smoke), 0L, 1L),
     race = as.factor(race),
-    race = relevel(race, ref = "White"),
-    across(c(comorbs, n_atc), as.numeric)
+    race = relevel(race, ref = "white"),
+  ) %>% 
+  group_by(trial_id) %>% 
+  nest() %>% 
+  ungroup()
+
+# Get correlation matrix for each trial
+b_ipd_cor <- a_ipd_fmt %>% 
+  mutate(
+    cor = map(data, function(df) {
+      terms <- paste0("~ ", paste0(names(df[c(2:14)]), collapse = " + "))
+      fml <- model.matrix(as.formula(terms), data = df)[, -1]
+      cor(fml)
+    })
   )
 
-# Get multivariate correlation
-a_ipd_terms <- paste0("~ ", paste0(names(a_ipd_fmt[c(5:17)]), collapse = " + "))
-a_ipd_mat <- model.matrix(as.formula(a_ipd_terms), data = a_ipd_fmt)[, -1]
-a_ipd_cor <- cor(a_ipd_mat)
+# Add summaries to nested data
+b_add_sum <- b_ipd_cor %>% 
+  left_join(
+    a_imp_sum %>% 
+      pivot_wider(names_from = marg, values_from = age10:sbp) %>% 
+      group_by(trial_id) %>%
+      nest(.key = "numeric") %>% 
+      ungroup()
+  ) %>% 
+  left_join(
+    a_imp_cat %>% 
+      bind_rows(.id = "var") %>% 
+      group_by(trial_id, var) %>% 
+      nest() %>% 
+      ungroup() %>% 
+      pivot_wider(names_from = var, values_from = data) %>% 
+      rename(conmeds = n_atc)
+  )
 
 # Inverse CDF for categorical and ordinal variables in add_integration
 qcat <- function(p, probs, values = seq_along(probs) - 1L) {
@@ -33,105 +57,85 @@ qcat <- function(p, probs, values = seq_along(probs) - 1L) {
   values[idx]
 }
 
-# Dummy probabilities for ordinal and categorical variable sampling
-comorb_prop <- c(
-  "0" = 0.28, "1" = 0.41, "2" = 0.19, "3" = 0.07, "4" = 0.03, "5" = 0.01
-)
+# Generate sobol sequences
+b_sobol <- b_add_sum %>% 
+  mutate(
+    sobol = pmap(
+      list(cor, numeric, comorbs, conmeds, race, smoke, sex),
+      function(r, df, morb, atc, rce, smk, male) {
+        add_integration(
+          df,
+          age10       = distr(qnorm, df$age10_mean, df$age10_sd),
+          sex         = distr(qbern, male$prop[[2]]),
+          bmi         = distr(qnorm, df$bmi_mean, df$bmi_sd),
+          hdl         = distr(qnorm, df$hdl_mean, df$hdl_sd),
+          total       = distr(qnorm, df$total_mean, df$total_sd),
+          comorbs     = distr(qcat, probs = unname(morb$comorbs), values = morb$prop),
+          durn        = distr(qgamma, df$durn_mean, df$durn_sd),
+          egfr        = distr(qnorm, df$egfr_mean, df$egfr_sd),
+          hba1c       = distr(qnorm, df$hba1c_mean, df$hba1c_sd),
+          sbp         = distr(qnorm, df$sbp_mean, df$sbp_sd),
+          n_atc       = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
+          smoke       = distr(qbern, smk$prop[[2]]),
+          asian       = distr(qbern, rce$prop[[1]]),
+          black_aa    = distr(qbern, rce$prop[[2]]),
+          other       = distr(qbern, rce$prop[[3]]),
+          cor = r,
+          n_int = 64
+        )
+      }
+    ),
+    sobol_ext = map(sobol, function(df) {
+      df %>% 
+        select(starts_with(".int")) %>% 
+        rename_with(., ~ gsub(".int_", "", .)) %>% 
+        unnest(cols = everything())
+    })
+  )
 
-conmed_prop <- c(
-  "0" = 0.23, "1" = 0.25, "2" = 0.17, "3" = 0.07, "4" = 0.05, "5" = 0.05, 
-  "6" = 0.04, "7" = 0.03, "8" = 0.03, "9" = 0.02, "10" = 0.02, "11" = 0.01, 
-  "12" = 0.01, "13" = 0.01, "14" = 0.01
-)
-
-smoke_prop <- c("Former/Never" = 0.86, "Current" = 0.14)
-
-race_prop <- c("Asian" = 0.3, "Black/AA" = 0.05, "Other" = 0.12, "White" = 0.54)
-
-# Setup distribution parameters
-b_params <- list(
-  age10   = list(mu = 6, sd = 1),
-  bmi     = list(mu = 5.4, sd = 1),
-  hdl     = list(mu = 1.2, sd = 0.5),
-  total   = list(mu = 3.8, sd = 1),
-  durn    = list(shape = (1.4/1)^2, scale = (1^2)/1.4),
-  egfr    = list(mu = 20, sd = 4),
-  hba1c   = list(mu = 8, sd = 1),
-  sbp     = list(mu = 40, sd = 3),
-  sex     = list(prob = 0.54),
-  smoke   = list(prob = 0.14),
-  race    = list(probs = race_prop, values = seq_along(race_prop)),
-  comorbs = list(probs = comorb_prop, values = as.integer(names(comorb_prop))),
-  n_atc   = list(probs = conmed_prop, values = as.integer(names(conmed_prop)))
-)
-
-# Get sobol sequences for synthetic participants
-b_sobol <- add_integration(
-  data.frame(dummy = 1),
-  age10 = distr(qnorm, b_params$age10$mu, b_params$age10$sd),
-  bmi = distr(qnorm, b_params$bmi$mu, b_params$bmi$sd),
-  hdl = distr(qnorm, b_params$hdl$mu, b_params$hdl$sd),
-  total = distr(qnorm, b_params$total$mu, b_params$total$sd),
-  comorbs = distr(qcat, probs = unname(b_params$comorbs$probs), values = b_params$comorbs$values),
-  durn    = distr(qgamma, b_params$durn$shape, b_params$durn$scale),
-  egfr    = distr(qnorm, b_params$egfr$mu, b_params$egfr$sd),
-  hba1c   = distr(qnorm, b_params$hba1c$mu, b_params$hba1c$sd),
-  n_atc   = distr(qcat, probs = unname(b_params$n_atc$probs), values = b_params$n_atc$values),
-  raceAsian = distr(qbern, race_prop[[1]]),
-  raceBlackAA = distr(qbern, race_prop[[2]]),
-  raceOther = distr(qbern, race_prop[[3]]),
-  sbp     = distr(qnorm, b_params$sbp$mu, b_params$sbp$sd),
-  sex     = distr(qbern, b_params$sex$prob),
-  smoke   = distr(qbern, b_params$smoke$prob),
-  cor = a_ipd_cor,
-  n_int = 64
-)
-
-b_sobol <- add_integration(
-  b_df,
-  age10 = distr(qnorm, age10mu, age10d),
-  bmi = distr(qnorm, bmimu, bmid),
-  hdl = distr(qnorm, hdlmu, hdld),
-  total = distr(qnorm, totalmu, totald),
-  comorbs = distr(qcat, probs = as.numeric(comorb_prop), values = as.integer(names(comorb_prop))),
-  durn = distr(qgamma, durna, durnb),
-  egfr = distr(qnorm, egfrmu, egfrd),
-  hba1c = distr(qnorm, hba1cmu, hba1cd),
-  n_atc = distr(qcat, probs = as.numeric(conmed_prop), values = as.integer(names(conmed_prop))),
-  raceAsian = distr(qbern, asianp),
-  raceBlackAA = distr(qbern, blackp),
-  raceOther = distr(qbern, otherp),
-  sbp = distr(qnorm, sbpmu, sbpd),
-  sex = distr(qbern, sexp),
-  smoke = distr(qbern, smokep),
-  cor = a_ipd_cor,
-  n_int = 64
-)
-
-# Extract sobol sequences for each covariate
-b_sobol_ext <- b_sobol %>% 
-  select(starts_with(".int")) %>% 
-  rename_with(., ~ gsub(".int_", "", .)) %>% 
-  unnest(cols = everything())
-
-# Prepare pooled hazard ratios
-b_hr <- a_imp_hr %>% 
+# Import log-hazard estimates
+b_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds") %>% 
   select(term, estimate) %>% 
   pivot_wider(names_from = "term", values_from = "estimate") %>% 
-  rename_with(., ~ paste0(., "_hr"))
+  rename_with(., ~ paste0(., "_loghr"))
 
-# Join hazard ratios with sobol sequences
-b_join_hr <- b_sobol_ext %>% 
-  cbind(b_hr) %>% 
-  as_tibble() %>% 
+# Rename betas
+b_beta <- c(
+  age10            = b_imp_hr$age10_loghr,
+  sex              = b_imp_hr$sex_loghr,
+  bmi              = b_imp_hr$bmi_loghr,
+  hdl              = b_imp_hr$chol_hdl_loghr,
+  total            = b_imp_hr$chol_total_loghr,
+  comorbs          = b_imp_hr$comorbs_loghr,
+  durn             = b_imp_hr$durn_loghr,
+  egfr             = b_imp_hr$egfr_loghr,
+  hba1c            = b_imp_hr$hba1c_loghr,
+  sbp              = b_imp_hr$sbp_loghr,
+  n_atc            = b_imp_hr$n_atc_loghr,
+  smoke            = b_imp_hr$smoke_loghr,
+  asian            = b_imp_hr$raceasian_loghr,
+  black_aa         = b_imp_hr$raceblack_aa_loghr,
+  other            = b_imp_hr$raceother_loghr
+)
+
+# Compute linear predictor per trial
+c_lp <- b_sobol %>% 
   mutate(
-    lp = age10*age10_hr + bmi*bmi_hr + hdl*chol_hdl_hr + total*chol_total_hr + 
-      durn*durn_hr + egfr*egfr_hr + hba1c*hba1c_hr + sbp*sbp_hr + sex*sex_hr + 
-      smoke*smoke_hr + raceAsian*raceasian_hr + raceBlackAA*raceblack_aa_hr + 
-      raceOther * raceother_hr + comorbs*comorbs_hr + n_atc*n_atc_hr,
-    attr = 1 / exp(lp)
+    lp_tbl = map(sobol_ext, function(df) {
+      X <- as.matrix(df)
+      lp <- as.vector(X %*% b_beta)
+      tibble(lp = lp, lp_hr = exp(lp))
+    })
   ) %>% 
-  select(lp, attr, everything())
+  select(trial_id, lp_tbl)
 
-mean(b_join_hr$attr)
+# Get average predicted risk per trial
+d_avg_risk <- c_lp %>% 
+  reframe(
+    avg_risk = map_dbl(
+      lp_tbl, ~ {
+        mean(1 - exp(-0.153 * .x$lp_hr))
+      }
+    )
+  )
 
