@@ -101,41 +101,32 @@ b_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds") %>%
 
 # Rename betas
 b_beta <- c(
-  age10            = b_imp_hr$age10_loghr,
-  sex              = b_imp_hr$sex_loghr,
-  bmi              = b_imp_hr$bmi_loghr,
-  hdl              = b_imp_hr$chol_hdl_loghr,
-  total            = b_imp_hr$chol_total_loghr,
-  comorbs          = b_imp_hr$comorbs_loghr,
-  durn             = b_imp_hr$durn_loghr,
-  egfr             = b_imp_hr$egfr_loghr,
-  hba1c            = b_imp_hr$hba1c_loghr,
-  sbp              = b_imp_hr$sbp_loghr,
-  n_atc            = b_imp_hr$n_atc_loghr,
-  smoke            = b_imp_hr$smoke_loghr,
-  asian            = b_imp_hr$raceasian_loghr,
-  black_aa         = b_imp_hr$raceblack_aa_loghr,
-  other            = b_imp_hr$raceother_loghr
+  age10     = b_imp_hr$age10_loghr,
+  sex       = b_imp_hr$sex_loghr,
+  bmi       = b_imp_hr$bmi_loghr,
+  hdl       = b_imp_hr$chol_hdl_loghr,
+  total     = b_imp_hr$chol_total_loghr,
+  comorbs   = b_imp_hr$comorbs_loghr,
+  durn      = b_imp_hr$durn_loghr,
+  egfr      = b_imp_hr$egfr_loghr,
+  hba1c     = b_imp_hr$hba1c_loghr,
+  sbp       = b_imp_hr$sbp_loghr,
+  n_atc     = b_imp_hr$n_atc_loghr,
+  smoke     = b_imp_hr$smoke_loghr,
+  asian     = b_imp_hr$raceasian_loghr,
+  black_aa  = b_imp_hr$raceblack_aa_loghr,
+  other     = b_imp_hr$raceother_loghr
 )
 
 # Compute linear predictor per trial
+# Get average predicted attrition risk per trial
 c_lp <- b_sobol %>% 
   mutate(
     lp_tbl = map(sobol_ext, function(df) {
       X <- as.matrix(df)
       lp <- as.vector(X %*% b_beta)
-      tibble(lp = lp, lp_hr = exp(lp))
-    })
+      tibble(lp = lp, lp_hr = exp(lp), risk = 1 - exp(-0.153 * lp_hr))
+    }),
+    avg_risk = map_dbl(lp_tbl, ~ sum(.x$risk) / 64)
   ) %>% 
-  select(trial_id, lp_tbl)
-
-# Get average predicted risk per trial
-d_avg_risk <- c_lp %>% 
-  reframe(
-    avg_risk = map_dbl(
-      lp_tbl, ~ {
-        mean(1 - exp(-0.153 * .x$lp_hr))
-      }
-    )
-  )
-
+  select(trial_id, lp_tbl, avg_risk)
