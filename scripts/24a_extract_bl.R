@@ -399,5 +399,17 @@ f_all <- f_clp_chars %>%
 f_all %>% count(trial_id, trttype) %>% count(trttype)
 a_imp_set %>% count(trial_id, trttype) %>% count(trttype)
 
+# Save as csv to manually find chars for two missing trials
+write_csv(
+  f_all %>% filter(trial_id %in% c("NCT02730377", "NCT02911948")), 
+  "processed_data/bl_chars_manual.csv"
+)
+
+# Import and add in to set
+g_all <- f_all %>% 
+  filter(!trial_id %in% c("NCT02730377", "NCT02911948")) %>% 
+  full_join(read_csv("processed_data/bl_chars_manual.csv")) %>% 
+  arrange(trial_id)
+
 # Save
-saveRDS(f_all, "processed_data/bl_chars_noimp.rds")
+saveRDS(g_all, "processed_data/bl_chars_noimp.rds")
