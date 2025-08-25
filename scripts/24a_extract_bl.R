@@ -11,7 +11,6 @@
 # Collapse into weighted marginals after
 source("scripts/00_config.R")
 library(tidyverse)
-library(multinma)
 
 # Helper function - compute pooled SD when summarising group chars
 pooledSD <- function(mu, delta, n) {
