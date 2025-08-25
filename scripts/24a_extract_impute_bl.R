@@ -46,18 +46,21 @@ names(b_split)
 # Age --------------------------------------------------------------------------
 
 # 334/344 trials
-c_age <- b_split$age %>% 
+c_age_mean <- b_split$age %>% 
   filter(second_format != "median") %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # Blood pressure  --------------------------------------------------------------
 
 # 89/344 trials
-c_sbp <- b_split$blood_pressure %>% 
+c_sbp_mean <- b_split$blood_pressure %>% 
   filter(category_level == "systolic") %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  mutate(variable = "sbp") %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # BMI --------------------------------------------------------------------------
 
@@ -69,7 +72,8 @@ c_bmi_df <- b_split$bmi %>%
 c_bmi_mean <- c_bmi_df %>% 
   filter(first_format == "mean") %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # Tidy categorical
 c_bmi_cat <- c_bmi_df %>% 
@@ -91,14 +95,17 @@ c_bmi_cat <- c_bmi_df %>%
     second = second/100
   ) %>% 
   select(trial_id, arm_id, variable, category, first, second) %>% 
-  rename(count = first, prop = second)
+  rename(count = first, prop = second) %>% 
+  arrange(trial_id, arm_id)
 
 # T2DM duration ----------------------------------------------------------------
 
 # 275/344 trials
-c_t2dur <- b_split$duration_t2dm %>% 
+c_t2dur_mean <- b_split$duration_t2dm %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  mutate(variable = "t2dur") %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # eGFR -------------------------------------------------------------------------
 
@@ -109,7 +116,8 @@ c_egfr_df <- b_split$egfr
 c_egfr_mean <- c_egfr_df %>% 
   filter(first_format == "mean") %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # Tidy categorical
 c_egfr_cat <- c_egfr_df %>% 
@@ -131,22 +139,25 @@ c_egfr_cat <- c_egfr_df %>%
 # HbA1c ------------------------------------------------------------------------
 
 # 346/344 trials - one missing sd
-c_hba1c <- b_split$hba1c %>% 
+c_hba1c_mean <- b_split$hba1c %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # HDL cholesterol --------------------------------------------------------------
 
 # 26/344 trials - one has CV, convert this to SD
-c_hdl <- b_split$hdl %>% 
+c_hdl_mean <- b_split$hdl %>% 
   mutate(
     second = case_when(
       second_format == "coeff of variation" ~ first * (second/100),
       TRUE ~ second
-    )
+    ),
+    variable = "hdl"
   ) %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # Sex --------------------------------------------------------------------------
 
@@ -162,13 +173,16 @@ c_sex <- b_split$male %>%
     pcnt = 1 - pcnt,
     variable = "female"
   ) %>% 
-  rename(prop = pcnt) %>% 
-  select(-count)
+  rename(female_prop = pcnt) %>% 
+  select(-count, -variable)
 
 # Race -------------------------------------------------------------------------
 
 # 226/344 trials - collapsed categories
+# Removed collapsed levels
+# Fixing totals >1 caused by proportions
 c_race <- b_split$race %>% 
+  filter(!grepl("collaps", category_level)) %>% 
   mutate(
     category = case_when(
       grepl("asian", category_level) ~ "asian",
@@ -184,7 +198,40 @@ c_race <- b_split$race %>%
   ) %>% 
   select(trial_id, arm_id, variable, category, first, second) %>% 
   rename(count = first, prop = second) %>% 
-  select(-count)
+  select(-variable, -count) %>% 
+  group_by(trial_id, arm_id, category) %>% 
+  reframe(prop = sum(prop)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = category, values_from = prop) %>% 
+  mutate(
+    across(asian:white, ~ if_else(. > 1, . - 1, .)),
+    across(asian:white, ~ if_else(. > 1, 1, .)),
+    across(asian:white, ~ if_else(is.na(.), 0, .)),
+    race_total = asian + black + other + white,
+    other = case_when(
+      race_total == 1.29 ~ other - 0.29,
+      race_total == 1.04 ~ other - 0.04,
+      race_total == 1.03 ~ other - 0.03,
+      race_total == 1.02 ~ other - 0.02,
+      race_total == 1.01 ~ other - 0.01,
+      race_total == 0.99 ~ other + 0.01,
+      TRUE ~ other
+    ),
+    race_total = asian + black + other + white,
+    across(asian:race_total, ~ round(., 2))
+  )
+
+# Adding missing to other where prop < 1
+c_race_fix <- c_race %>% 
+  mutate(
+    asian = if_else(race_total == 0.01, 1, asian),
+    race_total = asian + black + other + white,
+    other = if_else(race_total < 1, other + (1 - race_total), other),
+    race_total = asian + black + other + white,
+    across(asian:race_total, ~ round(., 2)),
+    other = if_else(race_total == 1.01, other - 0.01, other),
+    race_total = asian + black + other + white
+  )
 
 # Smoking status ---------------------------------------------------------------
 
@@ -193,14 +240,23 @@ c_smoke <- b_split$smoking_status %>%
   mutate(
     category = case_match(
       category_level,
-      "ex" ~ "former/never",
-      "never" ~ "former/never",
+      "ex" ~ "former_never",
+      "never" ~ "former_never",
       .default = category_level
     ),
     second = second/100
   ) %>% 
   select(trial_id, arm_id, variable, category, first, second) %>% 
-  rename(count = first, prop = second)
+  rename(count = first, prop = second) %>% 
+  select(-variable, -count) %>% 
+  group_by(trial_id, arm_id, category) %>% 
+  reframe(prop = sum(prop)) %>% 
+  pivot_wider(names_from = category, values_from = prop) %>% 
+  mutate(
+    former_never = if_else(is.na(former_never), 1 - current, former_never),
+    across(current:former_never, ~ round(., 2)),
+    smoke_total = current + former_never
+  )
 
 # Total cholesterol ------------------------------------------------------------
 
@@ -210,11 +266,37 @@ c_total <- b_split$total_cholesterol %>%
     second = case_when(
       second_format == "coeff of variation" ~ first * (second/100),
       TRUE ~ second
-    )
+    ),
+    variable = "total_chol"
   ) %>% 
   select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second)
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))
 
 # Combine ----------------------------------------------------------------------
 
-# 
+# List of tidied datasets
+d_lst <- list(
+  c_age_mean, c_sbp_mean, c_bmi_mean,c_t2dur_mean, c_egfr_mean,
+  c_hba1c_mean, c_hdl_mean, c_sex, c_race, c_smoke, c_total
+)
+
+# Join datasets together
+d_join <- reduce(d_lst, full_join)
+
+# Join with IDs from trial set
+d_join_ids <- a_imp_set %>% 
+  distinct(trial_id) %>% 
+  left_join(d_join) %>% 
+  select(-race_total, -smoke_total)
+
+# One trial missing all characteristics (manually add in)
+# Rest have varied missingness
+# Mostly smoking, cholesterol (both), egfr,
+d_join_ids %>% 
+  reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+  pivot_longer(everything()) %>% 
+  mutate(prop = value/1062) %>% 
+  arrange(desc(prop)) %>% 
+  print(n = 25)
+
