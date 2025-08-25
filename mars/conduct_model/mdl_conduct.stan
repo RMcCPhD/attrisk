@@ -21,13 +21,13 @@ functions {
 data {
   int<lower=0> I;                       // number of data points (arms in trials)
   int<lower=0> K;                       // number of covariates
-  int<lower=0> K2;                      // number of covariates modelling shape
   array[I] int<lower=0> r;              // observed attrition counts
   array[I] int<lower=0> N;              // number of participants
   vector[I] dt;                         // total follow-up time in years
-  vector[K2] B;                         // shape covariate coefficients
-  matrix[I, K] X;                       // covariate matrix for rate
-  matrix[I, K2] X2;                     // covariate matrix for shape
+  vector[I] lp;                         // covariate linear predictor for shape
+  real beta_rate;                       // rate beta from linear model of shape
+  real resid_sd;                        // residual SD from linear model of shape
+  matrix[I, K] X;                       // covariate matrix
 }
 
 parameters {
@@ -38,6 +38,8 @@ parameters {
   real<lower=0> tau_beta;               // global shrinkage factor
   vector<lower=0>[K] lambda_beta;       // local shrinkage factor
   vector[K] z_beta;                     // latent normal betas
+  
+  vector[I] error;                      // uncertainty parameter for shape
 }
 
 transformed parameters {
@@ -47,11 +49,15 @@ transformed parameters {
   // beta with shrinkage
   vector[K] beta = tau_beta * lambda_beta .* z_beta;
   
-  // b for each row (exp of mu1)
-  vector[I] b = exp(mu1 + X * beta);      
+  // linear predictor for log-rate
+  vector[I] log_b = mu1 + X * beta;
   
-  // a for each row (conditioned on b and covariates)
-  vector[I] a = b + X2 * B;       
+  // exponentiate to get b
+  vector[I] b = exp(log_b);      
+  
+  // a for each row (conditioned on log-rate, linear predictor and error)
+  // parameters from shape model fit externally
+  vector[I] a = log_b * beta_rate + lp + error;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          
@@ -67,6 +73,9 @@ model {
   tau_beta ~ normal(0, 1);
   lambda_beta ~ normal(0, 1);
   z_beta ~ normal(0, 1);
+  
+  // Normal prior for error, scale is residual sd from linear model of shape
+  error ~ normal(0, resid_sd);
   
   // Likelihood
   r ~ binomial(N, p);
@@ -84,3 +93,4 @@ generated quantities {
   real mean_rate = mean(b);             // mean rate
   real sd_rate = sd(b);                 // sd rate
 }
+

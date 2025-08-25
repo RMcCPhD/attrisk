@@ -59,47 +59,43 @@ saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 
 # Conduct data -----------------------------------------------------------------
 
-# Come back to fixing this
-
 # Same dataset, bl characteristics not included as predictors here
-c_conduct_df <- b_design_df
+c_conduct_df <- a_imp_df %>% select(-c(contains("dbl"), bmi_lower:bmi_upper))
 
 # Create model matrix for predictors
-c_vars <- names(c_conduct_df[c(7:24)])
+c_vars <- names(c_conduct_df[c(7:30)])
 c_fml <- as.formula(paste0("~ ", paste0(c_vars, collapse = " + ")))
 c_conduct_mat <- model.matrix(c_fml, data = c_conduct_df)[, -1]
 
 # Prepare conduct coefficients
 c_conduct_coefs <- a_imp_mdl_conduct_nm %>% 
-  filter(!(term %in% c("(Intercept)", "rate"))) %>% 
+  filter(!(term %in% c("(Intercept)"))) %>% 
   select(term, estimate) %>% 
   pivot_wider(names_from = "term", values_from = "estimate")
 
 c_coefs_names <- names(c_conduct_coefs)
 c_coefs_fml <- as.formula(paste0("~ ", paste0(c_coefs_names, collapse = " + ")))
 
-c_coefs_beta <- tibble(term = c_coefs_names, estimate = a_imp_mdl_conduct) %>% 
+c_coefs_beta <- tibble(term = c_coefs_names, estimate = a_imp_mdl_conduct$betas) %>% 
   pivot_wider(names_from = "term", values_from = "estimate")
 
 c_coefs_mat <- model.matrix(c_coefs_fml, data = c_coefs_beta)[-1]
 
-# Get data for shape modelling
-c_coefs_df <- a_imp_df %>% select(-c(contains("dbl"), bmi_lower:bmi_upper))
-c_coefs_vars <- names(c_coefs_df[c(9:31)])
-c_coefs_fml <- as.formula(paste0("~ ", paste0(c_coefs_vars, collapse = " + ")))
-c_coefs_df_mat <- model.matrix(c_coefs_fml, data = c_coefs_df)[, -1]
+# Create linear predictor
+c_lp <- as.vector(c_conduct_mat %*% c_coefs_mat[2:27])
+c_resid_sd <- a_imp_mdl_conduct$resid_sd
 
 # Prepare STAN data
 c_conduct_stan <- list(
   I = nrow(c_conduct_df),
-  K = ncol(c_conduct_mat),
-  K2 = length(c_coefs_mat),
+  K = ncol(c_conduct_mat[,1:20]),
   r = c_conduct_df$attr,
   N = c_conduct_df$arm_n,
   dt = c_conduct_df$duration,
-  B = c_coefs_mat,
-  X = c_conduct_mat,
-  X2 = c_coefs_df_mat
+  lp = c_lp,
+  beta_rate = c_coefs_mat[1],
+  resid_sd = c_resid_sd,
+  X = c_conduct_mat[,1:20]
 )
 
 str(c_conduct_stan)
