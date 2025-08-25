@@ -13,6 +13,24 @@ source("scripts/00_config.R")
 library(tidyverse)
 library(multinma)
 
+# Helper function - compute pooled SD when summarising group chars
+pooledSD <- function(mu, delta, n) {
+  # Get weighted mean
+  keep_mu <- is.finite(mu) & is.finite(n)
+  mu <- mu[keep_mu]
+  n_mu <- n[keep_mu]
+  if (length(n_mu) == 0) return(NA_real_)
+  N <- sum(n_mu)
+  if (N <= 1) return(NA_real_)
+  Mu <- sum(n_mu * mu) / N
+  
+  # Get pooled SD
+  keep_delta <- is.finite(delta) & is.finite(n)
+  within_sd <- sum( (n[keep_delta] - 1) * (delta[keep_delta]^2) )
+  bw_sd <- sum( n_mu * (mu - Mu)^2 )
+  sqrt( (within_sd + bw_sd) / (N - 1) )
+}
+
 # Import trial dataset and aggregated baseline characteristics
 a_imp_set <- readRDS("processed_data/latest_dataset.rds")
 a_imp_bl <- read_csv("data/base_dsp.csv")
@@ -42,6 +60,12 @@ b_bl_filter <- b_bl_vars %>%
 # Split by variable
 b_split <- split(b_bl_filter, b_bl_filter$variable)
 names(b_split)
+
+# Arm size ---------------------------------------------------------------------
+
+c_arm <- b_bl_vars %>% 
+  filter(variable == "n") %>% 
+  select(trial_id, arm_id, n = first)
 
 # Age --------------------------------------------------------------------------
 
@@ -300,3 +324,80 @@ d_join_ids %>%
   arrange(desc(prop)) %>% 
   print(n = 25)
 
+# Join arms from trial set
+d_imp_arms <- read_csv("created_metadata/arm_id_trt.csv")
+
+d_join_arms <- d_join_ids %>% 
+  left_join(d_imp_arms) %>% 
+  left_join(c_arm) %>% 
+  select(trial_id, n, atc:class, everything()) %>% 
+  filter(!class %in% c("dpp4", "glp1", "sglt2"), !is.na(class)) %>% 
+  select(-arm_id, -atc) %>% 
+  mutate(across(mean_age:sd_total_chol, ~ round(., 2))) %>% 
+  distinct()
+
+# Assign trttype to match trial set
+e_trttype <- d_join_arms %>% 
+  select(trial_id, class, n) %>% 
+  group_by(trial_id) %>% 
+  mutate(
+    trttype = case_when(
+      length(unique(class)) == 1 & class == "placebo" ~ 0L,
+      length(unique(class)) == 1 & class != "placebo" ~ 1L,
+      TRUE ~ 2L
+    )
+  ) %>% 
+  ungroup()
+
+# Join trttype to baseline set
+e_join_trttype <- d_join_arms %>% 
+  cbind(e_trttype %>% select(trttype)) %>% 
+  as_tibble() %>% 
+  select(trial_id, trttype, everything())
+
+# Collapse variables by trttype
+# 342 trials
+f_clp_chars <- e_join_trttype %>% 
+  group_by(trial_id, trttype) %>% 
+  reframe(
+    across(contains("mean"), ~ weighted.mean(., n)),
+    psd_age = pooledSD(mean_age, sd_age, n),
+    psd_sbp = pooledSD(mean_sbp, sd_sbp, n),
+    psd_bmi = pooledSD(mean_bmi, sd_bmi, n),
+    psd_t2dur = pooledSD(mean_t2dur, sd_t2dur, n),
+    psd_egfr = pooledSD(mean_egfr, sd_egfr, n),
+    psd_hba1c = pooledSD(mean_hba1c, sd_hba1c, n),
+    psd_hdl = pooledSD(mean_hdl, sd_hdl, n),
+    psd_total_chol = pooledSD(mean_total_chol, sd_total_chol, n),
+    across(female_prop:former_never, ~ weighted.mean(., n)),
+  ) %>%
+  mutate(across(mean_age:former_never, ~ round(., 2))) %>% 
+  select(
+    trial_id:trttype, contains("age"), contains("sbp"), contains("bmi"),
+    contains("t2dur"), contains("egfr"), contains("hba1c"), contains("hdl"),
+    contains("total_chol"), everything()
+  ) %>% 
+  rename_with(., ~ gsub("psd", "sd", .))
+
+# Re-add missing trials
+# Align trttype to trial set for two trials
+f_all <- f_clp_chars %>% 
+  full_join(
+    a_imp_set %>% 
+      filter(!trial_id %in% f_clp_chars$trial_id) %>% 
+      distinct(trial_id, trttype)
+  ) %>% 
+  arrange(trial_id) %>% 
+  mutate(
+    trttype = case_when(
+      trial_id %in% c("NCT00676338", "NCT01147627") ~ 1L,
+      TRUE ~ trttype
+    )
+  )
+
+# Check trttype breakdown - matches across trials
+f_all %>% count(trial_id, trttype) %>% count(trttype)
+a_imp_set %>% count(trial_id, trttype) %>% count(trttype)
+
+# Save
+saveRDS(f_all, "processed_data/bl_chars_noimp.rds")
