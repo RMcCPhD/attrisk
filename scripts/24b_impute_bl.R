@@ -104,6 +104,7 @@ fix_grps <- function(df) {
   df[race_cols] <- race_X
   df$white <- 1 - rowSums(race_X)
   df$white <- pmin(pmax(df$white, 0), 1)
+  
   df %>%
     select(trial_id:other, white, everything()) %>% 
     mutate(
@@ -142,6 +143,106 @@ c_bind %>%
   geom_density(alpha = 0.01) +
   facet_wrap(~name, scales = "free")
 
+# Pool variables across imputations based on distribution
+# Normally distributed
+pool_normal <- function(df, mu_var, delta_var) {
+  mu <- do.call(cbind, lapply(df, `[[`, mu_var))
+  delta <- do.call(cbind, lapply(df, `[[`, delta_var))
+  mu_rows <- rowMeans(mu, na.rm = TRUE)
+  var <- rowMeans(delta^2, na.rm = TRUE) + matrixStats::rowVars(mu)
+  tibble(mu = mu_rows, sd = sqrt(pmax(var, 0)))
+}
+
+pooled_age <- pool_normal(b_fixed, "mean_age", "sd_age")
+pooled_egfr <- pool_normal(b_fixed, "mean_egfr", "sd_egfr")
+pooled_hba1c <- pool_normal(b_fixed, "mean_hba1c", "sd_hba1c")
+
+# Gamma distributed
+pool_gamma <- function(df, )
+
+# Inspect distributions
+
+# ----- NORMAL-LIKE (e.g., age, sbp) ------------------------------------------
+pool_normal <- function(completed, mean_col, sd_col) {
+  M <- do.call(cbind, lapply(completed, `[[`, mean_col))  # I x m
+  S <- do.call(cbind, lapply(completed, `[[`, sd_col))    # I x m
+  mu  <- rowMeans(M, na.rm = TRUE)
+  sd2 <- rowMeans(S^2, na.rm = TRUE) + rowVars(M, na.rm = TRUE)
+  tibble(mu = mu, sd = sqrt(pmax(sd2, 0)))
+}
+
+# ----- LOGNORMAL-LIKE (e.g., duration; positive skew) ------------------------
+pool_lognormal <- function(completed, mean_col, sd_col) {
+  M <- do.call(cbind, lapply(completed, `[[`, mean_col))
+  S <- do.call(cbind, lapply(completed, `[[`, sd_col))
+  # per-imputation log-scale params
+  sigma2L <- log1p((S^2) / (M^2))
+  muL     <- log(M) - 0.5 * sigma2L
+  # mixture moments on original scale
+  m1  <- rowMeans(exp(muL + 0.5 * sigma2L), na.rm = TRUE)
+  v_w <- rowMeans(exp(2*muL + sigma2L) * (exp(sigma2L) - 1), na.rm = TRUE)  # within
+  v_b <- rowVars(exp(muL + 0.5 * sigma2L), na.rm = TRUE)                     # between
+  v   <- v_w + v_b
+  # match a single lognormal
+  sigma2L_star <- log1p(v / (m1^2))
+  muL_star     <- log(m1) - 0.5 * sigma2L_star
+  tibble(muL = muL_star, sdL = sqrt(pmax(sigma2L_star, 0)))
+}
+
+# ----- SINGLE PROPORTION as BETA (e.g., female_prop) -------------------------
+# Combines between-imp variance with binomial within-imp variance via n_eff
+pool_beta <- function(completed, prop_col, n_eff) {
+  P <- do.call(cbind, lapply(completed, `[[`, prop_col))  # I x m
+  pbar <- rowMeans(P, na.rm = TRUE)
+  v_b  <- rowVars(P, na.rm = TRUE)
+  v_w  <- pbar * (1 - pbar) / pmax(n_eff, 1)              # binomial approx
+  v    <- v_b + v_w
+  # method-of-moments Beta: Var = p(1-p)/(alpha0+1)  => alpha0 = p(1-p)/Var - 1
+  alpha0 <- pmax(pbar*(1 - pbar) / pmax(v, 1e-12) - 1, 2) # clamp >=2 for stability
+  alpha <- pmax(pbar * alpha0, 1e-6)
+  beta  <- pmax((1 - pbar) * alpha0, 1e-6)
+  tibble(alpha = alpha, beta = beta)
+}
+
+# ----- COMPOSITION as DIRICHLET (e.g., race/smoking) -------------------------
+# cols: vector of column names (must already sum ~1 in each completed dataset)
+pool_dirichlet <- function(completed, cols, n_eff) {
+  mats <- lapply(completed, function(d) as.matrix(d[cols]))   # list of I x K
+  Pbar <- Reduce(`+`, mats) / length(mats)                    # I x K
+  # between-imputation variance per part
+  Vb   <- Reduce(`+`, lapply(mats, function(M) (M - Pbar)^2)) / (length(mats) - 1)
+  # within-imputation (multinomial) variance approx: Var(p_i) ~ p_i(1-p_i)/(n_eff + 1)
+  Vw   <- Pbar * (1 - Pbar) / (pmax(n_eff, 1) + 1)
+  Vtot <- Vb + Vw                                              # I x K
+  # Solve alpha0 from Var_dirichlet(p_i) ≈ p_i(1-p_i)/(alpha0+1)
+  alpha0_hat <- rowMeans( Pbar * (1 - Pbar) / pmax(Vtot, 1e-12) - 1, na.rm = TRUE )
+  alpha0     <- pmax(alpha0_hat, 2)                            # clamp for stability
+  Alpha      <- Pbar * alpha0                                  # I x K
+  as_tibble(Alpha, .name_repair = ~cols) %>% mutate(alpha0 = alpha0)
+}
+
+# --------- BUILD ONE CONSENSUS TABLE PER ARM ---------------------------------
+# completed: list of m completed, renormalised datasets
+# keys: columns that define an arm (e.g., c("trial_id","trttype"))
+build_consensus <- function(completed, keys = c("trial_id","trttype")) {
+  base <- completed[[1]][keys]
+  n_eff <- if ("n" %in% names(completed[[1]])) completed[[1]]$n else rep(200, nrow(base))  # fallback
+  
+  age_ps   <- pool_normal(completed,   "mean_age",   "sd_age")   %>% rename(age_mu = mu, age_sd = sd)
+  sbp_ps   <- pool_normal(completed,   "mean_sbp",   "sd_sbp")   %>% rename(sbp_mu = mu, sbp_sd = sd)
+  dur_ps   <- pool_lognormal(completed,"mean_t2dur", "sd_t2dur") %>% rename(t2dur_muL = muL, t2dur_sdL = sdL)
+  bmi_ps   <- pool_lognormal(completed,"mean_bmi",   "sd_bmi")   %>% rename(bmi_muL = muL,  bmi_sdL  = sdL)
+  
+  fem_ps   <- pool_beta(completed, "female_prop", n_eff) %>% rename(female_alpha = alpha, female_beta = beta)
+  
+  race_ps  <- pool_dirichlet(completed, c("asian","black","other","white"), n_eff) %>%
+    rename(alpha_asian = asian, alpha_black = black, alpha_other = other, alpha_white = white)
+  
+  smoke_ps <- pool_dirichlet(completed, c("current","former_never"), n_eff) %>%
+    rename(alpha_current = current, alpha_former_never = former_never)
+  
+  dplyr::bind_cols(base, age_ps, sbp_ps, dur_ps, bmi_ps, fem_ps, race_ps, smoke_ps)
+}
 
 
 
