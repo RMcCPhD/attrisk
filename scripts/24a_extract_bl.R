@@ -201,59 +201,83 @@ c_sex <- b_split$male %>%
 
 # Race -------------------------------------------------------------------------
 
-# 226/344 trials - collapsed categories
-# Removed collapsed levels
-# Fixing totals >1 caused by proportions
-c_race <- b_split$race %>% 
+# 226/344 trials
+# Sum proportions to determine which levels to include
+c_race_df <- b_split$race %>% 
   filter(!grepl("collaps", category_level)) %>% 
+  mutate(second = round(second/100, 2)) %>% 
+  rename(prop = second) %>% 
+  group_by(trial_id, arm_id) %>% 
+  mutate(
+    race_total = sum(prop),
+    flag = if_else(race_total > 1, 1L, 0L)
+  ) %>% 
+  ungroup() %>% 
+  arrange(trial_id, arm_id)
+
+# Reduce white prop or asian chinese where prop > 1
+c_race_fix <- c_race_df %>% 
+  group_by(trial_id, arm_id) %>% 
+  mutate(
+    prop = case_when(
+      race_total > 1 & category_level == "white" ~ prop - (race_total - 1),
+      race_total > 1 & category_level == "asian chinese" ~ prop - (race_total - 1),
+      TRUE ~ prop
+    ),
+    race_total_new = sum(prop)
+  ) %>% 
+  ungroup()
+
+# Collapse categories
+# If one race group is missing, add in as difference between others and 1
+# If total is close to one and none missing, add diff to white
+c_race_clp <- c_race_fix %>% 
   mutate(
     category = case_when(
       grepl("asian", category_level) ~ "asian",
       grepl("black", category_level) ~ "black",
       grepl("white", category_level) ~ "white",
       TRUE ~ "other"
-    ),
-    second = second/100,
-    second = case_when(
-      second > 1 ~ 1, 
-      TRUE ~ round(second, 2)
     )
   ) %>% 
-  select(trial_id, arm_id, variable, category, first, second) %>% 
-  rename(count = first, prop = second) %>% 
-  select(-variable, -count) %>% 
   group_by(trial_id, arm_id, category) %>% 
   reframe(prop = sum(prop)) %>% 
-  ungroup() %>% 
+  select(trial_id, arm_id, category, prop) %>% 
   pivot_wider(names_from = category, values_from = prop) %>% 
   mutate(
-    across(asian:white, ~ if_else(. > 1, . - 1, .)),
-    across(asian:white, ~ if_else(. > 1, 1, .)),
-    across(asian:white, ~ if_else(is.na(.), 0, .)),
-    race_total = asian + black + other + white,
-    other = case_when(
-      race_total == 1.29 ~ other - 0.29,
-      race_total == 1.04 ~ other - 0.04,
-      race_total == 1.03 ~ other - 0.03,
-      race_total == 1.02 ~ other - 0.02,
-      race_total == 1.01 ~ other - 0.01,
-      race_total == 0.99 ~ other + 0.01,
-      TRUE ~ other
+    asian = case_when(
+      is.na(asian) & (black + other + white) == 1 ~ 0,
+      TRUE ~ asian
     ),
-    race_total = asian + black + other + white,
-    across(asian:race_total, ~ round(., 2))
+    race_total = round(asian + black + other + white, 2),
+    white = case_when(
+      race_total >= 0.95 & race_total <= 0.99 ~ white + (1 - race_total),
+      TRUE ~ white
+    ),
+    asian = case_when(
+      race_total == 0.83 | race_total == 0.87 ~ 1 - (black + other + white),
+      TRUE ~ asian
+    ),
+    across(black:white, ~ if_else(asian == 1, 0, .)),
+    race_total = round(asian + black + other + white, 2)
   )
 
-# Adding missing to other where prop < 1
-c_race_fix <- c_race %>% 
+# Replace NAs with zeros where other race groups sum to 1
+# Manually addressed
+# c_race_clp %>% 
+#   filter(is.na(race_total)) %>% 
+#   write_csv("scratch_data/race_add_zeros.csv")
+
+# Import manual fix and join with data
+c_imp_race_fix <- read_csv("scratch_data/race_add_zeros.csv")
+
+c_race_zero <- c_race_clp %>% 
+  filter(!trial_id %in% c_imp_race_fix$trial_id) %>% 
+  full_join(c_imp_race_fix) %>% 
+  arrange(trial_id, arm_id) %>% 
   mutate(
-    asian = if_else(race_total == 0.01, 1, asian),
-    race_total = asian + black + other + white,
-    other = if_else(race_total < 1, other + (1 - race_total), other),
-    race_total = asian + black + other + white,
-    across(asian:race_total, ~ round(., 2)),
-    other = if_else(race_total == 1.01, other - 0.01, other),
-    race_total = asian + black + other + white
+    white = if_else(trial_id == "NCT00101803" & white == 0.36, 0.37, white),
+    race_total = round(asian + black + other + white, 2)
   )
 
 # Smoking status ---------------------------------------------------------------
@@ -301,7 +325,7 @@ c_total <- b_split$total_cholesterol %>%
 # List of tidied datasets
 d_lst <- list(
   c_age_mean, c_sbp_mean, c_bmi_mean,c_t2dur_mean, c_egfr_mean,
-  c_hba1c_mean, c_hdl_mean, c_sex, c_race, c_smoke, c_total
+  c_hba1c_mean, c_hdl_mean, c_sex, c_race_zero, c_smoke, c_total
 )
 
 # Join datasets together
@@ -399,10 +423,10 @@ f_all %>% count(trial_id, trttype) %>% count(trttype)
 a_imp_set %>% count(trial_id, trttype) %>% count(trttype)
 
 # Save as csv to manually find chars for two missing trials
-write_csv(
-  f_all %>% filter(trial_id %in% c("NCT02730377", "NCT02911948")), 
-  "processed_data/bl_chars_manual.csv"
-)
+# write_csv(
+#   f_all %>% filter(trial_id %in% c("NCT02730377", "NCT02911948")), 
+#   "processed_data/bl_chars_manual.csv"
+# )
 
 # Import and add in to set
 g_all <- f_all %>% 
