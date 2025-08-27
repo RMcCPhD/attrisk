@@ -1,0 +1,17 @@
+var_level,n,race
+American Indian or Alaska Native,502,other
+American Indian or Alaska Native OR Black or African American,3,black
+American Indian or Alaska Native OR White,3,other
+Asian,1012,asian
+Asian OR Black or African American,3,black
+Asian OR White,3,asian
+Black or African American,893,black
+Black or African American AND White,3,black
+Hispanic or Latino,66,other
+Multiracial,260,other
+Native Hawaiian or Other Pacific Islander,349,other
+Non Hispanic or Latino AND White,60,white
+Non applicable,16,
+Other,497,other
+Unreported,139,other
+White,927,white

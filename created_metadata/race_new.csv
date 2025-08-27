@@ -1,0 +1,17 @@
+var_level,n,race,note
+American Indian or Alaska Native,502,other,
+American Indian or Alaska Native OR Black or African American,3,other,taking as less frequent group (american indian or alaska native)
+American Indian or Alaska Native OR White,3,other,taking as less frequent group (american indian or alaska native)
+Asian,1012,asian,
+Asian OR Black or African American,3,black,taking as generally less frequent group (black or african american)
+Asian OR White,3,asian,taking as less frequent group (asian)
+Black or African American,893,black,
+Black or African American AND White,3,black,taking as less frequent group (black or african american)
+Hispanic or Latino,66,other,set as other
+Multiracial,260,other,
+Native Hawaiian or Other Pacific Islander,349,other,
+Non Hispanic or Latino AND White,60,white,
+Non applicable,16,other,"has count data, set as other"
+Other,497,other,
+Unreported,139,other,
+White,927,white,
