@@ -1,0 +1,201 @@
+trial_id,arm_id,name,value,total,value_new,total_new,note,value_fix
+NCT00035984,ab0001,asian,0.03,0.84,0.03,0.84,,
+NCT00035984,ab0001,black,0.12,0.84,0.12,0.84,,
+NCT00035984,ab0001,other,0.03,0.84,0.03,0.84,"hispanic counted as race in this trial, brings total to 1",0.19
+NCT00035984,ab0001,white,0.66,0.84,0.66,0.84,,
+NCT00035984,ab0002,asian,0.03,0.84,0.03,0.84,,
+NCT00035984,ab0002,black,0.1,0.84,0.1,0.84,,
+NCT00035984,ab0002,other,0.02,0.84,0.02,0.84,"hispanic counted as race in this trial, brings total to 1",0.19
+NCT00035984,ab0002,white,0.69,0.84,0.69,0.84,,
+NCT00035984,ab0003,asian,0.02,0.84,0.02,0.84,,
+NCT00035984,ab0003,black,0.12,0.84,0.12,0.84,,
+NCT00035984,ab0003,other,0.02,0.84,0.02,0.84,"hispanic counted as race in this trial, brings total to 1",0.18
+NCT00035984,ab0003,white,0.68,0.84,0.68,0.84,,
+NCT00039026,ab0009,asian,0.02,0.79,0.02,0.79,,
+NCT00039026,ab0009,black,0.16,0.79,0.16,0.79,,
+NCT00039026,ab0009,other,0.01,0.79,0.01,0.79,"hispanic counted as race in this trial, brings total to 1",0.22
+NCT00039026,ab0009,white,0.6,0.79,0.6,0.79,,
+NCT00039026,ab0010,asian,0.02,0.83,0.02,0.83,,
+NCT00039026,ab0010,black,0.17,0.83,0.17,0.83,,
+NCT00039026,ab0010,other,0.02,0.83,0.02,0.83,"hispanic counted as race in this trial, brings total to 1",0.19
+NCT00039026,ab0010,white,0.62,0.83,0.62,0.83,,
+NCT00039026,ab0011,asian,0.02,0.8,0.02,0.8,,
+NCT00039026,ab0011,black,0.1,0.8,0.1,0.8,,
+NCT00039026,ab0011,other,0.01,0.8,0.01,0.8,"hispanic counted as race in this trial, brings total to 1",0.21
+NCT00039026,ab0011,white,0.67,0.8,0.67,0.8,,
+NCT00082381,uaa10001,asian,0.02,0.85,0.02,0.85,,
+NCT00082381,uaa10001,black,0.01,0.85,0.01,0.85,,
+NCT00082381,uaa10001,other,0.02,0.85,0.02,0.85,"hispanic counted as race in this trial, brings total to 1",0.17
+NCT00082381,uaa10001,white,0.8,0.85,0.8,0.85,,
+NCT00082381,uaa10002,asian,0.01,0.85,0.01,0.85,,
+NCT00082381,uaa10002,black,0.01,0.85,0.01,0.85,,
+NCT00082381,uaa10002,other,0.03,0.85,0.03,0.85,"hispanic counted as race in this trial, brings total to 1",0.18
+NCT00082381,uaa10002,white,0.8,0.85,0.8,0.85,,
+NCT00099853,ab0017,asian,0.01,0.93,0.01,0.93,,
+NCT00099853,ab0017,black,0.09,0.93,0.09,0.93,,
+NCT00099853,ab0017,other,0.05,0.93,0.05,0.93,"hispanic counted as race in this trial, brings total to 1",0.12
+NCT00099853,ab0017,white,0.78,0.93,0.78,0.93,,
+NCT00099853,ab0019,asian,0,0.91,0,0.91,,
+NCT00099853,ab0019,black,0.05,0.91,0.05,0.91,,
+NCT00099853,ab0019,other,0.02,0.91,0.02,0.91,"hispanic counted as race in this trial, brings total to 1",0.11
+NCT00099853,ab0019,white,0.84,0.91,0.84,0.91,,
+NCT00099853,ab0018,asian,0,0.91,0,0.91,,
+NCT00099853,ab0018,black,0.08,0.91,0.08,0.91,,
+NCT00099853,ab0018,other,0.04,0.91,0.04,0.91,"hispanic counted as race in this trial, brings total to 1",0.13
+NCT00099853,ab0018,white,0.79,0.91,0.79,0.91,,
+NCT00099892,ac0036,asian,0.01,0.82,0.01,0.82,,
+NCT00099892,ac0036,black,0.07,0.82,0.07,0.82,,
+NCT00099892,ac0036,other,0.01,0.82,0.01,0.82,"hispanic counted as race in this trial, brings total to 1",0.19
+NCT00099892,ac0036,white,0.73,0.82,0.73,0.82,,
+NCT00099892,ac0037,asian,0,0.83,0,0.83,,
+NCT00099892,ac0037,black,0.06,0.83,0.06,0.83,,
+NCT00099892,ac0037,other,0.03,0.83,0.03,0.83,"hispanic counted as race in this trial, brings total to 1",0.21
+NCT00099892,ac0037,white,0.74,0.83,0.74,0.83,,
+NCT00099892,ac0038,asian,0,0.87,0,0.87,,
+NCT00099892,ac0038,black,0.09,0.87,0.09,0.87,,
+NCT00099892,ac0038,other,0.04,0.87,0.04,0.87,"hispanic counted as race in this trial, brings total to 1",0.17
+NCT00099892,ac0038,white,0.74,0.87,0.74,0.87,,
+NCT00099905,ac0042,asian,0.01,0.85,0.01,0.85,,
+NCT00099905,ac0042,black,0.04,0.85,0.04,0.85,,
+NCT00099905,ac0042,other,0.04,0.85,0.04,0.85,"no results on ctgov or onedrive, paper not available, suspect same problem as before",0.19
+NCT00099905,ac0042,white,0.76,0.85,0.76,0.85,,
+NCT00099905,ac0039,asian,0,0.88,0,0.88,,
+NCT00099905,ac0039,black,0.13,0.88,0.13,0.88,,
+NCT00099905,ac0039,other,0.06,0.88,0.06,0.88,"no results on ctgov or onedrive, paper not available, suspect same problem as before",0.18
+NCT00099905,ac0039,white,0.69,0.88,0.69,0.88,,
+NCT00099905,ac0040,asian,0,0.87,0,0.87,,
+NCT00099905,ac0040,black,0.1,0.87,0.1,0.87,,
+NCT00099905,ac0040,other,0.04,0.87,0.04,0.87,"no results on ctgov or onedrive, paper not available, suspect same problem as before",0.17
+NCT00099905,ac0040,white,0.73,0.87,0.73,0.87,,
+NCT00099944,ab0022,asian,0.01,0.81,0.01,0.81,,
+NCT00099944,ab0022,black,0.1,0.81,0.1,0.81,,
+NCT00099944,ab0022,other,0.03,0.81,0.03,0.81,"hispanic counted as race in this trial, brings total to 1",0.22
+NCT00099944,ab0022,white,0.67,0.81,0.67,0.81,,
+NCT00099944,ab0024,asian,0,0.82,0,0.82,,
+NCT00099944,ab0024,black,0.11,0.82,0.11,0.82,,
+NCT00099944,ab0024,other,0.02,0.82,0.02,0.82,"hispanic counted as race in this trial, brings total to 1",0.2
+NCT00099944,ab0024,white,0.69,0.82,0.69,0.82,,
+NCT00099944,ab0023,asian,0.01,0.82,0.01,0.82,,
+NCT00099944,ab0023,black,0.08,0.82,0.08,0.82,,
+NCT00099944,ab0023,other,0.03,0.82,0.03,0.82,"hispanic counted as race in this trial, brings total to 1",0.21
+NCT00099944,ab0023,white,0.7,0.82,0.7,0.82,,
+NCT00101803,ac0053,asian,0.46,0.89,0.46,0.89,,
+NCT00101803,ac0053,black,0,0.89,0,0.89,,
+NCT00101803,ac0053,other,0.04,0.89,0.04,0.89,"hispanic counted as race in this trial, brings total to 1",0.15
+NCT00101803,ac0053,white,0.39,0.89,0.39,0.89,,
+NCT00101803,ac0050,asian,0.43,0.91,0.43,0.91,,
+NCT00101803,ac0050,black,0,0.91,0,0.91,,
+NCT00101803,ac0050,other,0.04,0.91,0.04,0.91,"hispanic counted as race in this trial, brings total to 1",0.13
+NCT00101803,ac0050,white,0.44,0.91,0.44,0.91,,
+NCT00101803,ac0051,asian,0.47,0.9,0.47,0.9,,
+NCT00101803,ac0051,black,0.01,0.9,0.01,0.9,,
+NCT00101803,ac0051,other,0.06,0.9,0.06,0.9,"hispanic counted as race in this trial, brings total to 1",0.16
+NCT00101803,ac0051,white,0.36,0.9,0.36,0.9,,
+NCT00101803,ac0052,asian,0.45,0.85,0.45,0.85,,
+NCT00101803,ac0052,black,0,0.85,0,0.85,,
+NCT00101803,ac0052,other,0.02,0.85,0.02,0.85,"hispanic counted as race in this trial, brings total to 1",0.17
+NCT00101803,ac0052,white,0.38,0.85,0.38,0.85,,
+NCT00102466,ab0030,asian,0.08,0.89,0.08,0.89,,
+NCT00102466,ab0030,black,0.01,0.89,0.01,0.89,,
+NCT00102466,ab0030,other,0.01,0.89,0.01,0.89,"hispanic counted as race in this trial, brings total to 1",0.12
+NCT00102466,ab0030,white,0.79,0.89,0.79,0.89,,
+NCT00102466,ab0029,asian,0.08,0.88,0.08,0.88,,
+NCT00102466,ab0029,black,0.01,0.88,0.01,0.88,,
+NCT00102466,ab0029,other,0.01,0.88,0.01,0.88,"hispanic counted as race in this trial, brings total to 1",0.13
+NCT00102466,ab0029,white,0.78,0.88,0.78,0.88,,
+NCT00106340,ab0031,asian,0.03,0.9,0.03,0.9,,
+NCT00106340,ab0031,black,0.01,0.9,0.01,0.9,,
+NCT00106340,ab0031,other,0.01,0.9,0.01,0.9,"hispanic counted as race in this trial, brings total to 1",0.11
+NCT00106340,ab0031,white,0.85,0.9,0.85,0.9,,
+NCT00106340,ab0032,asian,0.03,0.9,0.03,0.9,,
+NCT00106340,ab0032,black,0.01,0.9,0.01,0.9,,
+NCT00106340,ab0032,other,0,0.9,0,0.9,"hispanic counted as race in this trial, brings total to 1",0.1
+NCT00106340,ab0032,white,0.86,0.9,0.86,0.9,,
+NCT00237237,ac0066,asian,0.04,0.9,0.04,0.9,,
+NCT00237237,ac0066,black,0.03,0.9,0.03,0.9,,
+NCT00237237,ac0066,other,0.01,0.9,0.01,0.9,"hispanic counted as race in this trial, brings total to 1",0.11
+NCT00237237,ac0066,white,0.82,0.9,0.82,0.9,,
+NCT00237237,ac0067,asian,0.04,0.91,0.04,0.91,,
+NCT00237237,ac0067,black,0.03,0.91,0.03,0.91,,
+NCT00237237,ac0067,other,0.02,0.91,0.02,0.91,"hispanic counted as race in this trial, brings total to 1",0.11
+NCT00237237,ac0067,white,0.82,0.91,0.82,0.91,,
+NCT00351884,ab0035,asian,0,0.74,0,0.74,,
+NCT00351884,ab0035,black,0.06,0.74,0.06,0.74,,
+NCT00351884,ab0035,other,0,0.74,0,0.74,"hispanic counted as race in this trial, brings total to 1",0.26
+NCT00351884,ab0035,white,0.68,0.74,0.68,0.74,,
+NCT00351884,ab0037,asian,0.02,0.77,0.02,0.77,,
+NCT00351884,ab0037,black,0.07,0.77,0.07,0.77,,
+NCT00351884,ab0037,other,0,0.77,0,0.77,"hispanic counted as race in this trial, brings total to 1",0.23
+NCT00351884,ab0037,white,0.68,0.77,0.68,0.77,,
+NCT00351884,ab0036,asian,0.01,0.76,0.01,0.76,,
+NCT00351884,ab0036,black,0.09,0.76,0.09,0.76,,
+NCT00351884,ab0036,other,0.03,0.76,0.03,0.76,"hispanic counted as race in this trial, brings total to 1",0.27
+NCT00351884,ab0036,white,0.63,0.76,0.63,0.76,,
+NCT00359762,uaa10139,asian,NA,0.93,NA,0.93,,0
+NCT00359762,uaa10139,black,NA,0.93,NA,0.93,,0
+NCT00359762,uaa10139,other,0.02,0.93,0.02,0.93,"hispanic counted as race in this trial, brings total to 1",0.09
+NCT00359762,uaa10139,white,0.91,0.93,0.91,0.93,,
+NCT00359762,uaa10136,asian,NA,0.93,NA,0.93,,0
+NCT00359762,uaa10136,black,NA,0.93,NA,0.93,,0
+NCT00359762,uaa10136,other,0.01,0.93,0.01,0.93,"hispanic counted as race in this trial, brings total to 1",0.08
+NCT00359762,uaa10136,white,0.92,0.93,0.92,0.93,,
+NCT00381342,ab0043,asian,0.29,0.94,0.29,0.94,,
+NCT00381342,ab0043,black,NA,0.94,NA,0.94,,0
+NCT00381342,ab0043,other,NA,0.94,NA,0.94,"hispanic counted as race in this trial, brings total to 1",0.06
+NCT00381342,ab0043,white,0.65,0.94,0.65,0.94,,
+NCT00382096,ab0045,asian,0.1,0.91,0.1,0.91,,
+NCT00382096,ab0045,black,0.05,0.91,0.05,0.91,,
+NCT00382096,ab0045,other,0.04,0.91,0.04,0.91,"hispanic counted as race in this trial, brings total to 1",0.13
+NCT00382096,ab0045,white,0.72,0.91,0.72,0.91,,
+NCT00382096,ab0046,asian,0.1,0.9,0.1,0.9,,
+NCT00382096,ab0046,black,0.03,0.9,0.03,0.9,,
+NCT00382096,ab0046,other,0.02,0.9,0.02,0.9,"hispanic counted as race in this trial, brings total to 1",0.12
+NCT00382096,ab0046,white,0.75,0.9,0.75,0.9,,
+NCT00382096,ab0048,asian,0.11,0.9,0.11,0.9,,
+NCT00382096,ab0048,black,0.04,0.9,0.04,0.9,,
+NCT00382096,ab0048,other,0.02,0.9,0.02,0.9,"hispanic counted as race in this trial, brings total to 1",0.12
+NCT00382096,ab0048,white,0.73,0.9,0.73,0.9,,
+NCT00382096,ab0047,asian,0.1,0.91,0.1,0.91,,
+NCT00382096,ab0047,black,0.05,0.91,0.05,0.91,,
+NCT00382096,ab0047,other,0.02,0.91,0.02,0.91,"hispanic counted as race in this trial, brings total to 1",0.11
+NCT00382096,ab0047,white,0.74,0.91,0.74,0.91,,
+NCT00383578,ab0050,asian,0.19,0.93,0.19,1,,
+NCT00383578,ab0050,black,NA,0.93,0.07,1,value error,0
+NCT00383578,ab0050,other,0.01,0.93,0.01,1,"hispanic counted as race in this trial, brings total to 1",0.08
+NCT00383578,ab0050,white,0.73,0.93,0.73,1,,
+NCT00603239,uaa10229,asian,NA,0.67,NA,0.67,,0
+NCT00603239,uaa10229,black,0.06,0.67,0.06,0.67,,
+NCT00603239,uaa10229,other,NA,0.67,NA,0.67,"hispanic counted as race in this trial, brings total to 1",0.33
+NCT00603239,uaa10229,white,0.61,0.67,0.61,0.67,,
+NCT00603239,uaa10228,asian,0.02,0.66,0.02,1,,
+NCT00603239,uaa10228,black,0.07,0.66,0.07,1,,
+NCT00603239,uaa10228,other,NA,0.66,0.34,1,,
+NCT00603239,uaa10228,white,0.57,0.66,0.57,1,,
+NCT00637273,uaa10249,asian,0.23,0.69,0.23,0.69,,
+NCT00637273,uaa10249,black,0.12,0.69,0.12,0.69,,
+NCT00637273,uaa10249,other,0.01,0.69,0.01,0.69,"hispanic counted as race in this trial, brings total to 1",0.32
+NCT00637273,uaa10249,white,0.33,0.69,0.33,0.69,,
+NCT00637273,uaa10250,asian,0.24,0.73,0.24,0.73,,
+NCT00637273,uaa10250,black,0.08,0.73,0.08,0.73,,
+NCT00637273,uaa10250,other,0.02,0.73,0.02,0.73,"hispanic counted as race in this trial, brings total to 1",0.29
+NCT00637273,uaa10250,white,0.39,0.73,0.39,0.73,,
+NCT00637273,uaa10251,asian,0.25,0.7,0.25,0.7,,
+NCT00637273,uaa10251,black,0.12,0.7,0.12,0.7,,
+NCT00637273,uaa10251,other,0.03,0.7,0.03,0.7,"hispanic counted as race in this trial, brings total to 1",0.33
+NCT00637273,uaa10251,white,0.3,0.7,0.3,0.7,,
+NCT00676338,uaa10293,asian,0.2,0.92,0.2,0.92,,
+NCT00676338,uaa10293,black,0.02,0.92,0.02,0.92,,
+NCT00676338,uaa10293,other,0.01,0.92,0.01,0.92,"hispanic counted as race in this trial, brings total to 1",0.09
+NCT00676338,uaa10293,white,0.69,0.92,0.69,0.92,,
+NCT00676338,uaa10291,asian,0.21,0.91,0.21,0.91,,
+NCT00676338,uaa10291,black,0.04,0.91,0.04,0.91,,
+NCT00676338,uaa10291,other,0.01,0.91,0.01,0.91,"hispanic counted as race in this trial, brings total to 1",0.1
+NCT00676338,uaa10291,white,0.65,0.91,0.65,0.91,,
+NCT00676338,uaa10290,asian,0.22,0.93,0.22,0.93,,
+NCT00676338,uaa10290,black,0.03,0.93,0.03,0.93,,
+NCT00676338,uaa10290,other,0,0.93,0,0.93,"hispanic counted as race in this trial, brings total to 1",0.07
+NCT00676338,uaa10290,white,0.68,0.93,0.68,0.93,,
+NCT00800683,uaa10369,asian,0.17,0.98,0.17,0.98,,
+NCT00800683,uaa10369,black,0.11,0.98,0.11,0.98,,
+NCT00800683,uaa10369,other,0.01,0.98,0.01,0.98,rounding,0.02
+NCT00800683,uaa10369,white,0.69,0.98,0.69,0.98,rounding,0.7

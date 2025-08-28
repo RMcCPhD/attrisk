@@ -1,5 +1,6 @@
 
-# Script takes in tidied aggregated baseline characteristics from two repos
+# First part of extracting aggregated baseline characteristics
+# Takes in in tidied aggregated baseline characteristics from two repos
 # of Type2DiabetesSystematicReview (additional_covariates, nma_more_covariates)
 
 # Variables of interest
@@ -78,8 +79,9 @@ b_age_sex_bmi_t2dur <- readRDS(path_age_sex_bmi_t2dur)
 checkNA(b_age_sex_bmi_t2dur)
 
 b_age_sex_bmi_t2dur_tidy <- bind_rows(b_age_sex_bmi_t2dur$agg_durn_bmi) %>% 
+  mutate(male_p = male/n) %>% 
   select(
-    nct_id, arm_id_unq, arm_lvl, trtcls5, age_m, age_sd, male,
+    nct_id, arm_id_unq, arm_lvl, trtcls5, age_m, age_sd, male = male_p,
     bmi_mean, bmi_sd, dur_mean, dur_sd
   )
 
