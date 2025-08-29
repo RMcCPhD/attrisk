@@ -1,4 +1,7 @@
 
+# Pt2 of agg bl extraction
+# Checking previous aact extractions for additional arm variables
+
 source("scripts/00_config.R")
 source("scripts/00_paths.R")
 library(tidyverse)
@@ -594,29 +597,19 @@ c_smoke_new <- a_imp_pt1 %>%
 # 884 arms missing smoke (excl. two trials not in aact)
 checkNA(c_smoke_new)
 
-# Hba1c ------------------------------------------------------------------------
+# Combine ----------------------------------------------------------------------
 
-# 344 (none had it in additional_covariates)
-c_hba1c_ids <- a_na_lkp %>% select(trial_id)
+# Get dfs
+d_get_dfs <- lapply(ls(pattern = "_new"), get)
+names(d_get_dfs) <- ls(pattern = "_new")
 
+# Remove precursors to final versions (egfr, race)
+d_rm <- c("c_race_new", "c_race_new_tidy")
+d_dfs <- d_get_dfs[setdiff(names(d_get_dfs), d_rm)]
+names(d_dfs)
 
+# Join
+d_join <- reduce(d_dfs, left_join)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Save
+saveRDS(d_join, "processed_data/agg_bl_second_ext.rds")
