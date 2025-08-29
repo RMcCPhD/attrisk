@@ -1,5 +1,6 @@
 
 source("scripts/00_config.R")
+source("scripts/00_paths.R")
 library(tidyverse)
 
 # Helper: Check missingness
@@ -93,7 +94,7 @@ c_age_ext %>% count(trial_id)
 # Construct age
 c_age_new <- a_imp_pt1 %>% 
   select(trial_id, arm_id, age_m, age_sd) %>%
-  left_join(c_age_ext, suffix = c(".old", ".new")) %>% 
+  left_join(c_age_ext) %>% 
   mutate(
     age_mu = if_else(!is.na(age_m), age_m, m_age),
     age_d = if_else(!is.na(age_sd), age_sd, sd_age)
@@ -338,3 +339,284 @@ c_race_new_fix <- c_race_fixed_mt1 %>%
   arrange(trial_id)
 
 c_race_new_fix %>% count(trial_id)
+
+# BMI --------------------------------------------------------------------------
+
+# 241 trials
+c_bmi_ids <- a_na_lkp %>% filter(bmi == 1) %>% select(trial_id)
+
+# 117/241 trials
+c_bmi_ext <- b_split$bmi %>% 
+  filter(first_format == "mean") %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
+  inner_join(c_bmi_ids)
+
+c_bmi_ext %>% count(trial_id)
+
+# Construct age
+c_bmi_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, bmi_mean, bmi_sd) %>%
+  left_join(c_bmi_ext) %>% 
+  mutate(
+    bmi_mu = if_else(!is.na(bmi_mean), bmi_mean, mean_bmi),
+    bmi_d = if_else(!is.na(bmi_sd), bmi_sd, sd_bmi)
+  ) %>% 
+  select(-c(bmi_mean:sd_bmi))
+
+# 76 arms missing bmi (excl. two trials not in aact)
+checkNA(c_bmi_new)
+
+# T2D duration -----------------------------------------------------------------
+
+# 149 trials
+c_t2dur_ids <- a_na_lkp %>% filter(t2dur == 1) %>% select(trial_id)
+
+# 85/149 trials
+c_t2dur_ext <- b_split$duration_t2dm %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  mutate(variable = "t2dur") %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
+  inner_join(c_t2dur_ids)
+
+c_t2dur_ext %>% count(trial_id)
+
+# Construct t2dur
+c_t2dur_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, dur_mean, dur_sd) %>%
+  left_join(c_t2dur_ext) %>% 
+  mutate(
+    t2dur_mu = if_else(!is.na(dur_mean), dur_mean, mean_t2dur),
+    t2dur_d = if_else(!is.na(dur_sd), dur_sd, sd_t2dur)
+  ) %>% 
+  select(-c(dur_mean:sd_t2dur))
+
+# 175 arms missing t2dur (excl. two trials not in aact)
+checkNA(c_t2dur_new)
+
+# SBP --------------------------------------------------------------------------
+
+# 277 trials
+c_sbp_ids <- a_na_lkp %>% filter(sbp == 1) %>% select(trial_id)
+
+# 22/277 trials
+c_sbp_ext <- b_split$blood_pressure %>% 
+  filter(category_level == "systolic") %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  mutate(variable = "sbp") %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
+  inner_join(c_sbp_ids)
+
+c_sbp_ext %>% count(trial_id)
+
+# Construct sbp
+c_sbp_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, mean_blood_pressure, sd_blood_pressure) %>%
+  left_join(c_sbp_ext) %>% 
+  mutate(
+    sbp_mu = if_else(!is.na(mean_blood_pressure), mean_blood_pressure, mean_sbp),
+    sbp_d = if_else(!is.na(sd_blood_pressure), sd_blood_pressure, sd_sbp)
+  ) %>% 
+  select(-c(mean_blood_pressure:sd_sbp))
+
+# 671 arms missing sbp (excl. two trials not in aact)
+checkNA(c_sbp_new)
+
+# eGFR -------------------------------------------------------------------------
+
+# 295 trials
+c_egfr_ids <- a_na_lkp %>% filter(egfr == 1) %>% select(trial_id)
+
+# 24/295 trials
+c_egfr_ext <- b_split$egfr %>% 
+  filter(first_format == "mean") %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
+  inner_join(c_egfr_ids)
+
+c_egfr_ext %>% count(trial_id)
+
+# Construct egfr
+c_egfr_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, mean_egfr, sd_egfr) %>%
+  left_join(
+    c_egfr_ext, 
+    by = c("trial_id", "arm_id"), 
+    suffix = c(".old", ".new")
+  ) %>% 
+  mutate(
+    egfr_mu = if_else(!is.na(mean_egfr.old), mean_egfr.old, mean_egfr.new),
+    egfr_d = if_else(!is.na(sd_egfr.old), sd_egfr.old, sd_egfr.new)
+  ) %>% 
+  select(-c(mean_egfr.old:sd_egfr.new))
+
+# Pull again from additional_covariates data, might have missed some
+# No difference, already accounted for
+# c_egfr_add <- readRDS(z_imp_egfr) %>%
+#   select(trial_id = nct_id, arm_id = arm_comb, first, second) %>%
+#   rename(egfr_mean = first, egfr_sd = second)
+# 
+# c_egfr_new2 <- c_egfr_new %>%
+#   left_join(c_egfr_add) %>%
+#   mutate(
+#     egfr_mu2 = if_else(!is.na(egfr_mu), egfr_mu, egfr_mean),
+#     egfr_d2 = if_else(!is.na(egfr_d), egfr_d, egfr_sd)
+#   ) %>%
+#   select(-c(egfr_mu:egfr_sd))
+
+
+# 711 arms missing egfr (excl. two trials not in aact)
+checkNA(c_egfr_new)
+
+# Total cholesterol ------------------------------------------------------------
+
+# 335 trials
+c_total_chol_ids <- a_na_lkp %>% filter(total_chol == 1) %>% select(trial_id)
+
+# 26/335 trials
+c_total_chol_ext <- b_split$total_cholesterol %>% 
+  mutate(
+    second = case_when(
+      second_format == "coeff of variation" ~ first * (second/100),
+      TRUE ~ second
+    ),
+    variable = "total_chol"
+  ) %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
+  inner_join(c_egfr_ids)
+
+c_total_chol_ext %>% count(trial_id)
+
+# Construct total_chol
+c_total_chol_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, mean_total_cholesterol, sd_total_cholesterol) %>%
+  left_join(c_total_chol_ext) %>% 
+  mutate(
+    total_chol_mu = if_else(
+      !is.na(mean_total_cholesterol), mean_total_cholesterol, mean_total_chol
+    ),
+    total_chol_d = if_else(
+      !is.na(sd_total_cholesterol), sd_total_cholesterol, sd_total_chol
+    )
+  ) %>% 
+  select(-c(mean_total_cholesterol:sd_total_chol))
+
+# 857 arms missing total_chol (excl. two trials not in aact)
+checkNA(c_total_chol_new)
+
+# HDL cholesterol --------------------------------------------------------------
+
+# 344 (none had it in additional_covariates)
+c_hdl_ids <- a_na_lkp %>% select(trial_id)
+
+# 23/344 trials
+c_hdl_ext <- b_split$hdl %>% 
+  mutate(
+    second = case_when(
+      second_format == "coeff of variation" ~ first * (second/100),
+      TRUE ~ second
+    ),
+    variable = "hdl"
+  ) %>% 
+  select(trial_id, arm_id, variable, first, second) %>% 
+  rename(mean = first, sd = second) %>% 
+  pivot_wider(names_from = variable, values_from = c(mean, sd))  %>% 
+  inner_join(c_egfr_ids)
+
+c_hdl_ext %>% count(trial_id)
+
+# Construct hdl
+c_hdl_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id) %>% 
+  left_join(c_hdl_ext) %>% 
+  rename(hdl_mu = mean_hdl, hdl_d = sd_hdl)
+
+# 858 arms missing hdl (excl. two trials not in aact)
+checkNA(c_hdl_new)
+
+# Smoking status ---------------------------------------------------------------
+
+# 337 trials
+c_smoke_ids <- a_na_lkp %>% filter(smoke == 1) %>% select(trial_id)
+
+# 6/337
+c_smoke_ext <- b_split$smoking_status %>% 
+  mutate(
+    category = case_match(
+      category_level,
+      "ex" ~ "former_never",
+      "never" ~ "former_never",
+      .default = category_level
+    ),
+    second = second/100
+  ) %>% 
+  select(trial_id, arm_id, variable, category, first, second) %>% 
+  rename(count = first, prop = second) %>% 
+  select(-variable, -count) %>% 
+  group_by(trial_id, arm_id, category) %>% 
+  reframe(prop = sum(prop)) %>% 
+  pivot_wider(names_from = category, values_from = prop) %>% 
+  mutate(
+    former_never = if_else(is.na(former_never), 1 - current, former_never),
+    across(current:former_never, ~ round(., 2))
+  )  %>% 
+  inner_join(c_egfr_ids)
+
+c_smoke_ext %>% count(trial_id)
+
+# Construct smoke
+c_smoke_new <- a_imp_pt1 %>% 
+  select(trial_id, arm_id, current, former_never) %>%
+  left_join(
+    c_smoke_ext, 
+    by = c("trial_id", "arm_id"),
+    suffix = c(".old", ".new")
+  ) %>% 
+  mutate(
+    current = if_else(!is.na(current.old), current.old, current.new),
+    former_never = if_else(
+      !is.na(former_never.old), former_never.old, former_never.new
+    )
+  ) %>% 
+  select(-c(current.old:former_never.new)) %>% 
+  mutate(former_never = if_else(
+    !is.na(current) & is.na(former_never), 1 - current, former_never
+  ),
+    across(c(current, former_never), ~ round(., 2)),
+  )
+
+# 884 arms missing smoke (excl. two trials not in aact)
+checkNA(c_smoke_new)
+
+# Hba1c ------------------------------------------------------------------------
+
+# 344 (none had it in additional_covariates)
+c_hba1c_ids <- a_na_lkp %>% select(trial_id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
