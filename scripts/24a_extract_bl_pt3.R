@@ -357,205 +357,81 @@ c_t2dur_new <- a_imp_pt2 %>%
 # 191 arms missing t2dur (excl. two trials not in aact)
 checkNA(c_t2dur_new)
 
-# Continue below
-
 # SBP --------------------------------------------------------------------------
 
-# 277 trials
+# 255 trials
 c_sbp_ids <- a_na_lkp %>% filter(sbp == 1) %>% select(trial_id)
 
-# 22/277 trials
+# 0/255 trials
 c_sbp_ext <- b_split$blood_pressure %>% 
-  filter(category_level == "systolic") %>% 
-  select(trial_id, arm_id, variable, first, second) %>% 
-  mutate(variable = "sbp") %>% 
-  rename(mean = first, sd = second) %>% 
-  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
   inner_join(c_sbp_ids)
-
-c_sbp_ext %>% count(trial_id)
-
-# Construct sbp
-c_sbp_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id, mean_blood_pressure, sd_blood_pressure) %>%
-  left_join(c_sbp_ext) %>% 
-  mutate(
-    sbp_mu = if_else(!is.na(mean_blood_pressure), mean_blood_pressure, mean_sbp),
-    sbp_d = if_else(!is.na(sd_blood_pressure), sd_blood_pressure, sd_sbp)
-  ) %>% 
-  select(-c(mean_blood_pressure:sd_sbp))
-
-# 671 arms missing sbp (excl. two trials not in aact)
-checkNA(c_sbp_new)
 
 # eGFR -------------------------------------------------------------------------
 
-# 295 trials
+# 271 trials
 c_egfr_ids <- a_na_lkp %>% filter(egfr == 1) %>% select(trial_id)
 
-# 24/295 trials
+# 0/271 trials
 c_egfr_ext <- b_split$egfr %>% 
-  filter(first_format == "mean") %>% 
-  select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second) %>% 
-  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
   inner_join(c_egfr_ids)
-
-c_egfr_ext %>% count(trial_id)
-
-# Construct egfr
-c_egfr_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id, mean_egfr, sd_egfr) %>%
-  left_join(
-    c_egfr_ext, 
-    by = c("trial_id", "arm_id"), 
-    suffix = c(".old", ".new")
-  ) %>% 
-  mutate(
-    egfr_mu = if_else(!is.na(mean_egfr.old), mean_egfr.old, mean_egfr.new),
-    egfr_d = if_else(!is.na(sd_egfr.old), sd_egfr.old, sd_egfr.new)
-  ) %>% 
-  select(-c(mean_egfr.old:sd_egfr.new))
-
-# Pull again from additional_covariates data, might have missed some
-# No difference, already accounted for
-# c_egfr_add <- readRDS(z_imp_egfr) %>%
-#   select(trial_id = nct_id, arm_id = arm_comb, first, second) %>%
-#   rename(egfr_mean = first, egfr_sd = second)
-# 
-# c_egfr_new2 <- c_egfr_new %>%
-#   left_join(c_egfr_add) %>%
-#   mutate(
-#     egfr_mu2 = if_else(!is.na(egfr_mu), egfr_mu, egfr_mean),
-#     egfr_d2 = if_else(!is.na(egfr_d), egfr_d, egfr_sd)
-#   ) %>%
-#   select(-c(egfr_mu:egfr_sd))
-
-
-# 711 arms missing egfr (excl. two trials not in aact)
-checkNA(c_egfr_new)
 
 # Total cholesterol ------------------------------------------------------------
 
-# 335 trials
+# 321 trials
 c_total_chol_ids <- a_na_lkp %>% filter(total_chol == 1) %>% select(trial_id)
 
-# 26/335 trials
+# 1 but median/iqr and values seem incorrect
 c_total_chol_ext <- b_split$total_cholesterol %>% 
-  mutate(
-    second = case_when(
-      second_format == "coeff of variation" ~ first * (second/100),
-      TRUE ~ second
-    ),
-    variable = "total_chol"
-  ) %>% 
-  select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second) %>% 
-  pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
-  inner_join(c_egfr_ids)
-
-c_total_chol_ext %>% count(trial_id)
-
-# Construct total_chol
-c_total_chol_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id, mean_total_cholesterol, sd_total_cholesterol) %>%
-  left_join(c_total_chol_ext) %>% 
-  mutate(
-    total_chol_mu = if_else(
-      !is.na(mean_total_cholesterol), mean_total_cholesterol, mean_total_chol
-    ),
-    total_chol_d = if_else(
-      !is.na(sd_total_cholesterol), sd_total_cholesterol, sd_total_chol
-    )
-  ) %>% 
-  select(-c(mean_total_cholesterol:sd_total_chol))
-
-# 857 arms missing total_chol (excl. two trials not in aact)
-checkNA(c_total_chol_new)
+  inner_join(c_total_chol_ids)
 
 # HDL cholesterol --------------------------------------------------------------
 
-# 344 (none had it in additional_covariates)
-c_hdl_ids <- a_na_lkp %>% select(trial_id)
+# 321 trials
+c_hdl_ids <- a_na_lkp %>% filter(hdl == 1) %>% select(trial_id)
 
-# 23/344 trials
+# 1 but median/iqr and values seem incorrect
 c_hdl_ext <- b_split$hdl %>% 
-  mutate(
-    second = case_when(
-      second_format == "coeff of variation" ~ first * (second/100),
-      TRUE ~ second
-    ),
-    variable = "hdl"
-  ) %>% 
-  select(trial_id, arm_id, variable, first, second) %>% 
-  rename(mean = first, sd = second) %>% 
-  pivot_wider(names_from = variable, values_from = c(mean, sd))  %>% 
-  inner_join(c_egfr_ids)
-
-c_hdl_ext %>% count(trial_id)
-
-# Construct hdl
-c_hdl_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id) %>% 
-  left_join(c_hdl_ext) %>% 
-  rename(hdl_mu = mean_hdl, hdl_d = sd_hdl)
-
-# 858 arms missing hdl (excl. two trials not in aact)
-checkNA(c_hdl_new)
+  inner_join(c_hdl_ids)
 
 # Smoking status ---------------------------------------------------------------
 
-# 337 trials
+# 332 trials
 c_smoke_ids <- a_na_lkp %>% filter(smoke == 1) %>% select(trial_id)
 
-# 6/337
+# 0/322 trials
 c_smoke_ext <- b_split$smoking_status %>% 
-  mutate(
-    category = case_match(
-      category_level,
-      "ex" ~ "former_never",
-      "never" ~ "former_never",
-      .default = category_level
-    ),
-    second = second/100
-  ) %>% 
-  select(trial_id, arm_id, variable, category, first, second) %>% 
-  rename(count = first, prop = second) %>% 
-  select(-variable, -count) %>% 
-  group_by(trial_id, arm_id, category) %>% 
-  reframe(prop = sum(prop)) %>% 
-  pivot_wider(names_from = category, values_from = prop) %>% 
-  mutate(
-    former_never = if_else(is.na(former_never), 1 - current, former_never),
-    across(current:former_never, ~ round(., 2))
-  )  %>% 
-  inner_join(c_egfr_ids)
+  inner_join(c_smoke_ids)
 
-c_smoke_ext %>% count(trial_id)
+# Hba1c ------------------------------------------------------------------------
 
-# Construct smoke
-c_smoke_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id, current, former_never) %>%
-  left_join(
-    c_smoke_ext, 
-    by = c("trial_id", "arm_id"),
-    suffix = c(".old", ".new")
-  ) %>% 
+# 344 trials
+c_hba1c_ids <- a_na_lkp %>% filter(hba1c == 1) %>% select(trial_id)
+
+c_hba1c_ext <- b_split$hba1c %>% 
+  inner_join(c_hba1c_ids) %>% 
+  separate(second, into = c("1st", "2nd"), sep = ";") %>% 
   mutate(
-    current = if_else(!is.na(current.old), current.old, current.new),
-    former_never = if_else(
-      !is.na(former_never.old), former_never.old, former_never.new
+    across(`1st`:`2nd`, as.numeric),
+    mean_hba1c = first,
+    sd_hba1c = case_when(
+      second_format == "sd" ~ `1st`,
+      first_format == "mean"
+      & second_format == "range" ~ (`2nd` - `1st`) / 5
     )
   ) %>% 
-  select(-c(current.old:former_never.new)) %>% 
-  mutate(former_never = if_else(
-    !is.na(current) & is.na(former_never), 1 - current, former_never
-  ),
-  across(c(current, former_never), ~ round(., 2)),
-  )
+  select(trial_id, arm_id, mean_hba1c, sd_hba1c)
 
-# 884 arms missing smoke (excl. two trials not in aact)
-checkNA(c_smoke_new)
+# 314/344
+c_hba1c_ext %>% count(trial_id)
+
+# Construct hba1c
+c_hba1c_new <- a_imp_pt2 %>% 
+  select(trial_id, arm_id) %>%
+  left_join(c_hba1c_ext) %>% 
+  distinct()
+
+# 90 arms missing hba1c (excl. two trials not in aact)
+checkNA(c_hba1c_new)
 
 # Combine ----------------------------------------------------------------------
 
@@ -563,19 +439,18 @@ checkNA(c_smoke_new)
 d_get_dfs <- lapply(ls(pattern = "_new"), get)
 names(d_get_dfs) <- ls(pattern = "_new")
 
-# Remove precursors to final versions (egfr, race)
-d_rm <- c("c_race_new", "c_race_new_tidy")
-d_dfs <- d_get_dfs[setdiff(names(d_get_dfs), d_rm)]
-names(d_dfs)
-
 # Join
-d_join <- reduce(d_dfs, left_join)
+d_join <- reduce(d_get_dfs, left_join)
+
+# Join other variables
+d_all <- a_imp_pt2 %>%
+  select(
+    trial_id, arm_id, current, former_never, 
+    contains(c("total", "hdl", "egfr", "sbp"))
+  )
+
+checkNA(d_all)
 
 # Save
-saveRDS(d_join, "processed_data/agg_bl_second_ext.rds")
+saveRDS(d_all, "processed_data/agg_bl_third_ext.rds")
 
-
-
-
-# 89 arms missing bmi (excl. two trials not in aact)
-checkNA(c_bmi_new)

@@ -480,7 +480,7 @@ checkNA(c_egfr_new)
 # 335 trials
 c_total_chol_ids <- a_na_lkp %>% filter(total_chol == 1) %>% select(trial_id)
 
-# 26/335 trials
+# 17/335 trials
 c_total_chol_ext <- b_split$total_cholesterol %>% 
   mutate(
     second = case_when(
@@ -492,7 +492,7 @@ c_total_chol_ext <- b_split$total_cholesterol %>%
   select(trial_id, arm_id, variable, first, second) %>% 
   rename(mean = first, sd = second) %>% 
   pivot_wider(names_from = variable, values_from = c(mean, sd)) %>% 
-  inner_join(c_egfr_ids)
+  inner_join(c_total_chol_ids)
 
 c_total_chol_ext %>% count(trial_id)
 
@@ -518,7 +518,7 @@ checkNA(c_total_chol_new)
 # 344 (none had it in additional_covariates)
 c_hdl_ids <- a_na_lkp %>% select(trial_id)
 
-# 23/344 trials
+# 26/344 trials
 c_hdl_ext <- b_split$hdl %>% 
   mutate(
     second = case_when(
@@ -530,7 +530,7 @@ c_hdl_ext <- b_split$hdl %>%
   select(trial_id, arm_id, variable, first, second) %>% 
   rename(mean = first, sd = second) %>% 
   pivot_wider(names_from = variable, values_from = c(mean, sd))  %>% 
-  inner_join(c_egfr_ids)
+  inner_join(c_hdl_ids)
 
 c_hdl_ext %>% count(trial_id)
 
@@ -548,7 +548,7 @@ checkNA(c_hdl_new)
 # 337 trials
 c_smoke_ids <- a_na_lkp %>% filter(smoke == 1) %>% select(trial_id)
 
-# 6/337
+# 4/337
 c_smoke_ext <- b_split$smoking_status %>% 
   mutate(
     category = case_match(
@@ -569,7 +569,7 @@ c_smoke_ext <- b_split$smoking_status %>%
     former_never = if_else(is.na(former_never), 1 - current, former_never),
     across(current:former_never, ~ round(., 2))
   )  %>% 
-  inner_join(c_egfr_ids)
+  inner_join(c_smoke_ids)
 
 c_smoke_ext %>% count(trial_id)
 
