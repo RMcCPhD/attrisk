@@ -133,53 +133,26 @@ c_race_clp <- c_race_ext %>%
   reframe(prop = sum(second)) %>% 
   group_by(trial_id, arm_id) %>% 
   pivot_wider(names_from = race, values_from = prop) %>% 
-  ungroup()
-
-c_race_fill <- c_race_clp %>% 
-  pivot_longer(asian:white) %>% 
-  group_by(trial_id, arm_id) %>% 
-  mutate(
-    value_new = case_when(
-      is.na(value) & total == 1 ~ 0,
-      sum(is.na(value)) == 1 & is.na(value) & total < 1 ~ 1 - total,
-      TRUE ~ value
-    ),
-    value_new = round(value_new, 2),
-    total_new = round(sum(value_new, na.rm = TRUE), 2),
-    value_new = case_when(
-      total_new == 0.99 & name == "white" ~ value_new + 0.01,
-      total_new == 0.99 & name == "asian" & value_new == 0.99 ~ 1,
-      TRUE ~ value_new
-    ),
-    total_new = round(sum(value_new, na.rm = TRUE), 2)
-  ) %>% 
   ungroup() %>% 
-  select(-value) %>% 
-  pivot_wider(names_from = name, values_from = value_new)
-
-# Isolate trials with prop <1 (10)
-# c_race_lt1 <- c_race_fill %>% filter(total_new < 1)
-# c_race_lt1 %>% count(trial_id)
-# write_csv(c_race_lt1, "scratch_data/race_check_lt1_pt3.csv")
-
-c_race_fix_imp <- read_csv("scratch_data/race_checked_lt1_pt3.csv")
-
-c_race_fix_lt1 <- c_race_fill %>% 
-  anti_join(c_race_fix_imp %>% select(trial_id, arm_id)) %>% 
-  full_join(c_race_fix_imp %>% select(-note)) %>% 
-  group_by(trial_id, arm_id) %>% 
   mutate(
-    total_new = asian + black + other + white,
-    total_new = if_else(is.na(total_new) & !is.na(asian), 1, total_new)
-  ) %>% 
+    total = asian + black + other + white
+  )
+
+# Save to manually address rounding errors and check missing against ctgov
+# write_csv(c_race_clp, "scratch_data/race_check_pt4.csv")
+c_race_fix_imp <- read_csv("scratch_data/race_checked_pt4.csv")
+
+c_race_fix <- c_race_fix_imp %>% 
+  select(-note) %>% 
+  mutate(total = asian + black + other + white) %>% 
   arrange(trial_id, arm_id)
 
-c_race_new <- a_imp_pt2 %>% 
+c_race_new <- a_imp_pt3 %>% 
   select(trial_id, arm_id, asian:white) %>%
   left_join(
-    c_race_fix_lt1 %>% 
+    c_race_fix %>% 
       select(-contains("total")) %>% 
-      rename_at(vars(asian:white), ~ paste0(., "_new"))
+      rename_at(vars(black:asian), ~ paste0(., "_new"))
   ) %>% 
   mutate(
     asian = if_else(is.na(asian) & !is.na(asian_new), asian_new, asian),
@@ -187,98 +160,40 @@ c_race_new <- a_imp_pt2 %>%
     other = if_else(is.na(other) & !is.na(other_new), other_new, other),
     white = if_else(is.na(white) & !is.na(white_new), white_new, white)
   ) %>% 
-  select(-contains("new")) %>% 
-  mutate(
-    across(asian:white, ~ round(., 2)),
-    white = case_when(
-      asian + black + other + white == 0.99 ~ white + 0.01,
-      TRUE ~ white
-    ),
-    other = case_when(
-      asian + black + other + white == 1.01 ~ other - 0.01,
-      TRUE ~ other
-    )
-  )
+  select(-contains("new"))
 
-# 321 max arms missing race (excl. two trials not in aact)
+# 285 max arms missing race
 checkNA(c_race_new)
 
 # BMI --------------------------------------------------------------------------
 
-# 33 trials
+# 31 trials
 c_bmi_ids <- a_na_lkp %>% filter(bmi == 1) %>% select(trial_id)
 
+# 0/31
 c_bmi_ext <- b_split$bmi %>% 
-  inner_join(c_bmi_ids) %>% 
-  filter(!(first_format == "count" & second_format == "percentage")) %>% 
-  separate(second, into = c("1st", "2nd"), sep = ";| ;") %>% 
-  mutate(
-    across(`1st`:`2nd`, as.numeric),
-    mean_bmi = case_when(
-      first_format == "mean" ~ first,
-      first_format == "median"
-      & second_format == "range" ~ (`1st` + 2 * first + `2nd`) / 4,
-      first_format == "median"
-      & second_format == "iqr" ~ (`1st` + first + `2nd`) / 3
-    ),
-    sd_bmi = case_when(
-      second_format == "sd" ~ `1st`,
-      first_format == "mean"
-      & second_format == "range" ~ (`2nd` - `1st`) / 5,
-      first_format == "median"
-      & second_format == "range" ~ (`2nd` - `1st`) / 3,
-      first_format == "median"
-      & second_format == "iqr" ~ (`2nd` - `1st`) / 3
-    )
-  ) %>% 
-  select(trial_id, arm_id, mean_bmi, sd_bmi)
-
-# 3/33 trials
-c_bmi_ext %>% count(trial_id)
-
-c_bmi_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id, bmi_mu, bmi_d) %>%
-  left_join(c_bmi_ext) %>% 
-  mutate(
-    bmi_mu = if_else(!is.na(bmi_mu), bmi_mu, mean_bmi),
-    bmi_d = if_else(!is.na(bmi_d), bmi_d, sd_bmi)
-  ) %>% 
-  select(-c(mean_bmi:sd_bmi))
+  inner_join(c_bmi_ids)
 
 # T2D duration -----------------------------------------------------------------
 
-# 65 trials
+# 61 trials
 c_t2dur_ids <- a_na_lkp %>% filter(t2dur == 1) %>% select(trial_id)
 
-# 5/65 trials
-c_t2dur_ext <- b_split$duration_t2dm %>% 
+# 1/61 trials
+c_t2dur_ext <- b_split$`duration t2dm` %>% 
   inner_join(c_t2dur_ids) %>% 
   separate(second, into = c("1st", "2nd"), sep = ";| ;") %>% 
   mutate(
     across(`1st`:`2nd`, as.numeric),
-    mean_t2dur = case_when(
-      first_format == "mean" ~ first,
-      first_format == "median"
-      & second_format == "range" ~ (`1st` + 2 * first + `2nd`) / 4,
-      first_format == "median"
-      & second_format == "iqr" ~ (`1st` + first + `2nd`) / 3
-    ),
-    sd_t2dur = case_when(
-      second_format == "sd" ~ `1st`,
-      first_format == "mean"
-      & second_format == "range" ~ (`2nd` - `1st`) / 5,
-      first_format == "median"
-      & second_format == "range" ~ (`2nd` - `1st`) / 3,
-      first_format == "median"
-      & second_format == "iqr" ~ (`2nd` - `1st`) / 3
-    )
+    mean_t2dur = (`1st` + first + `2nd`) / 3,
+    sd_t2dur = (`2nd` - `1st`) / 3
   ) %>% 
   select(trial_id, arm_id, mean_t2dur, sd_t2dur)
 
 c_t2dur_ext %>% count(trial_id)
 
 # Construct t2dur
-c_t2dur_new <- a_imp_pt2 %>% 
+c_t2dur_new <- a_imp_pt3 %>% 
   select(trial_id, arm_id, t2dur_mu, t2dur_d) %>%
   left_join(c_t2dur_ext %>% mutate(across(contains("t2dur"), as.numeric))) %>% 
   mutate(
@@ -287,7 +202,7 @@ c_t2dur_new <- a_imp_pt2 %>%
   ) %>% 
   select(-c(mean_t2dur:sd_t2dur))
 
-# 191 arms missing t2dur (excl. two trials not in aact)
+# 162 arms missing t2dur (excl. two trials not in aact)
 checkNA(c_t2dur_new)
 
 # SBP --------------------------------------------------------------------------
@@ -296,7 +211,7 @@ checkNA(c_t2dur_new)
 c_sbp_ids <- a_na_lkp %>% filter(sbp == 1) %>% select(trial_id)
 
 # 0/255 trials
-c_sbp_ext <- b_split$blood_pressure %>% 
+c_sbp_ext <- b_split$`blood pressure` %>% 
   inner_join(c_sbp_ids)
 
 # eGFR -------------------------------------------------------------------------
@@ -310,11 +225,11 @@ c_egfr_ext <- b_split$egfr %>%
 
 # Total cholesterol ------------------------------------------------------------
 
-# 321 trials
+# 318 trials
 c_total_chol_ids <- a_na_lkp %>% filter(total_chol == 1) %>% select(trial_id)
 
-# 1 but median/iqr and values seem incorrect
-c_total_chol_ext <- b_split$total_cholesterol %>% 
+# 0/318
+c_total_chol_ext <- b_split$`total cholesterol` %>% 
   inner_join(c_total_chol_ids)
 
 # HDL cholesterol --------------------------------------------------------------
@@ -322,7 +237,7 @@ c_total_chol_ext <- b_split$total_cholesterol %>%
 # 321 trials
 c_hdl_ids <- a_na_lkp %>% filter(hdl == 1) %>% select(trial_id)
 
-# 1 but median/iqr and values seem incorrect
+# 0/318
 c_hdl_ext <- b_split$hdl %>% 
   inner_join(c_hdl_ids)
 
@@ -331,39 +246,32 @@ c_hdl_ext <- b_split$hdl %>%
 # 332 trials
 c_smoke_ids <- a_na_lkp %>% filter(smoke == 1) %>% select(trial_id)
 
-# 0/322 trials
-c_smoke_ext <- b_split$smoking_status %>% 
-  inner_join(c_smoke_ids)
+# 0/322 trials - smoking not in 2022 update set
 
 # Hba1c ------------------------------------------------------------------------
 
-# 344 trials
+# 35 trials
 c_hba1c_ids <- a_na_lkp %>% filter(hba1c == 1) %>% select(trial_id)
 
 c_hba1c_ext <- b_split$hba1c %>% 
   inner_join(c_hba1c_ids) %>% 
-  separate(second, into = c("1st", "2nd"), sep = ";") %>% 
-  mutate(
-    across(`1st`:`2nd`, as.numeric),
-    mean_hba1c = first,
-    sd_hba1c = case_when(
-      second_format == "sd" ~ `1st`,
-      first_format == "mean"
-      & second_format == "range" ~ (`2nd` - `1st`) / 5
-    )
-  ) %>% 
-  select(trial_id, arm_id, mean_hba1c, sd_hba1c)
+  select(trial_id, arm_id, mean_hba1c = first, sd_hba1c = second)
 
-# 314/344
+# 13/35
 c_hba1c_ext %>% count(trial_id)
 
 # Construct hba1c
-c_hba1c_new <- a_imp_pt2 %>% 
-  select(trial_id, arm_id) %>%
+c_hba1c_new <- a_imp_pt3 %>% 
+  select(trial_id, arm_id, hba1c_mu = mean_hba1c, hba1c_d = sd_hba1c) %>%
   left_join(c_hba1c_ext) %>% 
-  distinct()
+  mutate(
+    across(mean_hba1c:sd_hba1c, as.numeric),
+    hba1c_mu = if_else(!is.na(hba1c_mu), hba1c_mu, mean_hba1c),
+    hba1c_d = if_else(!is.na(hba1c_d), hba1c_d, sd_hba1c)
+  ) %>% 
+  select(-c(mean_hba1c:sd_hba1c))
 
-# 90 arms missing hba1c (excl. two trials not in aact)
+# 43 arms missing hba1c (check those missing sd manually)
 checkNA(c_hba1c_new)
 
 # Combine ----------------------------------------------------------------------
@@ -376,14 +284,52 @@ names(d_get_dfs) <- ls(pattern = "_new")
 d_join <- reduce(d_get_dfs, left_join)
 
 # Join other variables
-d_all <- a_imp_pt2 %>%
+d_all <- d_join %>% 
+  full_join(
+    a_imp_pt3 %>%
+      select(
+        trial_id, arm_id, current, former_never, 
+        contains(c("age", "male", "bmi", "sbp", "egfr", "total", "hdl"))
+      )
+  ) %>% 
   select(
-    trial_id, arm_id, current, former_never, 
-    contains(c("total", "hdl", "egfr", "sbp"))
+    trial_id:arm_id, contains("age"), male, asian:white, contains("bmi"),
+    contains("t2dur"), contains("sbp"), contains("egfr"), contains("total"),
+    contains("hdl"), contains("hba1c"), current, former_never
   )
 
-checkNA(d_all)
+
+# Check before and after
+checkNA(a_imp_pt3) %>% print(n = 24)
+checkNA(d_all) %>% print(n = 24)
+
+# Before (AACT, NMA covariates and pre-2022 table tidier)
+# Var          before   after
+# arm_id            2       2
+# age_mu           11      11
+# age_d            11      11
+# male             10      10
+# asian           304     282
+# black           307     285
+# other           306     284
+# white           300     278
+# bmi_mu           73      73
+# bmi_d            73      73
+# mean_hba1c       83      43
+# sd_hba1c         90      50
+# t2dur_mu        165     162
+# t2dur_d         165     162
+# sbp_mu          671     671
+# sbp_d           671     671
+# egfr_mu         711     711
+# egfr_d          711     711
+# total_chol_mu   849     849
+# total_chol_d    849     849
+# hdl_mu          852     852
+# hdl_d           852     852
+# current         884     884
+# former_never    884     884
 
 # Save
-saveRDS(d_all, "processed_data/agg_bl_third_ext.rds")
+saveRDS(d_all, "processed_data/agg_bl_fourth_ext.rds")
 

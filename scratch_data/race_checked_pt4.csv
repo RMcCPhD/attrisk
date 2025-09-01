@@ -1,0 +1,31 @@
+trial_id,arm_id,black,white,other,asian,total,note
+NCT01919489,unq_updaa10001,0.69,0.2,0.11,0,,remainder was unknown/not reported
+NCT01919489,unq_updaa10002,0.71,0.17,0.12,0,,remainder was unknown/not reported
+NCT03353350,unq_updaa10059,0.06,0.93,0.01,0,,"no asian, set to zero"
+NCT03353350,unq_updaa10060,0.13,0.85,0.01,0.01,,"this should be asian and other, was collapsed into asian"
+NCT03353350,unq_updaa10061,0.08,0.89,0.01,0.02,,"this should be asian and other, was collapsed into asian"
+NCT03353350,unq_updaa10062,0.1,0.88,0,0.02,,"this should be asian, was other"
+NCT03689374,unq_updaa10075,0.02,0.79,0,0.19,1,
+NCT03689374,unq_updaa10076,0.02,0.78,0,0.2,0.99,rounding
+NCT03730662,unq_updaa10078,0.03,0.83,0.11,0.03,,other was missing
+NCT03730662,unq_updaa10079,0.05,0.79,0.11,0.05,,other was missing
+NCT03730662,unq_updaa10080,0.03,0.85,0.1,0.02,,other was missing
+NCT03730662,unq_updaa10081,0.04,0.79,0.12,0.05,,other was missing
+NCT03882970,unq_updaa10092,0.03,0.91,0.01,0.05,1,
+NCT03882970,unq_updaa10093,0.03,0.92,0,0.05,0.99,rounding
+NCT03882970,unq_updaa10094,0.02,0.91,0.01,0.06,1,
+NCT03882970,unq_updaa10095,0.04,0.9,0,0.06,1,
+NCT03954834,unq_updaa10097,0.04,0.4,0.23,0.33,1,
+NCT03954834,unq_updaa10098,0.03,0.35,0.26,0.36,1,
+NCT03954834,unq_updaa10099,0.05,0.35,0.25,0.35,0.99,rounding
+NCT03954834,unq_updaa10100,0.06,0.31,0.26,0.37,1,
+NCT04039503,unq_updaa10110,0,0.82,0,0.18,0.99,rounding
+NCT04039503,unq_updaa10111,0.02,0.79,0.01,0.18,1,
+NCT04039503,unq_updaa10112,0.03,0.78,0.01,0.18,1,
+NCT04039503,unq_updaa10113,0.01,0.82,0,0.17,1,
+NCT04093752,updac0048,0,0.01,0.01,0.98,1,
+NCT04093752,updac0049,0,0.01,0,0.99,1,
+NCT04093752,updac0050,0,0,0.01,0.99,1,
+NCT04093752,updac0051,0,0.02,0,0.98,1,
+NCT04218734,updab0094,0,0,0,1,,
+NCT04218734,updab0095,0,0,0,1,,
