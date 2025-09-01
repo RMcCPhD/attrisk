@@ -443,10 +443,22 @@ names(d_get_dfs) <- ls(pattern = "_new")
 d_join <- reduce(d_get_dfs, left_join)
 
 # Join other variables
-d_all <- a_imp_pt2 %>%
-  select(
-    trial_id, arm_id, current, former_never, 
-    contains(c("total", "hdl", "egfr", "sbp"))
+d_all <- d_join %>% 
+  group_by(trial_id, arm_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>% 
+  distinct() %>% 
+  full_join(
+    a_imp_pt2 %>%
+      select(
+        trial_id, arm_id, current, former_never, 
+        contains(c("total", "hdl", "egfr", "sbp"))
+      ) %>% 
+      group_by(trial_id, arm_id) %>% 
+      slice_head(n = 1) %>% 
+      ungroup() %>% 
+      distinct() %>% 
+      arrange(trial_id, arm_id)
   )
 
 checkNA(d_all)
