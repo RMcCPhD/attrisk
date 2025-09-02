@@ -9,10 +9,48 @@ library(tidyverse)
 a_imp_df <- readRDS("processed_data/agg_bl_imputed_stack.rds") %>% 
   mutate(across(age_mu:former_never, ~ round(., 2)))
 
+# Nest
+a_nest <- a_imp_df %>% 
+  group_by(trial_id) %>% 
+  nest() %>% 
+  mutate(
+    data_rest = map(data, function(df) {
+      df %>% 
+        select(age_mu:former_never) %>% 
+        select(where(~n_distinct(.) == 1))
+    })
+  )
+
+# Keep only variables that were imputed
+a_keep <- a_nest %>% 
+  mutate(
+    data_filter = map(data, function(df) {
+      df %>% 
+        select(age_mu:former_never) %>% 
+        select(where(~n_distinct(.) > 1))
+    }),
+  ) %>% 
+  filter(
+    map_lgl(data_filter, ~ ncol(.x) > 0)
+  )
+
+# Plot iterations for each trial
+a_plot <- a_keep %>% 
+  mutate(
+    plots = map(data_filter, function(df) {
+      df %>% 
+        pivot_longer(everything()) %>% 
+        ggplot(aes(x = value)) +
+        geom_density() +
+        facet_wrap(~name, scales = "free") +
+        theme_classic()
+    })
+  )
+
 # Find best distribution per variable and pool accordingly ---------------------
 
 # Parametric distributions
-z_dists <- c("norm", "lnorm", "gamma", "beta", "weibull")
+z_dists <- c("norm", "lnorm", "weibull", "beta")
 
 # Function to fit distribution to each variable and get best
 find_best_dist <- function(x, families = z_dists) {
@@ -50,33 +88,36 @@ find_best_dist <- function(x, families = z_dists) {
   list(family = fam, fit = fits[[fam]])
 }
 
-# Apply function to continuous variables
-# Stacked dataset (i.e. bind_rows each imputation iteration)
-# Output is pooled estimates across iterations using best distribution
+# Variables
 z_vars <- names(a_imp_df[c(6:28)])
-# z_vars <- names(a_imp_df[c(6:22, 27:28)])
 
-b_best_dists <- map(z_vars, function(v) {
-  best <- find_best_dist(a_imp_df[[v]])
-  tibble(
-    var = v,
-    family = best$family,
-    aic = best$aic,
-    estimates = list(if (is.null(best$fit)) NA else best$fit$estimate)
-  )
-})
+# Apply function to continuous variables per trial
+# Output is pooled estimates across iterations using best distribution
+b_best_dists <- a_keep %>% 
+  transmute(
+    trial_id,
+    best_dist = map(
+      data_filter, function(df) {
+        vars_pres <- intersect(z_vars, names(df))
+        if (!length(vars_pres)) return(tibble())
+        map_df(
+          vars_pres, function(v) {
+            best <- find_best_dist(df[[v]])
+            tibble(
+              var = v,
+              family = best$family,
+              aic = best$aic,
+              estimates = list(if (is.null(best$fit)) NA else best$fit$estimate)
+            )
+          }
+        )
+      }
+    )
+  ) %>% 
+  unnest(best_dist)
 
-# Tidy outputs
-b_best_df <- bind_rows(b_best_dists) %>% 
-  separate(estimates, into = c("est1", "est2"), sep = ", ") %>% 
-  mutate(across(est1:est2, ~ gsub("c\\(|\\(|\\)", "", .))) %>% 
-  pivot_longer(est1:est2) %>% 
-  separate(value, into = c("dist", "value"), sep = " = ") %>% 
-  select(-name)
-
-# Convert non-normal parameters to original scale (i.e. mean/sd)
-c_wide <- b_best_df %>% 
-  pivot_wider(names_from = dist, values_from = value) %>% 
+b_best_df <- b_best_dists %>% 
+  unnest_wider(estimates, names_repair = "unique") %>% 
   mutate(across(meanlog:shape2, as.numeric))
 
 # Get expected values for variables based on best-fitting distribution
@@ -86,7 +127,6 @@ get_values_family <- function(fam, p) {
     fam,
     "norm"    = p$mean,                           
     "lnorm"   = exp(p$meanlog + 0.5 * p$sdlog^2),     
-    "gamma"   = if (!is.na(p$rate)) p$shape / p$rate else p$shape * p$scale,
     "weibull" = p$scale * gamma(1 + 1/p$shape), 
     "beta"    = p$shape1 / (p$shape1 + p$shape2),
     stop(sprintf("Unsupported family: %s", fam))
@@ -103,11 +143,46 @@ get_exp_values <- function(df, varname) {
 }
 
 # Build dataset of pooled variable parameters for continuous variables and male
-d_df_exp <- tibble(vars = unique(c_wide$var)) %>% 
+# Scale to match participant-level covariate scaling
+d_df_exp <- b_best_df %>% 
+  group_by(trial_id) %>% 
+  group_modify(~{
+    dat <- .x
+    out <- tibble(vars = unique(dat$var)) %>% 
+      mutate(
+        values = map_dbl(vars, ~ get_exp_values(dat, .x)),
+        values = round(values, 2)
+      )
+  }) %>% 
+  ungroup()
+
+# Join with variable marginals that were not imputed
+# All length 23
+e_not_imp <- a_nest %>% 
+  select(trial_id, data_rest) %>% 
+  unnest(data_rest) %>% 
+  distinct() %>% 
+  pivot_longer(age_mu:egfr_d) %>% 
+  filter(!is.na(value)) %>% 
+  rename(vars = name, values = value) %>% 
+  full_join(d_df_exp) %>% 
+  arrange(trial_id, vars)
+
+e_not_imp %>% count(trial_id) %>% filter(n != 23)
+
+# Scale
+f_df_scale <- e_not_imp %>% 
   mutate(
-    values = map_dbl(vars, ~ get_exp_values(c_wide, .x)),
-    values = round(values, 2)
+    values_scaled = case_when(
+      grepl("age", vars) ~ values / 10,
+      vars == "sbp_mu"   ~ values / values[vars == "sbp_d"],
+      vars == "bmi_mu"   ~ values / values[vars == "bmi_d"],
+      vars == "t2dur_mu" ~ values / values[vars == "t2dur_d"],
+      vars == "egfr_mu"  ~ values / values[vars == "egfr_d"],
+      vars %in% c("sbp_d", "bmi_d", "t2dur_d", "egfr_d") ~ 1,
+      TRUE ~ values
+    )
   )
 
 # Save
-saveRDS(d_df_exp, "processed_data/agg_bl_dists_ready.rds")
+saveRDS(f_df_scale, "processed_data/agg_bl_dists_ready.rds")
