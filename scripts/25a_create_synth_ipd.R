@@ -10,13 +10,12 @@ library(multinma)
 
 # Import agg bl
 a_imp_bl <- readRDS("processed_data/agg_bl_dists_ready.rds") %>% 
-  select(vars, values_scaled) %>% 
-  group_by(vars) %>% 
-  nest() %>% 
-  mutate(data = map_dbl(data, ~ .x$values_scaled)) %>% 
-  pivot_wider(names_from = vars, values_from = data) %>% 
+  select(trial_id, vars, values_scaled) %>% 
+  pivot_wider(names_from = vars, values_from = values_scaled) %>% 
   mutate(male = 1 - male) %>% 
-  rename(sex = male)
+  rename(sex = male) %>% 
+  group_by(trial_id) %>% 
+  nest()
 
 # Prepare correlation matrix ---------------------------------------------------
 
@@ -48,32 +47,42 @@ qcat <- function(p, probs, values = seq_along(probs) - 1L) {
 }
 
 # Generate sobol sequences
-c_sobol <- add_integration(
-  a_imp_bl,
-  age10       = distr(qnorm, a_imp_bl$age_mu, a_imp_bl$age_d),
-  bmi         = distr(qnorm, a_imp_bl$bmi_mu, a_imp_bl$bmi_d),
-  hdl         = distr(qnorm, a_imp_bl$hdl_mu, a_imp_bl$hdl_d),
-  total       = distr(qnorm, a_imp_bl$total_chol_mu, a_imp_bl$total_chol_d),
-  current     = distr(qbern, a_imp_bl$current),
-  t2dur       = distr(qgamma, a_imp_bl$t2dur_mu, a_imp_bl$t2dur_d),
-  egfr        = distr(qnorm, a_imp_bl$egfr_mu, a_imp_bl$egfr_d),
-  hba1c       = distr(qnorm, a_imp_bl$hba1c_mu, a_imp_bl$hba1c_d),
-  asian       = distr(qbern, a_imp_bl$asian),
-  black       = distr(qbern, a_imp_bl$black),
-  other       = distr(qbern, a_imp_bl$other),
-  sbp         = distr(qnorm, a_imp_bl$sbp_mu, a_imp_bl$sbp_d),
-  sex         = distr(qbern, a_imp_bl$sex),
-  # comorbs   = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
-  # n_atc       = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
-  cor = b_cor_rm,
-  n_int = 64
-)
+c_sobol <- a_imp_bl %>% 
+  mutate(
+    sobol = map(data, function(df) {
+      add_integration(
+        df,
+        age10       = distr(qnorm, df$age_mu, df$age_d),
+        bmi         = distr(qnorm, df$bmi_mu, df$bmi_d),
+        hdl         = distr(qnorm, df$hdl_mu, df$hdl_d),
+        total       = distr(qnorm, df$total_chol_mu, df$total_chol_d),
+        current     = distr(qbern, df$current),
+        t2dur       = distr(qgamma, df$t2dur_mu, df$t2dur_d),
+        egfr        = distr(qnorm, df$egfr_mu, df$egfr_d),
+        hba1c       = distr(qnorm, df$hba1c_mu, df$hba1c_d),
+        asian       = distr(qbern, df$asian),
+        black       = distr(qbern, df$black),
+        other       = distr(qbern, df$other),
+        sbp         = distr(qnorm, df$sbp_mu, df$sbp_d),
+        sex         = distr(qbern, df$sex),
+        # comorbs   = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
+        # n_atc     = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
+        cor = as.matrix(b_cor_rm),
+        n_int = 64
+      )
+    })
+  )
 
 # Tidy sequences
 c_sobol_tidy <- c_sobol %>% 
-  select(starts_with(".int")) %>% 
-  rename_with(., ~ gsub(".int_", "", .)) %>% 
-  unnest(cols = everything())
+  mutate(
+    sobol_ext = map(sobol, function(df) {
+      df %>% 
+        select(starts_with(".int")) %>% 
+        rename_with(., ~ gsub(".int_", "", .)) %>% 
+        unnest(cols = everything())
+    })
+  )
 
 # Import log-hazard estimates
 d_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds") %>% 
@@ -106,7 +115,7 @@ d_lp <- c_sobol_tidy %>%
   mutate(
     lp_tbl = map(sobol_ext, function(df) {
       X <- as.matrix(df)
-      lp <- as.vector(X %*% b_beta)
+      lp <- as.vector(X %*% d_beta)
       tibble(lp = lp, lp_hr = exp(lp), risk = 1 - exp(-0.153 * lp_hr))
     }),
     avg_risk = map_dbl(lp_tbl, ~ sum(.x$risk) / 64)
