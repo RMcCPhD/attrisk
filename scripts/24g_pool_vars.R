@@ -16,7 +16,7 @@ a_nest <- a_imp_df %>%
   mutate(
     data_rest = map(data, function(df) {
       df %>% 
-        select(age_mu:former_never) %>% 
+        select(age_mu:conmeds_size) %>% 
         select(where(~n_distinct(.) == 1))
     })
   )
@@ -26,7 +26,7 @@ a_keep <- a_nest %>%
   mutate(
     data_filter = map(data, function(df) {
       df %>% 
-        select(age_mu:former_never) %>% 
+        select(age_mu:conmeds_size) %>% 
         select(where(~n_distinct(.) > 1))
     }),
   ) %>% 
@@ -76,7 +76,7 @@ find_best_dist <- function(x, families = z_dists) {
 }
 
 # Variables
-z_vars <- names(a_imp_df[c(6:28)])
+z_vars <- names(a_imp_df[c(6:32)])
 
 # Apply function to continuous variables per trial
 # Output is pooled estimates across iterations using best distribution
