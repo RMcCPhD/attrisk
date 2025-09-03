@@ -34,17 +34,30 @@ colnames(b_imp_cor) <- b_cor_nms
 
 # Remove external variables
 b_cor_rm <- b_imp_cor[!rownames(b_imp_cor) == "rm", !rownames(b_imp_cor) == "rm"]
+b_cor_rm <- as.matrix(b_cor_rm)
 
-# Generate Sobol sequences -----------------------------------------------------
+# Create correlation matrix for comorbs and conmeds
+# Simulate counts using pooled marginal distributions
+b_cor_new <- matrix(
+  c(1, 0, 0, 1),
+  nrow = 2,
+  dimnames = list(
+    c("comorbs", "n_atc"),
+    c("comorbs", "n_atc")
+  )
+)
 
-# Helper: Inverse CDF for con meds and comorbs
-qcat <- function(p, probs, values = seq_along(probs) - 1L) {
-  probs <- probs / sum(probs)
-  cdf <- cumsum(probs)
-  p <- pmin(p, 1 - .Machine$double.eps)
-  idx <- findInterval(p, c(0, cdf))
-  values[idx]
-}
+# Build new correlation matrix
+c_old <- colnames(b_cor_rm)
+c_new <- c("comorbs", "n_atc")
+c_nms <- c(c_old, c_new)
+
+c_cor_full <- diag(length(c_nms))
+dimnames(c_cor_full) <- list(c_nms, c_nms)
+c_cor_full[c_old, c_old] <- b_cor_rm
+
+c_cor_full <- (c_cor_full + t(c_cor_full)) / 2
+c_cor_full <- as.matrix(Matrix::nearPD(c_cor_full, corr = TRUE)$mat)
 
 # Generate sobol sequences
 c_sobol <- a_imp_bl %>% 
@@ -65,9 +78,9 @@ c_sobol <- a_imp_bl %>%
         other       = distr(qbern, df$other),
         sbp         = distr(qnorm, df$sbp_mu, df$sbp_d),
         sex         = distr(qbern, df$sex),
-        # comorbs   = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
-        # n_atc     = distr(qcat, probs = unname(atc$n_atc), values = atc$prop),
-        cor = as.matrix(b_cor_rm),
+        comorbs     = distr(qnbinom, size = df$comorbs_size, mu = df$comorbs_mu),
+        n_atc       = distr(qnbinom, size = df$conmeds_size, mu = df$conmeds_mu),
+        cor = c_cor_full,
         n_int = 64
       )
     })
@@ -104,9 +117,9 @@ d_beta <- c(
   black_aa  = d_imp_hr$raceblack_aa_loghr,
   other     = d_imp_hr$raceother_loghr,
   sbp       = d_imp_hr$sbp_loghr,
-  sex       = d_imp_hr$sex_loghr
-  # comorbs   = d_imp_hr$comorbs_loghr,
-  # n_atc     = d_imp_hr$n_atc_loghr,
+  sex       = d_imp_hr$sex_loghr,
+  comorbs   = d_imp_hr$comorbs_loghr,
+  n_atc     = d_imp_hr$n_atc_loghr
 )
 
 # Compute linear predictor per trial
@@ -121,3 +134,6 @@ d_lp <- c_sobol_tidy %>%
     avg_risk = map_dbl(lp_tbl, ~ sum(.x$risk) / 64)
   ) %>% 
   select(trial_id, lp_tbl, avg_risk)
+
+# Save
+saveRDS(d_lp, "processed_data/conduct_sobol_avg_risk.rds")

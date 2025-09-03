@@ -155,7 +155,7 @@ e_not_imp <- a_nest %>%
   full_join(d_df_exp) %>% 
   arrange(trial_id, vars)
 
-e_not_imp %>% count(trial_id) %>% filter(n != 23)
+e_not_imp %>% count(trial_id) %>% filter(n != 27)
 
 # Scale
 f_df_scale <- e_not_imp %>% 
