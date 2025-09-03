@@ -173,9 +173,64 @@ c_iter <- lapply(seq_along(b_imp_transf), \(j) mutate(b_imp_transf[[j]], imp = j
 c_bind <- bind_rows(c_iter) %>% 
   select(imp, trial_id:male, asian:former_never, everything())
 
+# Impute con meds and comorbs --------------------------------------------------
+
+# Function to obtain base values for negative binomial parameters
+# Setup to match the spread in IPD marginals for conmeds and comorbs
+base_nb <- function(minx, medx, maxx, p_lo = 0.05, p_hi = 0.95) {
+  stopifnot(minx <= medx, medx <= maxx)
+  loss <- function(par) {
+    mu   <- exp(par[1]); size <- exp(par[2])
+    q_lo <- qnbinom(p_lo, size = size, mu = mu)
+    q_md <- qnbinom(0.50, size = size, mu = mu)
+    q_hi <- qnbinom(p_hi, size = size, mu = mu)
+    (q_lo - minx)^2 + 2*(q_md - medx)^2 + (q_hi - maxx)^2
+  }
+  opt <- optim(
+    par   = c(log(medx + 1e-6), log(1.5)),
+    fn    = loss,
+    method= "L-BFGS-B",
+    lower = c(log(1e-8), log(1e-3)),
+    upper = c(log(1e6),  log(1e3))
+  )
+  list(mu = exp(opt$par[1]), size = exp(opt$par[2]))
+}
+
+# Draw 20 sets of parameters with log-normal random effects
+draw_nb_params <- function(mu_base, size_base, n_draws = 20, 
+                           sigma_log_mu = 0.30, sigma_log_size = 0.15) {
+  tibble(imp = seq_len(n_draws)) |>
+    mutate(
+      com_mu   = exp(rnorm(n_draws, log(mu_base$com$mu),   sigma_log_mu)),
+      com_size = exp(rnorm(n_draws, log(mu_base$com$size), sigma_log_size)),
+      con_mu   = exp(rnorm(n_draws, log(mu_base$con$mu),   sigma_log_mu)),
+      con_size = exp(rnorm(n_draws, log(mu_base$con$size), sigma_log_size))
+    )
+}
+
+# Get global marginals
+d_base_comorbs <- base_nb(minx = 0, medx = 1, maxx = 9)
+d_base_conmeds <- base_nb(minx = 0, medx = 2, maxx = 48)
+d_mu_base <- list(com = d_base_comorbs, con = d_base_conmeds)
+
+# Build tibble of 20 parameter draws per trial (corresponding to each imputation)
+d_comorbs_conmeds <- tibble(trial_id = unique(c_bind$trial_id)) |>
+  group_by(trial_id) |>
+  group_modify(
+    ~ draw_nb_params(mu_base = d_mu_base, size_base = NULL, n_draws = 20)
+  ) |>
+  ungroup()
+
+# Join with rest of variables
+e_join <- c_bind %>% 
+  left_join(d_comorbs_conmeds) %>% 
+  select(imp:former_never, com_mu:con_size, everything()) %>% 
+  rename_with(., ~ gsub("com_", "comorbs_", .)) %>% 
+  rename_with(., ~ gsub("con_", "conmeds_", .))
+
 # Inspect
-c_plot_stack <- c_bind %>% 
-  pivot_longer(age_mu:former_never) %>% 
+e_plot_stack <- e_join %>% 
+  pivot_longer(age_mu:conmeds_size) %>% 
   mutate(
     name = case_when(
       grepl("asian|black|other|white", name) ~ paste0("race_", name),
@@ -187,17 +242,15 @@ c_plot_stack <- c_bind %>%
   geom_density(alpha = 0.01) +
   facet_wrap(~name, scales = "free")
 
-c_plot_stack
+e_plot_stack
 
 ggsave(
   "outputs/conduct_model/agg_bl/dist_before_clp.png",
-  c_plot_stack,
+  e_plot_stack,
   height = 10,
   width = 10,
   units = "in"
 )
 
 # Save
-saveRDS(c_bind, "processed_data/agg_bl_imputed_stack.rds")
-
-
+saveRDS(e_join, "processed_data/agg_bl_imputed_stack.rds")

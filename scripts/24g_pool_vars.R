@@ -34,19 +34,6 @@ a_keep <- a_nest %>%
     map_lgl(data_filter, ~ ncol(.x) > 0)
   )
 
-# Plot iterations for each trial
-a_plot <- a_keep %>% 
-  mutate(
-    plots = map(data_filter, function(df) {
-      df %>% 
-        pivot_longer(everything()) %>% 
-        ggplot(aes(x = value)) +
-        geom_density() +
-        facet_wrap(~name, scales = "free") +
-        theme_classic()
-    })
-  )
-
 # Find best distribution per variable and pool accordingly ---------------------
 
 # Parametric distributions
