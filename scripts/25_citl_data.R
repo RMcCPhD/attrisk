@@ -3,6 +3,8 @@
 source("scripts/00_config.R")
 library(tidyverse)
 
+# Generate sobol sequences -----------------------------------------------------
+
 # Import design features and pooled marginals
 a_imp_df <- readRDS("processed_data/agg_bl_imputed_stack.rds")
 
@@ -63,19 +65,26 @@ c_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds") %>%
 
 # Rename betas
 c_beta <- c(
-  age10     = d_imp_hr$age10_loghr,
-  bmi       = d_imp_hr$bmi_loghr,
-  hdl       = d_imp_hr$chol_hdl_loghr,
-  total     = d_imp_hr$chol_total_loghr,
-  current   = d_imp_hr$smoke_loghr,
-  t2dur     = d_imp_hr$durn_loghr,
-  egfr      = d_imp_hr$egfr_loghr,
-  hba1c     = d_imp_hr$hba1c_loghr,
-  asian     = d_imp_hr$raceasian_loghr,
-  black_aa  = d_imp_hr$raceblack_aa_loghr,
-  other     = d_imp_hr$raceother_loghr,
-  sbp       = d_imp_hr$sbp_loghr,
-  sex       = d_imp_hr$sex_loghr,
-  comorbs   = d_imp_hr$comorbs_loghr,
-  n_atc     = d_imp_hr$n_atc_loghr
+  age10     = c_imp_hr$age10_loghr,
+  bmi       = c_imp_hr$bmi_loghr,
+  hdl       = c_imp_hr$chol_hdl_loghr,
+  total     = c_imp_hr$chol_total_loghr,
+  current   = c_imp_hr$smoke_loghr,
+  t2dur     = c_imp_hr$durn_loghr,
+  egfr      = c_imp_hr$egfr_loghr,
+  hba1c     = c_imp_hr$hba1c_loghr,
+  asian     = c_imp_hr$raceasian_loghr,
+  black_aa  = c_imp_hr$raceblack_aa_loghr,
+  other     = c_imp_hr$raceother_loghr,
+  sbp       = c_imp_hr$sbp_loghr,
+  sex       = c_imp_hr$sex_loghr,
+  comorbs   = c_imp_hr$comorbs_loghr,
+  n_atc     = c_imp_hr$n_atc_loghr
 )
+
+# Prepare test data ------------------------------------------------------------
+
+# Five trials
+
+# Prepare conduct stan data ----------------------------------------------------
+
