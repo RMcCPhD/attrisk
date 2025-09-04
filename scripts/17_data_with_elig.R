@@ -20,9 +20,18 @@ b_elig_fill <- a_imp_elig %>%
     bmi_upper = case_when(
       is.na(bmi_upper) ~ "<=45",
       TRUE ~ bmi_upper
+    ),
+    egfr_lower = case_when(
+      egfr_lower <= 30 ~ "<=30",
+      egfr_lower > 30 ~ ">30",
+      is.na(egfr_lower) ~ "None"
+    ),
+    egfr_upper = case_when(
+      egfr_upper <= 60 ~ "<=60",
+      egfr_upper > 60 ~ ">60",
+      is.na(egfr_upper) ~ "None"
     )
-  ) %>% 
-  select(-contains("egfr"))
+  )
 
 # Categorise variables as binary variables
 c_elig_cat <- b_elig_fill %>% 
@@ -46,6 +55,18 @@ c_elig_cat <- b_elig_fill %>%
     max_bmi_cat = case_when(
       as.numeric(str_extract(bmi_upper, "[0-9]+")) <= 40 ~ 0L,
       TRUE ~ 1L
+    ),
+    # Min egfr: 0 = None, 1 = <=30, 2 = >30
+    min_egfr_cat = case_when(
+      egfr_lower == "None" ~ 0L,
+      egfr_lower == "<=30" ~ 1L,
+      TRUE ~ 2L
+    ),
+    # Max egfr: 0 = None, 1 = <=60, 2 = >60
+    max_egfr_cat = case_when(
+      egfr_lower == "None" ~ 0L,
+      egfr_lower == "<=60" ~ 1L,
+      TRUE ~ 2L
     )
   )
 
@@ -59,10 +80,14 @@ c_add_n1 <- c_elig_cat %>%
       age_upper = 150,
       bmi_lower = "18.5",
       bmi_upper = "<40",
-      min_age_cat = 1,
-      max_age_cat = 1,
-      min_bmi_cat = 0,
-      max_bmi_cat = 0
+      egfr_lower = "None",
+      egfr_upper = "None",
+      min_age_cat = 1L,
+      max_age_cat = 1L,
+      min_bmi_cat = 0L,
+      max_bmi_cat = 0L,
+      min_egfr_cat = 0L,
+      max_egfr_cat = 1L
     )
   )
 

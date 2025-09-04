@@ -186,7 +186,7 @@ f_design_df <- e_join_chars %>%
   ))
 
 # Prepare model formula
-z_covars_names <- names(f_design_df[c(3, 8:25)])
+z_covars_names <- names(f_design_df[c(3, 8:27)])
 z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ ", z_covars))
 
@@ -342,7 +342,7 @@ g_conduct_df <- e_join_chars %>%
   select(-c(source, bmi_lower:bmi_upper, contains("dbl")))
 
 # Prepare model formula
-z_covars2_names <- names(g_conduct_df[c(3, 8:31)])
+z_covars2_names <- names(g_conduct_df[c(3, 8:33)])
 z_covars2 <- paste0(z_covars2_names, collapse = " + ")
 z_fml2 <- as.formula(paste0("shape ~ ", z_covars2))
 

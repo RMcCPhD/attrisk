@@ -59,6 +59,9 @@ c_cor_full[c_old, c_old] <- b_cor_rm
 c_cor_full <- (c_cor_full + t(c_cor_full)) / 2
 c_cor_full <- as.matrix(Matrix::nearPD(c_cor_full, corr = TRUE)$mat)
 
+# Save correlation matrix
+saveRDS(c_cor_full, "processed_data/citl_cor_mat.rds")
+
 # Generate sobol sequences
 c_sobol <- a_imp_bl %>% 
   mutate(

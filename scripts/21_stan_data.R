@@ -16,7 +16,7 @@ b_design_df <- a_imp_df %>%
   select(-c(contains("dbl"), bmi_lower:bmi_upper, male_prop:egfr_mean))
 
 # Create model matrix for predictors
-b_vars <- names(b_design_df[7:24])
+b_vars <- names(b_design_df[7:26])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
 b_design_mat <- model.matrix(b_fml, data = b_design_df)[, -1]
 
@@ -35,7 +35,7 @@ b_coefs_beta <- tibble(term = b_coefs_names, estimate = a_imp_mdl_design$betas) 
 b_coefs_mat <- model.matrix(b_coefs_fml, data = b_coefs_beta)[-1]
 
 # Create linear predictor
-b_lp <- as.vector(b_design_mat %*% b_coefs_mat[2:21])
+b_lp <- as.vector(b_design_mat %*% b_coefs_mat[2:23])
 b_resid_sd <- a_imp_mdl_design$resid_sd
 
 # Prepare STAN data
@@ -63,7 +63,7 @@ saveRDS(b_design_stan, "processed_data/latest_stan_design.rds")
 c_conduct_df <- a_imp_df %>% select(-c(contains("dbl"), bmi_lower:bmi_upper))
 
 # Create model matrix for predictors
-c_vars <- names(c_conduct_df[c(7:30)])
+c_vars <- names(c_conduct_df[c(7:32)])
 c_fml <- as.formula(paste0("~ ", paste0(c_vars, collapse = " + ")))
 c_conduct_mat <- model.matrix(c_fml, data = c_conduct_df)[, -1]
 
@@ -82,20 +82,20 @@ c_coefs_beta <- tibble(term = c_coefs_names, estimate = a_imp_mdl_conduct$betas)
 c_coefs_mat <- model.matrix(c_coefs_fml, data = c_coefs_beta)[-1]
 
 # Create linear predictor
-c_lp <- as.vector(c_conduct_mat %*% c_coefs_mat[2:27])
+c_lp <- as.vector(c_conduct_mat %*% c_coefs_mat[2:29])
 c_resid_sd <- a_imp_mdl_conduct$resid_sd
 
 # Prepare STAN data
 c_conduct_stan <- list(
   I = nrow(c_conduct_df),
-  K = ncol(c_conduct_mat[,1:20]),
+  K = ncol(c_conduct_mat[,1:22]),
   r = c_conduct_df$attr,
   N = c_conduct_df$arm_n,
   dt = c_conduct_df$duration,
   lp = c_lp,
   beta_rate = c_coefs_mat[1],
   resid_sd = c_resid_sd,
-  X = c_conduct_mat[,1:20]
+  X = c_conduct_mat[,1:22]
 )
 
 str(c_conduct_stan)

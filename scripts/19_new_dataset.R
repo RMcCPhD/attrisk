@@ -28,7 +28,7 @@ a_imp_dur <- read_csv("scratch_data/add_duration.csv")
 # Age NAs = no upper limit, set to 150
 # Add missing trial
 b_elig <- a_imp_elig %>% 
-  select(trial_id, contains(c("age", "bmi"))) %>% 
+  select(trial_id, contains(c("age", "bmi", "egfr"))) %>% 
   mutate(
     age_upper = case_when(
       is.na(age_upper) ~ 150,
@@ -41,6 +41,16 @@ b_elig <- a_imp_elig %>%
     bmi_upper = case_when(
       is.na(bmi_upper) ~ "<=45",
       TRUE ~ bmi_upper
+    ),
+    egfr_lower = case_when(
+      egfr_lower <= 30 ~ "<=30",
+      egfr_lower > 30 ~ ">30",
+      is.na(egfr_lower) ~ "None"
+    ),
+    egfr_upper = case_when(
+      egfr_upper <= 60 ~ "<=60",
+      egfr_upper > 60 ~ ">60",
+      is.na(egfr_upper) ~ "None"
     )
   ) %>% 
   bind_rows(
@@ -49,7 +59,9 @@ b_elig <- a_imp_elig %>%
       age_lower = 19,
       age_upper = 150,
       bmi_lower = "18.5",
-      bmi_upper = "<40"
+      bmi_upper = "<40",
+      egfr_lower = "None",
+      egfr_upper = "None"
     )
   ) %>% 
   distinct()
@@ -83,7 +95,7 @@ c_rm_err <- b_join %>% filter(!(attr > arm_n))
 d_tidy <- c_rm_err %>% 
   select(
     source, trial_id:trttype, n, arm_n, attr, duration,
-    age_lower:bmi_upper, duration:n_poms,
+    age_lower:egfr_upper, duration:n_poms,
     male_n:egfr_mean
   )
 
@@ -103,7 +115,7 @@ e_factors <- d_tidy %>%
     blinding = fct_relevel(blinding, "open_label")
   ) %>% 
   select(-c(p3, p4, po, bdbl, btrip, bquad, bol)) %>% 
-  select(source:bmi_upper, phase:blinding, everything())
+  select(source:egfr_upper, phase:blinding, everything())
 
 # Add attrition counts before they were collapsed
 f_attr <- e_factors %>% 
@@ -141,7 +153,10 @@ g_attr_fixed <- f_attr %>%
       select(trial_id, arm_id)
   ) %>% 
   full_join(g_fix) %>% 
-  arrange(trial_id, trttype, attr)
+  arrange(trial_id, trttype, attr) %>% 
+  mutate(
+    across(egfr_lower:egfr_upper, ~ if_else(is.na(.), "None", .))
+  )
 
 # Now 344 trials (258 agg, 86 ipd)
 g_attr_fixed %>% count(trial_id, source) %>% count(source)
@@ -160,6 +175,8 @@ g_attr_fixed %>%
 # Age upper: 0 = 80, 1 = no limit
 # Min bmi: 0 = Underweight/healthy (<25), 1 = Obese and above (>=25)
 # Max bmi: 0 = Obese (<40), 1 = Morbidly obese (>=40)
+# Min egfr: 0 = None, 1 = <=30, 2 = >30
+# Max egfr: 0 = None, 1 = <=60, 2 = >60
 # Reduced ordinal for number of arms and facilities
 # 1 - 2 arms, 2 - 3 arms, 3 - 4 arms, 4 - >4 arms
 # Log-transformed number of facilities and sample size
@@ -185,6 +202,16 @@ h_tidy <- g_attr_fixed %>%
       as.numeric(str_extract(bmi_upper, "[0-9]+")) <= 40 ~ 0L,
       TRUE ~ 1L
     ),
+    min_egfr = case_when(
+      egfr_lower == "None" ~ 0L,
+      egfr_lower == "<=30" ~ 1L,
+      TRUE ~ 2L
+    ),
+    max_egfr = case_when(
+      egfr_lower == "None" ~ 0L,
+      egfr_lower == "<=60" ~ 1L,
+      TRUE ~ 2L
+    ),
     n_arms = case_when(
       n_arms == 2 ~ 1L,
       n_arms == 3 ~ 2L,
@@ -197,7 +224,7 @@ h_tidy <- g_attr_fixed %>%
   ) %>% 
   select(
     source:age_upper_dbl, age_lower:age_upper, bmi_lower:bmi_upper, 
-    min_bmi:max_bmi, n_log, phase:n_facilities, one_pom,
+    min_bmi:max_egfr, n_log, phase:n_facilities, one_pom,
     male_prop, age10_mean:egfr_mean
   ) %>% 
   select(source:class, n:attr, trttype, everything())
