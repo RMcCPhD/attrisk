@@ -154,9 +154,9 @@ g_attr_fixed <- f_attr %>%
   ) %>% 
   full_join(g_fix) %>% 
   arrange(trial_id, trttype, attr) %>% 
-  mutate(
-    across(egfr_lower:egfr_upper, ~ if_else(is.na(.), "None", .))
-  )
+  group_by(trial_id) %>% 
+  fill(egfr_lower:egfr_upper, .direction = "downup") %>% 
+  ungroup()
 
 # Now 344 trials (258 agg, 86 ipd)
 g_attr_fixed %>% count(trial_id, source) %>% count(source)

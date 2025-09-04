@@ -144,7 +144,7 @@ d_df_exp <- b_best_df %>%
   ungroup()
 
 # Join with variable marginals that were not imputed
-# All length 23
+# All length 27
 e_not_imp <- a_nest %>% 
   select(trial_id, data_rest) %>% 
   unnest(data_rest) %>% 
