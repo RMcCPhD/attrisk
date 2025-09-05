@@ -148,7 +148,7 @@ c_citl_stan <- list(
   J = J,
   pK = pK,
   Z = Z,
-  pB <- c_beta
+  pB = c_beta
 )
 
 str(c_citl_stan)
