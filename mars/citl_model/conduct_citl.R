@@ -14,10 +14,10 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
 # Import stan data
-a_imp_dat <- readRDS("latest_stan_conduct.rds")
+a_imp_dat <- readRDS("latest_stan_citl.rds")
 
 # Compile stan model
-b_compile <- stan_model("mdl_conduct.stan")
+b_compile <- stan_model("mdl_conduct_citl.stan")
 
 # Fit model
 c_fit <- sampling(
@@ -30,7 +30,7 @@ c_fit <- sampling(
   control = list(adapt_delta = 0.9999, max_treedepth = 15)
 )
 
-saveRDS(c_fit, "conduct_fit.rds")
+saveRDS(c_fit, "citl_fit.rds")
 
 # Summarise
 d_draws <- as_draws_df(c_fit)
@@ -61,10 +61,10 @@ d_sum_conv <- d_sum %>%
 write_csv(d_sum_conv, "sum_rhat_ess.csv")
 
 # Examine r recovery
-ppc_dens <- ppc_dens_overlay(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:361, ])
+ppc_dens <- ppc_dens_overlay(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:344, ])
 ggsave("r_recovery_overall.jpg", ppc_dens, width = 8, height = 8, units = "in")
 
-ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:361, ])
+ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:344, ])
 ggsave("r_recovery_ind.jpg", ppc_int, width = 8, height = 8, units = "in")
 
 # Extract posterior estimates
@@ -74,4 +74,4 @@ e_sum <- summarise_draws(
   ~ quantile(.x, probs = c(0.025, 0.975))
 )
 
-saveRDS(e_sum, "conduct_sum_draws.rds")
+saveRDS(e_sum, "citl_sum_draws.rds")
