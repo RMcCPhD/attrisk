@@ -2,13 +2,45 @@
 # Prepare data for calibration-in-the-large model
 source("scripts/00_config.R")
 library(tidyverse)
+library(multinma)
 
-# Generate sobol sequences -----------------------------------------------------
+# Repeat setup for non-CITL conduct model --------------------------------------
 
-# Import design features and pooled marginals
-a_imp_df <- readRDS("processed_data/agg_bl_imputed_stack.rds")
+# Import design features and mean aggregate characteristics
+a_imp_df <- readRDS("processed_data/latest_dataset.rds") %>% 
+  select(-c(contains("dbl"), bmi_lower:bmi_upper))
 
-a_imp_bl <- readRDS("processed_data/agg_bl_dists_ready.rds") %>% 
+# Import shape linear predictor
+a_imp_mdl_conduct_nm <- read_csv("outputs/model_shape/conduct/lm_res.csv")
+a_imp_mdl_conduct <- readRDS("outputs/model_shape/conduct/lm_res_shrinkage.rds")
+
+# Create model matrix for predictors
+b_vars <- names(a_imp_df[c(7:32)])
+b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
+b_conduct_mat <- model.matrix(b_fml, data = a_imp_df)[, -1]
+
+# Prepare conduct coefficients
+b_conduct_coefs <- a_imp_mdl_conduct_nm %>%
+  filter(!(term %in% c("(Intercept)"))) %>%
+  select(term, estimate) %>%
+  pivot_wider(names_from = "term", values_from = "estimate")
+
+b_coefs_names <- names(b_conduct_coefs)
+b_coefs_fml <- as.formula(paste0("~ ", paste0(b_coefs_names, collapse = " + ")))
+
+b_coefs_beta <- tibble(term = b_coefs_names, estimate = a_imp_mdl_conduct$betas) %>%
+  pivot_wider(names_from = "term", values_from = "estimate")
+
+b_coefs_mat <- model.matrix(b_coefs_fml, data = b_coefs_beta)[-1]
+
+# Create linear predictor
+b_lp <- as.vector(b_conduct_mat %*% b_coefs_mat[2:29])
+b_resid_sd <- a_imp_mdl_conduct$resid_sd
+
+# Get Sobol sequences and log-hazard betas -------------------------------------
+
+# Import marginals for baseline characteristics
+c_imp_bl <- readRDS("processed_data/agg_bl_dists_ready.rds") %>% 
   select(trial_id, vars, values_scaled) %>% 
   pivot_wider(names_from = vars, values_from = values_scaled) %>% 
   mutate(male = 1 - male) %>% 
@@ -17,10 +49,10 @@ a_imp_bl <- readRDS("processed_data/agg_bl_dists_ready.rds") %>%
   nest()
 
 # Import correlation matrix
-a_imp_cor <- readRDS("processed_data/citl_cor_mat.rds")
+c_imp_cor <- readRDS("processed_data/citl_cor_mat.rds")
 
 # Generate sobol sequences
-b_sobol <- a_imp_bl %>% 
+c_sobol <- c_imp_bl %>% 
   mutate(
     sobol = map(data, function(df) {
       add_integration(
@@ -34,20 +66,20 @@ b_sobol <- a_imp_bl %>%
         egfr        = distr(qnorm, df$egfr_mu, df$egfr_d),
         hba1c       = distr(qnorm, df$hba1c_mu, df$hba1c_d),
         asian       = distr(qbern, df$asian),
-        black       = distr(qbern, df$black),
+        black_aa    = distr(qbern, df$black),
         other       = distr(qbern, df$other),
         sbp         = distr(qnorm, df$sbp_mu, df$sbp_d),
         sex         = distr(qbern, df$sex),
         comorbs     = distr(qnbinom, size = df$comorbs_size, mu = df$comorbs_mu),
         n_atc       = distr(qnbinom, size = df$conmeds_size, mu = df$conmeds_mu),
-        cor = a_imp_cor,
+        cor = c_imp_cor,
         n_int = 64
       )
     })
   )
 
 # Tidy sequences
-b_sobol_tidy <- b_sobol %>% 
+c_sobol_tidy <- c_sobol %>% 
   mutate(
     sobol_ext = map(sobol, function(df) {
       df %>% 
@@ -82,9 +114,44 @@ c_beta <- c(
   n_atc     = c_imp_hr$n_atc_loghr
 )
 
-# Prepare test data ------------------------------------------------------------
+# Prepare CITL inputs ----------------------------------------------------------
 
-# Five trials
+# Parameters
+I <- nrow(a_imp_df)   # N trials
+J <- 64L              # N synthetic participants
+Pnm <- names(c_beta) # Predictor names
+pK <- length(Pnm)    # N predictors
 
-# Prepare conduct stan data ----------------------------------------------------
+# Construct large matrix of sobol sequences per trial (IxJ) x pK
+Z_blocks <- vector("list", I)
+for (i in seq_len(I)) {
+  trial <- a_imp_df$trial_id[i]
+  idx <- match(trial, c_sobol_tidy$trial_id)
+  M <- c_sobol_tidy$sobol_ext[[idx]]
+  Z_blocks[[i]] <- as.matrix(M)
+}
+Z <- do.call(rbind, Z_blocks)
 
+# Construct STAN data with CITL inputs -----------------------------------------
+
+# Up to X is same inputs as before, after is CITL inputs
+c_citl_stan <- list(
+  I = nrow(a_imp_df),
+  K = ncol(b_conduct_mat[,1:22]),
+  r = a_imp_df$attr,
+  N = a_imp_df$arm_n,
+  dt = a_imp_df$duration,
+  lp = b_lp,
+  beta_rate = b_coefs_mat[1],
+  resid_sd = b_resid_sd,
+  X = b_conduct_mat[,1:22],
+  J = J,
+  pK = pK,
+  Z = Z,
+  pB <- c_beta
+)
+
+str(c_citl_stan)
+
+# Save
+saveRDS(c_citl_stan, "processed_data/latest_stan_citl.rds")
