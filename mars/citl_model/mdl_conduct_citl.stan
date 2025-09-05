@@ -40,7 +40,7 @@ data {
   // Non-CITL inputs
   int<lower=1> I;                       // number of data points (arms in trials)
   int<lower=1> K;                       // number of covariates
-  array[I] int<lower=1> r;              // observed attrition counts
+  array[I] int<lower=0> r;              // observed attrition counts
   array[I] int<lower=1> N;              // number of participants
   vector[I] dt;                         // total follow-up time in years
   vector[I] lp;                         // covariate linear predictor for shape
