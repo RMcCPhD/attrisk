@@ -62,10 +62,10 @@ d_sum_conv <- d_sum %>%
 write_csv(d_sum_conv, "mars/citl_test/outputs/sum_rhat_ess.csv")
 
 # Examine r recovery
-ppc_dens <- ppc_dens_overlay(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:5,])
+ppc_dens <- ppc_dens_overlay(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:344,])
 ggsave("r_recovery_overall.jpg", ppc_dens, width = 8, height = 8, units = "in")
 
-ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:5,])
+ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new"))
 ggsave("r_recovery_ind.jpg", ppc_int, width = 8, height = 8, units = "in")
 
 # Extract posterior estimates

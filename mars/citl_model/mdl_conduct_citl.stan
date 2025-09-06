@@ -22,15 +22,14 @@ functions {
   // Delta produced, added to log-rate to calibrate intercept to participant
   // risk profile per arm
   real get_eff_rate(real p_tgt, real a, real dt) {
-    real p = fmin(1 - 1e-12, fmax(1e-12, p_tgt)); // Clamped to stabilise
     // Inverted Gompertz CDF
     if (fabs(a) < 1e-4) {
       // Reduce to inverted exp when a ≈ 0
-      return -log1m(p) / fmax(1e-12, dt);
+      return -log1m(p_tgt) / dt;
     } else {
       // Inverted Gompertz CDF
-      real num = a * (-log1m(p));
-      real den = fmax(1e-12, exp(a * dt) - 1);
+      real num = a * (-log1m(p_tgt));
+      real den = exp(a * dt) - 1;
       return num / den;
     }
   }
@@ -53,6 +52,12 @@ data {
   int<lower=1> pK;                      // Participant-level covariates
   matrix[I * J, pK] Z;                  // Stacked Sobol sequences for covariates
   vector[pK] pB;                        // Pooled Cox log-HRs
+}
+
+transformed data {
+  // Participant-level linear predictor across arms
+  vector[I * J] eta_all = Z * pB;       // Stacked across arms
+  vector[I * J] hr_all = exp(eta_all);  // HR
 }
 
 parameters {
@@ -83,15 +88,11 @@ transformed parameters {
   // parameters from shape model fit externally
   vector[I] a_base = log_b_base * beta_rate + lp + error;
   
-  // Participant-level linear predictor across arms
-  vector[I * J] eta_all = Z * pB;       // Stacked across arms
-  vector[I] avg_p;                      // Average participant risk per arm
-  
   // Compute arm-specific average risk
+  vector[I] avg_p;
   for (i in 1:I) {
     int s = (i - 1) * J + 1;                              // Starting row index
-    vector[J] eta_i = segment(eta_all, s, J);             // Slice participant row
-    vector[J] hr_i  = exp(eta_i);                         // Get participant HR
+    vector[J] hr_i  = segment(hr_all, s, J);              // Slice HR row
     vector[J] b_i   = rep_vector(b_base[i], J) .* hr_i;   // Participant rate
     vector[J] a_i   = rep_vector(a_base[i], J);           // Participant shape
     vector[J] dt_i  = rep_vector(dt[i], J);               // Duration
@@ -102,17 +103,17 @@ transformed parameters {
   // Invert to effective baseline rate (rate without participant risk profiles)
   vector[I] log_b_eff;
   for (i in 1:I) {
-    real b_eff_i = fmax(get_eff_rate(avg_p[i], a_base[i], dt[i]), 1e-12);
+    real b_eff_i = get_eff_rate(avg_p[i], a_base[i], dt[i]);
     log_b_eff[i] = log(b_eff_i);
   }
   
   // Apply delta to intercept, obtain updated log-rate
-  vector[I] delta     = log_b_eff - log_b_base; // arm-specific shift on log-rate
+  vector[I] delta     = log_b_eff - log_b_base; // arm-specific shift in log-rate
   vector[I] mu1_cal   = mu1 + delta;            // updated intercept
   vector[I] log_b_cal = mu1_cal + X * beta;     // construct log-rate
   vector[I] b_cal     = exp(log_b_cal);         // new rate
 
-  // 5) Calibrated probabilities used in likelihood
+  // Compute p with calibrated rate
   vector[I] p = gompertz_prob(b_cal, a_base, dt);
   
 }
@@ -139,12 +140,6 @@ generated quantities {
   array[I] int r_new;                   // predicted attrition counts
   vector[I] log_lik;                    // log-likelihood
   
-  // Calibrated intercept components
-  vector[I] log_b_base_out = log_b_base;
-  vector[I] log_b_cal_out  = log_b_cal;
-  vector[I] delta_out      = delta;
-  vector[I] avg_risk_out   = avg_p;
-  
   // Rate marginals (pre-CITL and calibrated)
   real mean_rate = mean(b_base);
   real sd_rate = sd(b_base);
@@ -158,3 +153,4 @@ generated quantities {
   }
 
 }
+
