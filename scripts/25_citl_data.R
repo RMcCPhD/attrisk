@@ -3,6 +3,7 @@
 source("scripts/00_config.R")
 library(tidyverse)
 library(multinma)
+library(posterior)
 
 # Repeat setup for non-CITL conduct model --------------------------------------
 
