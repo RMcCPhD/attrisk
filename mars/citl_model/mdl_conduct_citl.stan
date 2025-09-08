@@ -1,156 +1,85 @@
+// Clamp p to prevent exact 0 or 1s, allows STAN to sample in stable regions
 functions {
-  // Safely use Gompertz cumulative distribution
-  // If a is close to 0, collapse to exponential
-  // Otherwise use Gompertz
-  vector gompertz_prob(vector b, vector a, vector dt) {
-    int I = rows(b);
-    vector[I] p;
-    for (i in 1:I) {
-      if (fabs(a[i]) < 1e-4) {
-        // Limit case: Exponential model when a ≈ 0
-        p[i] = 1 - exp(-b[i] * dt[i]);
-      } else {
-        // General Gompertz model
-        p[i] = 1 - exp(-b[i] / a[i] * (exp(a[i] * dt[i]) - 1));
-      }
-    }
-    return p;
-  }
-  
-  // Safely obtain effective rate for a given target p, shape and time
-  // Use to obtain log-diff between effective and actual log-rate
-  // Delta produced, added to log-rate to calibrate intercept to participant
-  // risk profile per arm
-  real get_eff_rate(real p_tgt, real a, real dt) {
-    // Inverted Gompertz CDF
-    if (fabs(a) < 1e-4) {
-      // Reduce to inverted exp when a ≈ 0
-      return -log1m(p_tgt) / dt;
-    } else {
-      // Inverted Gompertz CDF
-      real num = a * (-log1m(p_tgt));
-      real den = exp(a * dt) - 1;
-      return num / den;
-    }
+  real clamp_p(real x) {
+    return fmin(fmax(x, 1e-12), 1 - 1e-12);
   }
 }
 
 data {
-  // Non-CITL inputs
-  int<lower=1> I;                       // number of data points (arms in trials)
+  int<lower=1> I;                       // number arms
   int<lower=1> K;                       // number of covariates
+  int<lower=1> J;                       // number of sobol participants
   array[I] int<lower=0> r;              // observed attrition counts
-  array[I] int<lower=1> N;              // number of participants
+  array[I] int<lower=1> N;              // number of arm participants
   vector[I] dt;                         // total follow-up time in years
-  vector[I] lp;                         // covariate linear predictor for shape
-  real beta_rate;                       // rate beta from linear model of shape
-  real<lower=0> resid_sd;               // residual SD from linear model of shape
+  
+  // Pre-CITL draws
+  vector[I] mu1_draw;                   // intercept of log-rate
+  vector[K] beta_draw;                  // covariate betas
   matrix[I, K] X;                       // covariate matrix
+  vector[I] lp;                         // linear predictor of shape
+  real beta_rate;                       // rate beta from linear model of shape
+  vector[I] error_draw;                 // residual errors passed to shape
   
   // CITL inputs
-  int<lower=1> J;                       // Participant per arm
-  int<lower=1> pK;                      // Participant-level covariates
-  matrix[I * J, pK] Z;                  // Stacked Sobol sequences for covariates
-  vector[pK] pB;                        // Pooled Cox log-HRs
+  int<lower=1> pK;                      // number of sobol covariates
+  matrix[I * J, pK] Z;                  // stacked matrix of Sobol sequences
+  vector[pK] pB;                        // pooled Cox log-HRs
 }
 
 transformed data {
-  // Participant-level linear predictor across arms
-  vector[I * J] eta_all = Z * pB;       // Stacked across arms
-  vector[I * J] hr_all = exp(eta_all);  // HR
+  vector[I * J] hr_all = exp(Z * pB);   // participant-level HR
 }
 
 parameters {
-  // Hierarchical structure for rate
-  real mu_mu1;                          // global log-mean for intercept (mu1)
-  real<lower=0> tau_mu1;                // sd for log(mu1)
-  vector[I] z_mu1;                      // standard normal latent mu1 variables
-  
-  // Global-local shrinkage for design features
-  real<lower=0> tau_beta;               // global shrinkage factor
-  vector<lower=0>[K] lambda_beta;       // local shrinkage factor
-  vector[K] z_beta;                     // latent normal betas
-  
-  // Error for shape
-  vector[I] error;                      // N(0, resid_sd)
+  real gamma_mu;                        // global calibration
+  vector[I] gamma_raw;                  // arm-specific calibration
+  real<lower=0> gamma_sigma;            // shrinkage scale
 }
 
 transformed parameters {
-  // (Pre-CITL) Arm-specific log-rate intercepts and betas
-  vector[I] mu1 = mu_mu1 + tau_mu1 * z_mu1;
-  vector[K] beta = tau_beta * (lambda_beta .* z_beta);
+  vector[I] gamma = gamma_mu + gamma_sigma * gamma_raw;
+  vector[I] log_b_pre = mu1_draw + X * beta_draw;             // pre-CITL log-rate
+  vector[I] log_b_cal = log_b_pre + gamma;                    // calibrated log-rate
+  vector[I] b_cal = exp(log_b_cal);                           // rate
+  vector[I] a_cal = log_b_cal * beta_rate + lp + error_draw;  // shape
   
-  // (Pre-CITL) Arm-specific baseline log-rate and rate
-  vector[I] log_b_base = mu1 + X * beta;
-  vector[I] b_base = exp(log_b_base);      
-  
-  // Arm-specific shape (conditioned on log-rate, linear predictor and error)
-  // parameters from shape model fit externally
-  vector[I] a_base = log_b_base * beta_rate + lp + error;
-  
-  // Compute arm-specific average risk
-  vector[I] avg_p;
+  // Compute arm-level average participant risk
+  vector[I] p_i;
   for (i in 1:I) {
-    int s = (i - 1) * J + 1;                              // Starting row index
-    vector[J] hr_i  = segment(hr_all, s, J);              // Slice HR row
-    vector[J] b_i   = rep_vector(b_base[i], J) .* hr_i;   // Participant rate
-    vector[J] a_i   = rep_vector(a_base[i], J);           // Participant shape
-    vector[J] dt_i  = rep_vector(dt[i], J);               // Duration
-    vector[J] p_i   = gompertz_prob(b_i, a_i, dt_i);      // Compute risk
-    avg_p[i]        = mean(p_i);                          // Average arm risk
+    int s = (i - 1) * J + 1;
+    vector[J] hr_i = segment(hr_all, s, J);
+    real a_i = a_cal[i];
+    real b_i = b_cal[i];
+    real t_i = dt[i];
+    
+    // Safely compute Gompertz constant used to compute risk
+    real C_i = (fabs(a_i) < 1e-4) ? (b_i * t_i) : (b_i / a_i) * expm1(a_i * t_i);
+    p_i[i] = clamp_p(1 - mean(exp(-hr_i * C_i)));
   }
-  
-  // Invert to effective baseline rate (rate without participant risk profiles)
-  vector[I] log_b_eff;
-  for (i in 1:I) {
-    real b_eff_i = get_eff_rate(avg_p[i], a_base[i], dt[i]);
-    log_b_eff[i] = log(b_eff_i);
-  }
-  
-  // Apply delta to intercept, obtain updated log-rate
-  vector[I] delta     = log_b_eff - log_b_base; // arm-specific shift in log-rate
-  vector[I] mu1_cal   = mu1 + delta;            // updated intercept
-  vector[I] log_b_cal = mu1_cal + X * beta;     // construct log-rate
-  vector[I] b_cal     = exp(log_b_cal);         // new rate
-
-  // Compute p with calibrated rate
-  vector[I] p = gompertz_prob(b_cal, a_base, dt);
-  
 }
 
 model {
-  // b has a log-normal prior via exp(mu1 + X * beta)
-  mu_mu1 ~ normal(0, 1);
-  tau_mu1 ~ normal(0, 1);               // truncated normal via <lower=0>
-  z_mu1 ~ normal(0, 1);
-  
-  // Hierarchical global-local gaussian prior for beta shrinkage
-  tau_beta ~ normal(0, 1);
-  lambda_beta ~ normal(0, 1);
-  z_beta ~ normal(0, 1);
-  
-  // Normal prior for error, scale is residual sd from linear model of shape
-  error ~ normal(0, resid_sd);
-  
-  // Likelihood
-  r ~ binomial(N, p);
+  // Normal priors for CITL gamma
+  gamma_mu ~ normal(0, 1);
+  gamma_raw ~ normal(0, 1);
+  gamma_sigma ~ normal(0, 1);
+    
+  // Pass average risk to likelihood
+  target += binomial_lpmf(r | N, p_i);
+    
 }
 
 generated quantities {
-  array[I] int r_new;                   // predicted attrition counts
-  vector[I] log_lik;                    // log-likelihood
+  vector[I] delta = log_b_cal - log_b_pre;
+  vector[I] haz_mult = exp(delta);
   
-  // Rate marginals (pre-CITL and calibrated)
-  real mean_rate = mean(b_base);
-  real sd_rate = sd(b_base);
-  real mean_rate_cal = mean(b_cal);
-  real sd_rate_cal = sd(b_cal);
-
-  // Posterior predictive and log-likelihood
+  // PPC and log-likelihood
+  array[I] int r_new;
+  vector[I] log_lik;
   for (i in 1:I) {
-    r_new[i] = binomial_rng(N[i], p[i]);
-    log_lik[i] = binomial_lpmf(r[i] | N[i], p[i]);
+    r_new[i]  = binomial_rng(N[i], p_i[i]);
+    log_lik[i]= binomial_lpmf(r[i] | N[i], p_i[i]);
   }
-
 }
 

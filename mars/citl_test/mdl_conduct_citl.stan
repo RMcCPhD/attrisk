@@ -1,37 +1,7 @@
+// Clamp p to prevent exact 0 or 1s, allows STAN to sample in stable regions
 functions {
-  // Safely use Gompertz cumulative distribution
-  // If a is close to 0, collapse to exponential
-  // Otherwise use Gompertz
-  vector gompertz_prob(vector b, vector a, vector dt) {
-    int I = rows(b);
-    vector[I] p;
-    for (i in 1:I) {
-      if (fabs(a[i]) < 1e-4) {
-        // Limit case: Exponential model when a ≈ 0
-        p[i] = 1 - exp(-b[i] * dt[i]);
-      } else {
-        // General Gompertz model
-        p[i] = 1 - exp(-b[i] / a[i] * (exp(a[i] * dt[i]) - 1));
-      }
-    }
-    return p;
-  }
-  
-  // Safely obtain effective rate for a given target p, shape and time
-  // Use to obtain log-diff between effective and actual log-rate
-  // Delta produced, added to log-rate to calibrate intercept to participant
-  // risk profile per arm
-  real get_eff_rate(real p_tgt, real a, real dt) {
-    // Inverted Gompertz CDF
-    if (fabs(a) < 1e-4) {
-      // Reduce to inverted exp when a ≈ 0
-      return -log1m(p_tgt) / dt;
-    } else {
-      // Inverted Gompertz CDF
-      real num = a * (-log1m(p_tgt));
-      real den = exp(a * dt) - 1;
-      return num / den;
-    }
+  real clamp_p(real x) {
+    return fmin(fmax(x, 1e-12), 1 - 1e-12);
   }
 }
 
@@ -49,15 +19,18 @@ data {
   
   // CITL inputs
   int<lower=1> J;                       // Participant per arm
-  int<lower=1> pK;                      // Participant-level covariates
-  matrix[I * J, pK] Z;                  // Stacked Sobol sequences for covariates
+  int<lower=1> pK;                      // Number of sobol covariates
+  matrix[I * J, pK] Z;                  // Stacked matrix of Sobol sequences
   vector[pK] pB;                        // Pooled Cox log-HRs
 }
 
 transformed data {
   // Participant-level linear predictor across arms
-  vector[I * J] eta_all = Z * pB;       // Stacked across arms
-  vector[I * J] hr_all = exp(eta_all);  // HR
+  vector[I * J] hr_all = exp(Z * pB);   // Participant-level HR
+  
+  // Helper - starting row for each arm
+  array[I] int arm_start;
+  for (i in 1:I) arm_start[i] = (i - 1) * J + 1;
 }
 
 parameters {
@@ -73,49 +46,51 @@ parameters {
   
   // Error for shape
   vector[I] error;                      // N(0, resid_sd)
+  
+  // Arm-specific CITL intercept shift (log scale)
+  real gamma_citl;                      // Global CITL factor
+  vector[I] gamma_i_raw;                // Arm-specific calibration
+  real<lower=0> gamma_sigma;            // Shrinkage scale
 }
 
 transformed parameters {
-  // (Pre-CITL) Arm-specific log-rate intercepts and betas
+  
+  // Centre gamma
+  vector[I] gamma_i = gamma_i_raw - mean(gamma_i_raw);
+  
+  // Arm-specific log-rate intercepts and betas
   vector[I] mu1 = mu_mu1 + tau_mu1 * z_mu1;
   vector[K] beta = tau_beta * (lambda_beta .* z_beta);
   
-  // (Pre-CITL) Arm-specific baseline log-rate and rate
-  vector[I] log_b_base = mu1 + X * beta;
-  vector[I] b_base = exp(log_b_base);      
+  // Calibrated rate
+  vector[I] log_b_cal = mu1 + X * beta + gamma_citl + gamma_i;
+  vector[I] b_cal = exp(log_b_cal);      
   
-  // Arm-specific shape (conditioned on log-rate, linear predictor and error)
-  // parameters from shape model fit externally
-  vector[I] a_base = log_b_base * beta_rate + lp + error;
+  // Shape updated with calibrated log_rate
+  vector[I] a_cal = log_b_cal * beta_rate + lp + error;
   
-  // Compute arm-specific average risk
-  vector[I] avg_p;
+  // Compute average arm risk from Sobol sequences
+  vector[I] p;
   for (i in 1:I) {
-    int s = (i - 1) * J + 1;                              // Starting row index
-    vector[J] hr_i  = segment(hr_all, s, J);              // Slice HR row
-    vector[J] b_i   = rep_vector(b_base[i], J) .* hr_i;   // Participant rate
-    vector[J] a_i   = rep_vector(a_base[i], J);           // Participant shape
-    vector[J] dt_i  = rep_vector(dt[i], J);               // Duration
-    vector[J] p_i   = gompertz_prob(b_i, a_i, dt_i);      // Compute risk
-    avg_p[i]        = mean(p_i);                          // Average arm risk
+    int s = arm_start[i]; // Starting row index
+    vector[J] hr_i = segment(hr_all, s, J);  // Slice HR rows
+    
+    // Safely compute Gompertz constant
+    real a_i = a_cal[i];
+    real b_i = b_cal[i];
+    real t_i = dt[i];
+    real C_i;
+    
+    if (fabs(a_i) < 1e-4) {
+      // Limit case: Reduce to exp if a ≈ 0
+      C_i = b_i * t_i;
+    } else {
+      C_i = (b_i / a_i) * (exp(a_i * t_i) - 1);
+    }
+    
+    real p_i = 1 - mean(exp(-hr_i * C_i));
+    p[i] = clamp_p(p_i);
   }
-  
-  // Invert to effective baseline rate (rate without participant risk profiles)
-  vector[I] log_b_eff;
-  for (i in 1:I) {
-    real b_eff_i = get_eff_rate(avg_p[i], a_base[i], dt[i]);
-    log_b_eff[i] = log(b_eff_i);
-  }
-  
-  // Apply delta to intercept, obtain updated log-rate
-  vector[I] delta     = log_b_eff - log_b_base; // arm-specific shift in log-rate
-  vector[I] mu1_cal   = mu1 + delta;            // updated intercept
-  vector[I] log_b_cal = mu1_cal + X * beta;     // construct log-rate
-  vector[I] b_cal     = exp(log_b_cal);         // new rate
-
-  // Compute p with calibrated rate
-  vector[I] p = gompertz_prob(b_cal, a_base, dt);
-  
 }
 
 model {
@@ -132,7 +107,12 @@ model {
   // Normal prior for error, scale is residual sd from linear model of shape
   error ~ normal(0, resid_sd);
   
-  // Likelihood
+  // Normal priors for CITL gamma
+  gamma_citl ~ normal(0, 1);
+  gamma_i_raw ~ normal(0, gamma_sigma);
+  gamma_sigma ~ normal(0, 1);
+  
+  // Likelihood using average risk from sobol sequences
   r ~ binomial(N, p);
 }
 
@@ -140,17 +120,44 @@ generated quantities {
   array[I] int r_new;                   // predicted attrition counts
   vector[I] log_lik;                    // log-likelihood
   
-  // Rate marginals (pre-CITL and calibrated)
-  real mean_rate = mean(b_base);
-  real sd_rate = sd(b_base);
-  real mean_rate_cal = mean(b_cal);
-  real sd_rate_cal = sd(b_cal);
+  // Pre and post-CITL intercepts
+  vector[I] log_b_pre  = mu1 + X * beta;
+  vector[I] log_b_post = log_b_cal;
 
-  // Posterior predictive and log-likelihood
+  // Expected versus observed attrition counts and rates
+  vector[I] exp_count;                  // N[i] * p[i]
+  vector[I] exp_rate;                   // p[i]
+  vector[I] obs_count;                  // r[i]
+  vector[I] obs_rate;                   // r[i] / N[i]
+
+  // Monitoring CITL
+  real expected_total = 0;
+  int  observed_total = 0;
+  int  total_N = 0;
+
   for (i in 1:I) {
-    r_new[i] = binomial_rng(N[i], p[i]);
+    // Posterior predictive and log-likelihood
+    r_new[i]   = binomial_rng(N[i], p[i]);
     log_lik[i] = binomial_lpmf(r[i] | N[i], p[i]);
+
+    // per-arm diagnostics
+    exp_count[i] = N[i] * p[i];
+    exp_rate[i]  = p[i];
+    obs_count[i] = r[i];
+    obs_rate[i]  = r[i] / N[i];
+
+    // accumulate totals
+    expected_total += exp_count[i];
+    observed_total += r[i];
+    total_N        += N[i];
   }
 
+  // Overall CITL summaries
+  real avg_expected = expected_total / total_N;
+  real avg_observed = observed_total / total_N;
+
+  // (Optional) expose calibrated parameters for downstream use
+  vector[I] b_cal_out = b_cal;
+  vector[I] a_cal_out = a_cal;
 }
 

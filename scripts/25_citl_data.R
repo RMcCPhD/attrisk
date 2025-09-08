@@ -132,12 +132,42 @@ for (i in seq_len(I)) {
 }
 Z <- do.call(rbind, Z_blocks)
 
+# Prepare posterior draws from pre-CITL model ----------------------------------
+
+# Import fitted model, get draws df
+d_imp_mdl <- readRDS("mars/conduct_model/outputs/conduct_fit.rds")
+d_draws <- as_draws(d_imp_mdl)
+
+# Get variable arrays
+d_mu1 <- extract_variable_array(d_draws, variable = "mu1")
+d_beta <- extract_variable_array(d_draws, variable = "beta")
+d_err <- extract_variable_array(d_draws, variable = "error")
+
+# Flatten arrays
+flatten_arrays <- function(arr) {
+  stopifnot(length(dim(arr)) == 3)
+  iter <- dim(arr)[1]
+  chain <- dim(arr)[2]
+  trial <- dim(arr)[3]
+  
+  mats <- lapply(seq_len(chain), function(c) {
+    arr[, c, , drop = FALSE][, 1, ]
+  })
+  
+  do.call(rbind, mats)
+}
+
+mu1_draw_all   <- flatten_arrays(d_mu1)   # 12000 x 344
+beta_draw_all  <- flatten_arrays(d_beta)  # 12000 x 22
+error_draw_all <- flatten_arrays(d_err)   # 12000 x 344
+
 # Construct STAN data with CITL inputs -----------------------------------------
 
 # Up to X is same inputs as before, after is CITL inputs
-c_citl_stan <- list(
+e_citl_stan <- list(
   I = nrow(a_imp_df),
   K = ncol(b_conduct_mat[,1:22]),
+  J = J,
   r = a_imp_df$attr,
   N = a_imp_df$arm_n,
   dt = a_imp_df$duration,
@@ -145,13 +175,17 @@ c_citl_stan <- list(
   beta_rate = b_coefs_mat[1],
   resid_sd = b_resid_sd,
   X = b_conduct_mat[,1:22],
-  J = J,
   pK = pK,
   Z = Z,
   pB = c_beta
 )
 
-str(c_citl_stan)
+str(e_citl_stan)
 
 # Save
-saveRDS(c_citl_stan, "processed_data/latest_stan_citl.rds")
+saveRDS(e_citl_stan, "processed_data/latest_stan_citl.rds")
+
+# Save flattened arrays
+saveRDS(mu1_draw_all, "processed_data/citl_mu1.rds")
+saveRDS(beta_draw_all, "processed_data/citl_beta.rds")
+saveRDS(error_draw_all, "processed_data/citl_error.rds")

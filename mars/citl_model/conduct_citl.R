@@ -13,65 +13,60 @@ options(scipen = 999)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
-# Import stan data
+# Import stan data and flattened arrays
 a_imp_dat <- readRDS("latest_stan_citl.rds")
+a_imp_mu1 <- readRDS("citl_mu1.rds")
+a_imp_beta <- readRDS("citl_beta.rds")
+a_imp_error <- readRDS("citl_error.rds")
+
+# Get dims
+total_draws <- nrow(a_imp_mu1)
+I <- ncol(a_imp_mu1)
+K <- ncol(a_imp_beta)
+
+# Get subset of posterior samples
+D_target <- 120L
+n_chains <- 4L
+iters <- total_draws / n_chains
+per_chain <- max(1L, floor(D_target / n_chains))
+chain_idx <- unique(as.integer(round(seq(1, iters, length.out = per_chain))))
+ids <- as.integer(unlist(lapply(0:(n_chains - 1L), function(c) c * iters + chain_idx)))
+ids <- ids[ids >= 1 & ids <= total_draws]
+ids <- unique(ids)
+message(sprintf("Selected %d stage-1 draws (%d per chain).", length(ids), per_chain))
 
 # Compile stan model
 b_compile <- stan_model("mdl_conduct_citl.stan")
 
-# Fit model
-c_fit <- sampling(
-  b_compile,
-  data = a_imp_dat,
-  warmup = 1000,
-  iter = 4000,
-  chains = 4,
-  seed = 123,
-  control = list(adapt_delta = 0.9999, max_treedepth = 15)
-)
+# Build data with the pre-CITL draws per trial
+build_stage2 <- function(d) {
+  within(a_imp_dat, {
+    mu1_draw   <- a_imp_mu1[d, ]    # length I
+    beta_draw  <- a_imp_beta[d, ]   # length K
+    error_draw <- a_imp_error[d, ]  # length I
+  })
+}
 
-saveRDS(c_fit, "citl_fit.rds")
+# Iterate model per trial
+run_batch <- function(draws_ids, out_dir = "citl_fits") {
+  
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  for (d in draws_ids) {
+    dat <- build_stage2(d)
+    
+    fit <- sampling(
+      b_compile,
+      data = dat,
+      warmup = 250,
+      iter = 500,
+      chains = 4,
+      seed = 123,
+      control = list(adapt_delta = 0.95, max_treedepth = 12)
+    )
+    
+    saveRDS(fit, file.path("citl_fits", sprintf("citl_fit_d%05d.rds", d)))
+  }
+}
 
-# Summarise
-d_draws <- as_draws_df(c_fit)
-d_sum_draws <- summarise_draws(d_draws)
-
-# Get array for ppc
-d_array <- as.array(c_fit)
-
-# Check for divergences
-check_hmc_diagnostics(c_fit) # Nothing abnormal, i.e. 0 divergences
-
-# Split draws into a separate column
-d_sum <- d_sum_draws %>% 
-  mutate(variable = gsub("\\[[0-9,]+\\]", "", variable)) %>% 
-  group_by(variable) %>% 
-  mutate(draw = case_when(n() == 1 ~ NA, TRUE ~ row_number())) %>% 
-  select(variable, draw, everything()) %>% 
-  ungroup()
-
-d_sum_conv <- d_sum %>% 
-  group_by(variable) %>% 
-  reframe(
-    n = n(),
-    mean_rhat = mean(rhat, na.rm = TRUE),
-    mean_ess = mean(ess_bulk, na.rm = TRUE)
-  )
-
-write_csv(d_sum_conv, "sum_rhat_ess.csv")
-
-# Examine r recovery
-ppc_dens <- ppc_dens_overlay(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:344, ])
-ggsave("r_recovery_overall.jpg", ppc_dens, width = 8, height = 8, units = "in")
-
-ppc_int <- ppc_intervals(a_imp_dat$r, as.matrix(c_fit, pars = "r_new")[1:344, ])
-ggsave("r_recovery_ind.jpg", ppc_int, width = 8, height = 8, units = "in")
-
-# Extract posterior estimates
-e_sum <- summarise_draws(
-  d_draws,
-  mean, median, sd,
-  ~ quantile(.x, probs = c(0.025, 0.975))
-)
-
-saveRDS(e_sum, "citl_sum_draws.rds")
+run_batch(ids)
