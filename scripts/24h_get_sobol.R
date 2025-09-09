@@ -87,8 +87,8 @@ c_beta <- c(
 # Prepare CITL inputs ----------------------------------------------------------
 
 # Parameters
-I <- nrow(a_imp_df)   # N trials
-J <- 64L              # N synthetic participants
+I <- nrow(a_imp_df)  # N trials
+J <- 128L            # N synthetic participants
 Pnm <- names(c_beta) # Predictor names
 pK <- length(Pnm)    # N predictors
 

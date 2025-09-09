@@ -21,7 +21,6 @@ a_imp_sobol <- readRDS("processed_data/sobol_lst.rds")
 
 # Get posterior draws of log-rate, rate and shape
 b_logb <- extract_variable_array(a_draws, variable = "log_b")
-b_b <- extract_variable_array(a_draws, variable = "b")
 b_a <- extract_variable_array(a_draws, variable = "a")
 
 # Construct DxI matrices from parameter arrays
@@ -33,7 +32,6 @@ arr_to_mat <- function(arr) {
 }
 
 b_logb_mat <- arr_to_mat(b_logb)
-b_b_mat <- arr_to_mat(b_b)
 b_a_mat <- arr_to_mat(b_a)
 
 # Pull out trials, counts (i.e. target), arm size and time
@@ -44,7 +42,7 @@ dt <- a_imp_standf$dt
 
 # Build arm-level participant linear predictors, split by arm
 b_sobol_lp <- as.vector(a_imp_sobol$Z %*% a_imp_sobol$loghr)
-b_lp <- split(b_sobol_lp, rep(seq_len(I), each = 64L))
+b_lp <- split(b_sobol_lp, rep(seq_len(I), each = 128L))
 
 # Build time list
 b_dt_lst <- lapply(seq_len(I), \(i) rep(dt[i], length(b_lp[[i]])))
@@ -60,7 +58,7 @@ gompertz_prob <- function(b, a, dt, lp) {
 }
 
 # Expand uniroot brackets until signs differ or ceiling is hit
-uniroot_bracket <- function(f, lo = -10, hi = 10, step = 5, max_expand = 6) {
+uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5, max_expand = 6) {
   flo <- f(lo)
   fhi <- f(hi)
   k <- 0
@@ -95,7 +93,7 @@ find_delta <- function(log_b, a, dt, lp, r_obs, N_arm) {
   if (f_lo < 0 && f_hi < 0) return(NA_real_)
   
   # Backsolve to find delta
-  out <- uniroot_bracket(f, lo = -10, hi = 10, step = 6, max_expand = 6)
+  out <- uniroot_bracket(f, lo = -30, hi = 30, step = 5, max_expand = 6)
   if (is.null(out)) {
     obj <- function(delta) (f(delta))^2
     optimise(obj, interval = c(-40, 40))$minimum
@@ -130,3 +128,104 @@ for (i in 1:I) {
   }
 }
 
+mean(is.na(delta_mat[,i])) # 0 NAs
+
+# Save delta matrix
+saveRDS(delta_mat, "outputs/conduct_model/citl/delta_draws.rds")
+
+# Get pre- and post-CITL average risk and predicted counts
+avg_risk_pre  <- matrix(NA_real_, nrow = S, ncol = I)
+pred_count_pre  <- matrix(NA_real_, nrow = S, ncol = I)
+
+avg_risk_post  <- matrix(NA_real_, nrow = S, ncol = I)
+pred_count_post  <- matrix(NA_real_, nrow = S, ncol = I)
+
+for (i in 1:I) {
+  lp_i <- b_lp[[i]]
+  dt_i <- b_dt_lst[[i]]
+  
+  # Progress notification
+  if (i %% 10 == 1 || i == I) message(sprintf("Arm %d/%d", i, I))
+  
+  for (s in 1:S) {
+    p_pre <- gompertz_prob(
+      b = exp(b_logb_mat[s, i]), a = b_a_mat[[i]], 
+      dt = dt_i, lp = lp_i
+    )
+    p_post <- gompertz_prob(
+      b = exp(b_logb_mat[s, i] + delta_mat[s, i]), a = b_a_mat[[i]], 
+      dt = dt_i, lp = lp_i
+    )
+    avg_risk_pre[s, i]  <- mean(p_pre)
+    avg_risk_post[s, i] <- mean(p_post)
+    pred_count_pre[s, i]  <- N[i] * avg_risk_pre[s, i]
+    pred_count_post[s, i] <- N[i] * avg_risk_post[s, i]
+  }
+}
+
+# Summarise per arm
+calib_sum <- tibble(
+  arm = seq_len(I),
+  N = N,
+  r_obs = r,
+  delta_med     = apply(delta_mat, 2, \(x) median(x, na.rm=TRUE)),
+  delta_lo      = apply(delta_mat, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
+  delta_hi      = apply(delta_mat, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
+  risk_pre_med  = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
+  risk_pre_lo   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
+  risk_pre_hi   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
+  risk_post_med = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
+  risk_post_lo  = apply(avg_risk_post, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
+  risk_post_hi  = apply(avg_risk_post, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
+  pred_pre_med  = apply(pred_count_pre, 2, \(x) median(x, na.rm=TRUE)),
+  pred_post_med = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE))
+)
+
+# Save summary
+write_csv(calib_sum, "outputs/conduct_model/citl/delta_risk_sum.csv")
+
+# Check if backsolving hit targets
+res <- avg_risk_post - rep(r / N, nrow(avg_risk_post))
+summary(as.numeric(res))
+
+# 64 Sobol
+# Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
+# -0.894497 -0.078729 0.009574 0.026206 0.104049 0.985915
+
+# 128 Sobol
+# Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
+# -0.894496 -0.078727  0.009573  0.026123  0.104005  0.985915
+
+# 256 Sobol
+# Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
+
+# Plot
+plot_dat <- tibble(
+  arm = rep(seq_len(I), 2),
+  obs = rep(r / N, 2),
+  fit = c(
+    apply(avg_risk_pre, 2, median, na.rm = TRUE),
+    apply(avg_risk_post, 2, median, na.rm = TRUE)
+  ),
+  stage = rep(c("pre", "post"), each = I)
+)
+
+plot_citl <- plot_dat %>% 
+  ggplot(aes(x = obs, y = fit, colour = stage)) +
+  geom_abline(linetype = 2) +
+  geom_point() +
+  labs(
+    x = "Observed attrition proportion",
+    y = "Predicted attrition proportion"
+  ) +
+  theme_classic()
+
+plot_citl
+
+ggsave(
+  "outputs/conduct_model/citl/calib_plot.png",
+  plot_citl,
+  width = 6,
+  height = 6,
+  units = "in"
+)
