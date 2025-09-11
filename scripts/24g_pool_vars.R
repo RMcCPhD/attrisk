@@ -130,7 +130,6 @@ get_exp_values <- function(df, varname) {
 }
 
 # Build dataset of pooled variable parameters for continuous variables and male
-# Scale to match participant-level covariate scaling
 d_df_exp <- b_best_df %>% 
   group_by(trial_id) %>% 
   group_modify(~{

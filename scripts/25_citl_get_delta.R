@@ -23,7 +23,7 @@ a_imp_sobol <- readRDS("processed_data/sobol_lst.rds")
 b_logb <- extract_variable_array(a_draws, variable = "log_b")
 b_a <- extract_variable_array(a_draws, variable = "a")
 
-# Construct DxI matrices from parameter arrays
+# Reshape arrays into matrices of draws x trials
 arr_to_mat <- function(arr) {
   iter <- dim(arr)[1]
   chain <- dim(arr)[2]
@@ -40,14 +40,13 @@ r <- a_imp_standf$r
 N <- a_imp_standf$N
 dt <- a_imp_standf$dt
 
-# Build arm-level participant linear predictors, split by arm
+# Build arm-level participant linear predictors (log-HR), split by arm
 b_sobol_lp <- as.vector(a_imp_sobol$Z %*% a_imp_sobol$loghr)
-b_lp <- split(b_sobol_lp, rep(seq_len(I), each = 128L))
+b_lp <- split(b_sobol_lp, rep(seq_len(I), each = 64L))
 
 # Build time list
 b_dt_lst <- lapply(seq_len(I), \(i) rep(dt[i], length(b_lp[[i]])))
 
-# Helper functions
 # Compute probability using Gompertz CDF, limit to exp if shape close to 0
 gompertz_prob <- function(b, a, dt, lp) {
   if (abs(a) < 1e-4) {
@@ -57,8 +56,10 @@ gompertz_prob <- function(b, a, dt, lp) {
   }
 }
 
+# Find intercept shift (delta) that matches predicted avg and obs risk
+# Root finding used to backsolve
 # Expand uniroot brackets until signs differ or ceiling is hit
-uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5, max_expand = 6) {
+uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5) {
   flo <- f(lo)
   fhi <- f(hi)
   k <- 0
@@ -73,7 +74,7 @@ uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5, max_expand = 6) {
   uniroot(f, c(lo, hi))$root
 }
 
-# Find delta for d draws
+# Apply functions to find delta for each draw per trial
 find_delta <- function(log_b, a, dt, lp, r_obs, N_arm) {
   
   # Get proportion
@@ -85,15 +86,9 @@ find_delta <- function(log_b, a, dt, lp, r_obs, N_arm) {
     mean(p) - y_prop
   }
   
-  # Check boundary saturation
-  f_lo <- f(-30)
-  f_hi <- f(30)
-  if (is.na(f_lo) || is.na(f_hi)) return(NA_real_)
-  if (f_lo > 0 && f_hi > 0) return(NA_real_)
-  if (f_lo < 0 && f_hi < 0) return(NA_real_)
+  # Use root-finding for delta
+  out <- uniroot_bracket(f, lo = -30, hi = 30, step = 5)
   
-  # Backsolve to find delta
-  out <- uniroot_bracket(f, lo = -30, hi = 30, step = 5, max_expand = 6)
   if (is.null(out)) {
     obj <- function(delta) (f(delta))^2
     optimise(obj, interval = c(-40, 40))$minimum
@@ -101,12 +96,13 @@ find_delta <- function(log_b, a, dt, lp, r_obs, N_arm) {
   
 }
 
-# Backsolve to find delta for every draw and arm
+# Setup for backsolving
 S <- nrow(b_logb_mat) # Draws
 lp_lst <- b_lp # Participant LPs
 dt_lst <- b_dt_lst # Time
 delta_mat <- matrix(NA_real_, nrow = S, ncol = I) # Matrix to store deltas
 
+# Backsolve to find delta for every draw per trial
 for (i in 1:I) {
   lp_i <- lp_lst[[i]]
   dt_i <- dt_lst[[i]]
@@ -133,6 +129,9 @@ mean(is.na(delta_mat[,i])) # 0 NAs
 # Save delta matrix
 saveRDS(delta_mat, "outputs/conduct_model/citl/delta_draws.rds")
 
+# Import to save runtime
+delta_mat <- readRDS("outputs/conduct_model/citl/delta_draws.rds")
+
 # Get pre- and post-CITL average risk and predicted counts
 avg_risk_pre  <- matrix(NA_real_, nrow = S, ncol = I)
 pred_count_pre  <- matrix(NA_real_, nrow = S, ncol = I)
@@ -149,11 +148,11 @@ for (i in 1:I) {
   
   for (s in 1:S) {
     p_pre <- gompertz_prob(
-      b = exp(b_logb_mat[s, i]), a = b_a_mat[[i]], 
+      b = exp(b_logb_mat[s, i]), a = b_a_mat[s, i], 
       dt = dt_i, lp = lp_i
     )
     p_post <- gompertz_prob(
-      b = exp(b_logb_mat[s, i] + delta_mat[s, i]), a = b_a_mat[[i]], 
+      b = exp(b_logb_mat[s, i] + delta_mat[s, i]), a = b_a_mat[s, i], 
       dt = dt_i, lp = lp_i
     )
     avg_risk_pre[s, i]  <- mean(p_pre)
@@ -168,23 +167,27 @@ calib_sum <- tibble(
   arm = seq_len(I),
   N = N,
   r_obs = r,
+  r_pred = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE)),
+  r_citl = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE)),
+  p_obs = r/N,
+  p_pred = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
+  p_citl = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
   delta_med     = apply(delta_mat, 2, \(x) median(x, na.rm=TRUE)),
   delta_lo      = apply(delta_mat, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
-  delta_hi      = apply(delta_mat, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
-  risk_pre_med  = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
-  risk_pre_lo   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
-  risk_pre_hi   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
-  risk_post_med = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
-  risk_post_lo  = apply(avg_risk_post, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
-  risk_post_hi  = apply(avg_risk_post, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
-  pred_pre_med  = apply(pred_count_pre, 2, \(x) median(x, na.rm=TRUE)),
-  pred_post_med = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE))
+  delta_hi      = apply(delta_mat, 2, \(x) quantile(x, 0.975, na.rm=TRUE))
+  # risk_pre_med  = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
+  # risk_pre_lo   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
+  # risk_pre_hi   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
+  # risk_post_med = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
+  # risk_post_lo  = apply(avg_risk_post, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
+  # risk_post_hi  = apply(avg_risk_post, 2, \(x) quantile(x, 0.975, na.rm=TRUE))
 )
 
 # Save summary
 write_csv(calib_sum, "outputs/conduct_model/citl/delta_risk_sum.csv")
 
 # Check if backsolving hit targets
+# At or very close to zero a good sign
 res <- avg_risk_post - rep(r / N, nrow(avg_risk_post))
 summary(as.numeric(res))
 
@@ -192,12 +195,9 @@ summary(as.numeric(res))
 # Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
 # -0.894497 -0.078729 0.009574 0.026206 0.104049 0.985915
 
-# 128 Sobol
+# 128 Sobol (very little diff, stick to 64)
 # Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
 # -0.894496 -0.078727  0.009573  0.026123  0.104005  0.985915
-
-# 256 Sobol
-# Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
 
 # Plot
 plot_dat <- tibble(
@@ -215,8 +215,8 @@ plot_citl <- plot_dat %>%
   geom_abline(linetype = 2) +
   geom_point() +
   labs(
-    x = "Observed attrition proportion",
-    y = "Predicted attrition proportion"
+    x = "Observed attrition risk",
+    y = "Predicted attrition risk"
   ) +
   theme_classic()
 

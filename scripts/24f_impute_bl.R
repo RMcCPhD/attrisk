@@ -7,6 +7,27 @@ library(Amelia)
 # Import characteristics
 a_imp_bl <- readRDS("processed_data/agg_bl_pooled_arms.rds")
 
+# Heatmap of missingness before imputation
+plot_hmap_preimp <- a_imp_bl %>% 
+  mutate(across(trttype:one_pom, as.character)) %>% 
+  pivot_longer(age_mu:former_never) %>% 
+  mutate(na = if_else(is.na(value), 0L, 1L)) %>% 
+  ggplot(aes(x = trial_id, y = fct_rev(name), fill = na)) +
+  geom_tile() +
+  labs(x = NULL, y = NULL) +
+  theme_classic() +
+  theme(
+    axis.text.x = element_blank()
+  )
+
+ggsave(
+  "outputs/conduct_model/agg_bl/hmap_pre_imputation.png",
+  plot_hmap_preimp,
+  width = 10,
+  height = 10,
+  units = "in"
+)
+
 # Helper functions for setting up proportion imputations
 softmax <- function(x) {
   ex <- exp(x - max(x, na.rm = TRUE))
@@ -20,7 +41,7 @@ renorm_simplex <- function(p, eps = 1e-3) {
   p / s
 }
 
-logit     <- function(p) log(p/(1-p))
+logit <- function(p) log(p/(1-p))
 inv_logit <- function(z) 1/(1+exp(-z))
 alr  <- function(p) log(p[-length(p)] / p[length(p)])
 ialr <- function(z) softmax(c(z, 0))

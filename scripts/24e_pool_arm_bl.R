@@ -42,6 +42,8 @@ b_add_trttype <- a_imp_fix %>%
   ) %>% 
   select(trial_id:arm_id, trttype, everything())
 
+saveRDS(b_add_trttype, "scratch_data/ryan_bl_dataset.rds")
+
 # Helper function - compute pooled SD when summarising group chars
 pooledSD <- function(mu, delta, n) {
   # Get weighted mean
