@@ -8,3 +8,14 @@ outputs/
 processed_data/*.rds
 mars/design_model/*.rds
 mars/conduct_model/*.rds
+created_metadata/
+data/
+logs/
+mars/
+mpes/
+processed_data/
+quarto/
+scratch_data/
+scripts/
+vivli/
+
