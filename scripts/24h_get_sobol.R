@@ -33,7 +33,7 @@ c_sobol <- c_imp_bl %>%
         hdl         = distr(qnorm, df$hdl_mu, df$hdl_d),
         total       = distr(qnorm, df$total_chol_mu, df$total_chol_d),
         current     = distr(qbern, df$current),
-        t2dur       = distr(qnorm, df$t2dur_mu, df$t2dur_d),
+        t2dur       = distr(qgamma, df$t2dur_mu, df$t2dur_d),
         egfr        = distr(qnorm, df$egfr_mu, df$egfr_d),
         hba1c       = distr(qnorm, df$hba1c_mu, df$hba1c_d),
         asian       = distr(qbern, df$asian),
@@ -59,6 +59,25 @@ c_sobol_tidy <- c_sobol %>%
         unnest(cols = everything())
     })
   )
+
+# Check
+c_sobol_check <- c_sobol_tidy %>% 
+  select(trial_id, sobol_ext) %>% 
+  unnest(sobol_ext)
+
+# Save trials and vars with negative Sobol values (mostly t2dur)
+# c_sobol_check %>% 
+#   ungroup() %>% 
+#   distinct(trial_id, name) %>% 
+#   # count(name)
+#   write_csv("scratch_data/sobol_neg_vals.csv")
+
+c_sobol_check %>%
+  pivot_longer(age10:n_atc) %>%
+  ggplot(aes(x = value)) +
+  geom_density() +
+  facet_wrap(~name, scales = "free") +
+  theme_classic()
 
 # Import log-hazard estimates
 c_imp_hr <- readRDS("outputs/conduct_model/cox_ma/ma_res.rds") %>% 

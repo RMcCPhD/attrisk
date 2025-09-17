@@ -3,9 +3,12 @@
 source("scripts/00_config.R")
 library(tidyverse)
 library(Amelia)
+library(truncnorm)
 
 # Import characteristics
-a_imp_bl <- readRDS("processed_data/agg_bl_pooled_arms.rds")
+# Set HDL to NA for NCT01272232 - incorrect, can't find original
+a_imp_bl <- readRDS("processed_data/agg_bl_pooled_arms.rds") %>% 
+  mutate(across(contains("hdl"), ~ if_else(trial_id == "NCT01272232", NA, .)))
 
 # Heatmap of missingness before imputation
 plot_hmap_preimp <- a_imp_bl %>% 
@@ -88,7 +91,7 @@ b_format <- a_imp_bl %>%
   select(trial_id:phase, blind_ol:blind_quad, everything()) %>% 
   select(-blinding, -source)
 
-race_cols <- c("asian","black","other","white")
+race_cols <- c("asian", "black", "other", "white")
 
 # Function to build dataset with race and smoking status prepped for imputation
 prep_df <- function(df) {
@@ -136,8 +139,7 @@ prop_bounds <- if (length(prop_male)) {
 }
 
 # Bounds for numeric variables
-b_format %>% 
-  # mutate(across(ends_with("_d"), ~ log(.))) %>% 
+b_amelia_df %>% 
   reframe(across(ends_with(c("_mu", "_d")), ~ unlist(
     list(min = min(., na.rm = TRUE), max = max(., na.rm = TRUE))
   ))) %>% 
@@ -165,26 +167,6 @@ marg_limits <- rbind(
   c(match("total_chol_d", names(b_format)), 0.07, 1.9)
 )
 
-# Limits with log-SDs - leads to extreme values
-# marg_limits <- rbind(
-#   c(match("age_mu", names(b_format)), 39.5, 74.9),
-#   c(match("age_d", names(b_format)), 1.3, 2.6),
-#   c(match("bmi_mu", names(b_format)), 24.2, 37.4),
-#   c(match("bmi_d", names(b_format)), 0.6, 2.36),
-#   c(match("egfr_mu", names(b_format)), 24.1, 154),
-#   c(match("egfr_d", names(b_format)), 1.48, 4.25),
-#   c(match("hba1c_mu", names(b_format)), 6.7, 10.2),
-#   c(match("hba1c_d", names(b_format)), -0.92, 0.59),
-#   c(match("hdl_mu", names(b_format)), 0.94, 2.7),
-#   c(match("hdl_d", names(b_format)), -3.91, -0.36),
-#   c(match("sbp_mu", names(b_format)), 124, 151),
-#   c(match("sbp_d", names(b_format)), 1.9, 2.86),
-#   c(match("t2dur_mu", names(b_format)), 0.72, 20.7),
-#   c(match("t2dur_d", names(b_format)), -0.14, 2.89),
-#   c(match("total_chol_mu", names(b_format)), 4, 9.8),
-#   c(match("total_chol_d", names(b_format)), -2.66, 0.64)
-# )
-
 # Combine bounds for male and numeric covariates
 bounds <- rbind(
   prop_bounds, 
@@ -201,10 +183,6 @@ b_impute <- amelia(
   noms    = "trttype",
   empri   = 0.01 * nrow(b_amelia_df),
   bounds  = bounds,
-  # logs = c(
-  #   "age_d", "bmi_d", "egfr_d", "hba1c_d", "hdl_d",
-  #   "sbp_d", "t2dur_d", "total_chol_d"
-  # ),
   incheck = TRUE
 )
 
@@ -243,7 +221,6 @@ c_iter <- lapply(seq_along(b_imp_transf), \(j) mutate(b_imp_transf[[j]], imp = j
 # Stack, check race and smoking sum to 1
 # Exponentiate log-SDs
 c_bind <- bind_rows(c_iter) %>% 
-  # mutate(across(ends_with("_d"), ~ exp(.))) %>% 
   select(imp, trial_id:male, asian:former_never, everything())
 
 # Impute con meds and comorbs --------------------------------------------------
