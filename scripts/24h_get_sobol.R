@@ -22,6 +22,7 @@ c_imp_bl <- readRDS("processed_data/agg_bl_dists_ready.rds") %>%
 c_imp_cor <- readRDS("processed_data/citl_cor_mat.rds")
 
 # Generate sobol sequences
+# Updated distributions supplied to match IPD covariates
 c_sobol <- c_imp_bl %>% 
   mutate(
     sobol = map(data, function(df) {
@@ -32,7 +33,7 @@ c_sobol <- c_imp_bl %>%
         hdl         = distr(qnorm, df$hdl_mu, df$hdl_d),
         total       = distr(qnorm, df$total_chol_mu, df$total_chol_d),
         current     = distr(qbern, df$current),
-        t2dur       = distr(qgamma, df$t2dur_mu, df$t2dur_d),
+        t2dur       = distr(qnorm, df$t2dur_mu, df$t2dur_d),
         egfr        = distr(qnorm, df$egfr_mu, df$egfr_d),
         hba1c       = distr(qnorm, df$hba1c_mu, df$hba1c_d),
         asian       = distr(qbern, df$asian),

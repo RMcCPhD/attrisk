@@ -28,6 +28,30 @@ ggsave(
   units = "in"
 )
 
+# Plot before imputation
+plot_dens <- a_imp_bl %>% 
+  pivot_longer(age_mu:former_never) %>% 
+  mutate(
+    name = case_when(
+      grepl("asian|black|other|white", name) ~ paste0("race_", name),
+      grepl("curr|form", name) ~ paste0("smoke_", name),
+      TRUE ~ name
+    )
+  ) %>% 
+  ggplot(aes(x = value)) +
+  geom_density(alpha = 0.01) +
+  facet_wrap(~name, scales = "free")
+
+plot_dens
+
+ggsave(
+  "outputs/conduct_model/agg_bl/dist_before_imp.png",
+  plot_dens,
+  height = 10,
+  width = 10,
+  units = "in"
+)
+
 # Helper functions for setting up proportion imputations
 softmax <- function(x) {
   ex <- exp(x - max(x, na.rm = TRUE))
@@ -113,6 +137,7 @@ prop_bounds <- if (length(prop_male)) {
 
 # Bounds for numeric variables
 b_format %>% 
+  # mutate(across(ends_with("_d"), ~ log(.))) %>% 
   reframe(across(ends_with(c("_mu", "_d")), ~ unlist(
     list(min = min(., na.rm = TRUE), max = max(., na.rm = TRUE))
   ))) %>% 
@@ -120,6 +145,7 @@ b_format %>%
   arrange(name) %>% 
   print(n = 32)
 
+# Limits pre-log SDs
 marg_limits <- rbind(
   c(match("age_mu", names(b_format)), 39.5, 74.9),
   c(match("age_d", names(b_format)), 3.67, 13.4),
@@ -139,6 +165,26 @@ marg_limits <- rbind(
   c(match("total_chol_d", names(b_format)), 0.07, 1.9)
 )
 
+# Limits with log-SDs - leads to extreme values
+# marg_limits <- rbind(
+#   c(match("age_mu", names(b_format)), 39.5, 74.9),
+#   c(match("age_d", names(b_format)), 1.3, 2.6),
+#   c(match("bmi_mu", names(b_format)), 24.2, 37.4),
+#   c(match("bmi_d", names(b_format)), 0.6, 2.36),
+#   c(match("egfr_mu", names(b_format)), 24.1, 154),
+#   c(match("egfr_d", names(b_format)), 1.48, 4.25),
+#   c(match("hba1c_mu", names(b_format)), 6.7, 10.2),
+#   c(match("hba1c_d", names(b_format)), -0.92, 0.59),
+#   c(match("hdl_mu", names(b_format)), 0.94, 2.7),
+#   c(match("hdl_d", names(b_format)), -3.91, -0.36),
+#   c(match("sbp_mu", names(b_format)), 124, 151),
+#   c(match("sbp_d", names(b_format)), 1.9, 2.86),
+#   c(match("t2dur_mu", names(b_format)), 0.72, 20.7),
+#   c(match("t2dur_d", names(b_format)), -0.14, 2.89),
+#   c(match("total_chol_mu", names(b_format)), 4, 9.8),
+#   c(match("total_chol_d", names(b_format)), -2.66, 0.64)
+# )
+
 # Combine bounds for male and numeric covariates
 bounds <- rbind(
   prop_bounds, 
@@ -155,6 +201,10 @@ b_impute <- amelia(
   noms    = "trttype",
   empri   = 0.01 * nrow(b_amelia_df),
   bounds  = bounds,
+  # logs = c(
+  #   "age_d", "bmi_d", "egfr_d", "hba1c_d", "hdl_d",
+  #   "sbp_d", "t2dur_d", "total_chol_d"
+  # ),
   incheck = TRUE
 )
 
@@ -191,7 +241,9 @@ b_imp_transf <- lapply(b_impute$imputations, conv_transf)
 c_iter <- lapply(seq_along(b_imp_transf), \(j) mutate(b_imp_transf[[j]], imp = j))
 
 # Stack, check race and smoking sum to 1
+# Exponentiate log-SDs
 c_bind <- bind_rows(c_iter) %>% 
+  # mutate(across(ends_with("_d"), ~ exp(.))) %>% 
   select(imp, trial_id:male, asian:former_never, everything())
 
 # Impute con meds and comorbs --------------------------------------------------
@@ -252,6 +304,20 @@ e_join <- c_bind %>%
 # Inspect
 e_plot_stack <- e_join %>% 
   pivot_longer(age_mu:conmeds_size) %>% 
+  select(trial_id, name, value) %>% 
+  mutate(type = "imp") %>% 
+  full_join(
+    a_imp_bl %>% 
+      pivot_longer(age_mu:former_never) %>% 
+      mutate(
+        name = case_when(
+          grepl("asian|black|other|white", name) ~ paste0("race_", name),
+          grepl("curr|form", name) ~ paste0("smoke_", name),
+          TRUE ~ name
+        )
+      ) %>% 
+      mutate(type = "pre")
+  ) %>% 
   mutate(
     name = case_when(
       grepl("asian|black|other|white", name) ~ paste0("race_", name),
@@ -259,9 +325,11 @@ e_plot_stack <- e_join %>%
       TRUE ~ name
     )
   ) %>% 
-  ggplot(aes(x = value)) +
+  ggplot(aes(x = value, colour = type)) +
   geom_density(alpha = 0.01) +
-  facet_wrap(~name, scales = "free")
+  labs(x = NULL, y = NULL) +
+  facet_wrap(~name, scales = "free") +
+  theme_classic()
 
 e_plot_stack
 
