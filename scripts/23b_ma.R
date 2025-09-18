@@ -39,15 +39,47 @@ saveRDS(b_ma_tidy, "outputs/conduct_model/cox_ma/ma_res.rds")
 
 # Plot pooled log-hazard
 plot_ma <- b_ma_tidy %>% 
-  arrange(desc(estimate)) %>% 
-  ggplot(aes(x = term, y = estimate, ymin = lo, ymax = hi)) +
+  mutate(
+    term = case_match(
+      term,
+      "age10" ~ "Age (decades)",
+      "bmi" ~ "BMI (kg/m2)",
+      "chol_hdl" ~ "HDL cholesterol (mmol/L)",
+      "chol_total" ~ "Total cholesterol (mmol/L)",
+      "comorbs" ~ "Number of comorbidities",
+      "durn" ~ "Duration of type 2 diabetes (years)",
+      "egfr" ~ "eGFR (ml/min/1.73m2)",
+      "hba1c" ~ "HbA1c (%)",
+      "n_atc" ~ "Number of concomitant medications",
+      "raceasian" ~ "Asian",
+      "raceblack_aa" ~ "Black/African American",
+      "raceother" ~ "Other race",
+      "sbp" ~ "Systolic blood pressure (mmHg)",
+      "sex" ~ "Male",
+      "smoke" ~ "Current smoker",
+      "trttypeac" ~ "Treatment type (active comparator)",
+      .default = term
+    ),
+    term = factor(
+      term,
+      levels = c(
+        "Age (decades)", "Male", "Asian", "Black/African American", "Other race",
+        "Current smoker", "Duration of type 2 diabetes (years)", "BMI (kg/m2)",
+        "Number of comorbidities", "Number of concomitant medications",
+        "HbA1c (%)", "eGFR (ml/min/1.73m2)", "Systolic blood pressure (mmHg)",
+        "HDL cholesterol (mmol/L)", "Total cholesterol (mmol/L)",
+        "Treatment type (active comparator)"
+      )
+    )
+  ) %>% 
+  ggplot(aes(x = fct_rev(term), y = estimate, ymin = lo, ymax = hi)) +
   geom_point() + 
   geom_linerange() +
   scale_y_continuous(n.breaks = 15) +
   coord_flip() +
   geom_hline(yintercept = 0, colour = "red") +
   theme_classic() +
-  labs(x = NULL, y = "Log estimates")
+  labs(x = NULL, y = "Pooled log hazard ratio")
 
 plot_ma
 
@@ -61,15 +93,47 @@ ggsave(
 
 # Plot hazard ratio
 plot_ma_hr <- b_ma_tidy %>% 
-  arrange(desc(estimate)) %>% 
-  ggplot(aes(x = term, y = hr, ymin = lo_hr, ymax = hi_hr)) +
+  mutate(
+    term = case_match(
+      term,
+      "age10" ~ "Age (decades)",
+      "bmi" ~ "BMI (kg/m2)",
+      "chol_hdl" ~ "HDL cholesterol (mmol/L)",
+      "chol_total" ~ "Total cholesterol (mmol/L)",
+      "comorbs" ~ "Number of comorbidities",
+      "durn" ~ "Duration of type 2 diabetes (years)",
+      "egfr" ~ "eGFR (ml/min/1.73m2)",
+      "hba1c" ~ "HbA1c (%)",
+      "n_atc" ~ "Number of concomitant medications",
+      "raceasian" ~ "Asian",
+      "raceblack_aa" ~ "Black/African American",
+      "raceother" ~ "Other race",
+      "sbp" ~ "Systolic blood pressure (mmHg)",
+      "sex" ~ "Male",
+      "smoke" ~ "Current smoker",
+      "trttypeac" ~ "Treatment type (active comparator)",
+      .default = term
+    ),
+    term = factor(
+      term,
+      levels = c(
+        "Age (decades)", "Male", "Asian", "Black/African American", "Other race",
+        "Current smoker", "Duration of type 2 diabetes (years)", "BMI (kg/m2)",
+        "Number of comorbidities", "Number of concomitant medications",
+        "HbA1c (%)", "eGFR (ml/min/1.73m2)", "Systolic blood pressure (mmHg)",
+        "HDL cholesterol (mmol/L)", "Total cholesterol (mmol/L)",
+        "Treatment type (active comparator)"
+      )
+    )
+  ) %>% 
+  ggplot(aes(x = fct_rev(term), y = hr, ymin = lo_hr, ymax = hi_hr)) +
   geom_point() + 
   geom_linerange() +
   scale_y_continuous(n.breaks = 15) +
   coord_flip() +
   geom_hline(yintercept = 1, colour = "red") +
   theme_classic() +
-  labs(x = NULL, y = "Log estimates")
+  labs(x = NULL, y = "Pooled hazard ratio")
 
 plot_ma_hr
 

@@ -97,13 +97,70 @@ betas <- a_imp_res %>%
   select(var, everything())
 
 betas_plot <- betas %>% 
+  mutate(
+    var = case_match(
+      var,
+      "age_lower" ~ "Eligibility: Lower age limit",
+      "age_upper" ~ "Eligibility: Upper age limit",
+      "blindingdouble" ~ "Double blinding",
+      "blindingquadruple" ~ "Quadruple blinding",
+      "blindingtriple" ~ "Triple blinding",
+      "duration" ~ "Total follow-up time (years)",
+      "max_bmi" ~ "Eligibility: Upper BMI limit",
+      "max_egfr" ~ "Eligibility: Upper eGFR limit",
+      "min_bmi" ~ "Eligibility: Lower BMI limit",
+      "min_egfr" ~ "Eligibility: Lower eGFR limit",
+      "n_arms" ~ "Number of arms",
+      "n_facilities" ~ "Number of facilities/sites",
+      "n_log" ~ "Sample size",
+      "one_pom" ~ "Single primary outcome",
+      "phase" ~ "Phase",
+      "reg_afr" ~ "Sites in African regions",
+      "reg_am" ~ "Sites in the Americas",
+      "reg_em" ~ "Sites in Eastern Medi.",
+      "reg_eur" ~ "Sites in Europe",
+      "reg_sea" ~ "Sites in SE Asia",
+      "reg_wpac" ~ "Sites in Western Pacific",
+      "trttype" ~ "Treatment type",
+      .default = var
+    ),
+    var = factor(
+      var,
+      levels = c(
+        "Eligibility: Upper age limit",
+        "Eligibility: Lower age limit",
+        "Eligibility: Upper BMI limit",
+        "Eligibility: Lower BMI limit",
+        "Eligibility: Upper eGFR limit",
+        "Eligibility: Lower eGFR limit",
+        "Total follow-up time (years)",
+        "Treatment type",
+        "Phase",
+        "Sample size",
+        "Number of arms",
+        "Number of facilities/sites",
+        "Single primary outcome",
+        "Double blinding",
+        "Quadruple blinding",
+        "Triple blinding",
+        "Sites in African regions",
+        "Sites in the Americas",
+        "Sites in Eastern Medi.",
+        "Sites in Europe",
+        "Sites in SE Asia",
+        "Sites in Western Pacific"
+      )
+    )
+  ) %>% 
   ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(var))) +
   geom_point() +
   geom_linerange() +
   geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
   scale_x_continuous(n.breaks = 15) +
-  theme_bw() +
-  labs(x = "Mean point estimate (95% credible interval", y = NULL)
+  theme_classic() +
+  labs(x = "Mean effect on Gompertz rate (95% credible interval)", y = NULL)
+
+betas_plot
 
 a_imp_res %>% 
   filter(grepl("^log_b\\[", variable)) %>% 
