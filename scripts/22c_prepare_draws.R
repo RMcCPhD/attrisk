@@ -63,3 +63,46 @@ f_join <- e_sum %>% full_join(e_sum_beta %>% rename(param = cov))
 
 # Save
 saveRDS(f_join, "outputs/design_model/sum_draws_shiny.rds")
+
+# Sample posterior draws from multivariate normal distribution -----------------
+
+# Get draws matrix of target parameters
+g_draws_mat <- as_draws_matrix(as.array(a_imp_mdl))
+g_keep <- grepl("^mu1|^beta|^a", colnames(g_draws_mat))
+g_params <- g_draws_mat[, g_keep, drop = FALSE]
+
+# Separate out betas
+g_gomp <- g_params[, !grepl("beta", colnames(g_params)), drop = FALSE]
+g_betas <- g_params[, grepl("beta", colnames(g_params)), drop = FALSE]
+
+# Sample Gompertz parameters
+h_mu <- colMeans(g_gomp)
+h_Sigma <- cov(g_gomp)
+h_mvr <- MASS::mvrnorm(1000, mu = h_mu, Sigma = h_Sigma)
+
+# Sample betas
+h_mu_beta <- colMeans(g_betas)
+h_Sigma_beta <- cov(g_betas)
+h_mvr_beta <- MASS::mvrnorm(1000, mu = h_mu_beta, Sigma = h_Sigma_beta)
+
+# Tidy samples
+i_tidy <- as_tibble(h_mvr) %>% 
+  pivot_longer(everything()) %>% 
+  separate(name, into = c("param", "trial"), sep = "\\[") %>% 
+  mutate(trial = gsub("\\]", "", trial)) %>% 
+  arrange(trial) %>% 
+  group_by(trial, param) %>% 
+  mutate(sample = row_number())
+
+# Tidy beta samples
+i_tidy_beta <- as_tibble(h_mvr_beta) %>% 
+  pivot_longer(everything()) %>% 
+  separate(name, into = c("beta", "cov"), sep = "\\[") %>% 
+  mutate(cov = gsub("\\]", "", cov)) %>% 
+  arrange(cov) %>% 
+  group_by(cov, beta) %>% 
+  mutate(sample = row_number())
+
+# Save
+saveRDS(i_tidy, "scratch_data/mvr_draws_post_testing.rds")
+saveRDS(i_tidy_beta, "scratch_data/mvr_draws_beta.rds")

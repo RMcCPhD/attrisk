@@ -124,7 +124,10 @@ prep_df <- function(df) {
 }
 
 # Apply function to df
-b_amelia_df <- prep_df(b_format)
+b_amelia_df <- prep_df(b_format) %>% 
+  mutate(
+    across(ends_with("_d"), ~ log(.))
+  )
 
 # Bounds for male proportion
 prop_male <- intersect(c("male"), names(b_amelia_df))
@@ -145,26 +148,47 @@ b_amelia_df %>%
   ))) %>% 
   pivot_longer(everything()) %>% 
   arrange(name) %>% 
+  # filter(grepl("_d", name)) %>% 
   print(n = 32)
 
 # Limits pre-log SDs
+# marg_limits <- rbind(
+#   c(match("age_mu", names(b_format)), 39.5, 74.9),
+#   c(match("age_d", names(b_format)), 3.67, 13.4),
+#   c(match("bmi_mu", names(b_format)), 24.2, 37.4),
+#   c(match("bmi_d", names(b_format)), 1.83, 10.6),
+#   c(match("egfr_mu", names(b_format)), 24.1, 154),
+#   c(match("egfr_d", names(b_format)), 4.4, 70),
+#   c(match("hba1c_mu", names(b_format)), 6.7, 10.2),
+#   c(match("hba1c_d", names(b_format)), 0.4, 6.3),
+#   c(match("hdl_mu", names(b_format)), 0.94, 2.7),
+#   c(match("hdl_d", names(b_format)), 0.02, 0.7),
+#   c(match("sbp_mu", names(b_format)), 124, 151),
+#   c(match("sbp_d", names(b_format)), 6.7, 17.4),
+#   c(match("t2dur_mu", names(b_format)), 0.72, 20.7),
+#   c(match("t2dur_d", names(b_format)), 0.87, 18),
+#   c(match("total_chol_mu", names(b_format)), 4, 9.8),
+#   c(match("total_chol_d", names(b_format)), 0.07, 1.9)
+# )
+
+# Limits with log-SDs
 marg_limits <- rbind(
   c(match("age_mu", names(b_format)), 39.5, 74.9),
-  c(match("age_d", names(b_format)), 3.67, 13.4),
+  c(match("age_d", names(b_format)), 1.3, 2.6),
   c(match("bmi_mu", names(b_format)), 24.2, 37.4),
-  c(match("bmi_d", names(b_format)), 1.83, 10.6),
+  c(match("bmi_d", names(b_format)), 0.6, 2.4),
   c(match("egfr_mu", names(b_format)), 24.1, 154),
-  c(match("egfr_d", names(b_format)), 4.4, 70),
+  c(match("egfr_d", names(b_format)), 1.5, 4.3),
   c(match("hba1c_mu", names(b_format)), 6.7, 10.2),
-  c(match("hba1c_d", names(b_format)), 0.4, 6.3),
+  c(match("hba1c_d", names(b_format)), -0.92, 0.59),
   c(match("hdl_mu", names(b_format)), 0.94, 2.7),
-  c(match("hdl_d", names(b_format)), 0.02, 0.7),
+  c(match("hdl_d", names(b_format)), -3.91, -0.36),
   c(match("sbp_mu", names(b_format)), 124, 151),
-  c(match("sbp_d", names(b_format)), 6.7, 17.4),
+  c(match("sbp_d", names(b_format)), 1.9, 2.86),
   c(match("t2dur_mu", names(b_format)), 0.72, 20.7),
-  c(match("t2dur_d", names(b_format)), 0.87, 18),
+  c(match("t2dur_d", names(b_format)), -0.14, 2.89),
   c(match("total_chol_mu", names(b_format)), 4, 9.8),
-  c(match("total_chol_d", names(b_format)), 0.07, 1.9)
+  c(match("total_chol_d", names(b_format)), -2.66, 0.64)
 )
 
 # Combine bounds for male and numeric covariates
@@ -221,7 +245,8 @@ c_iter <- lapply(seq_along(b_imp_transf), \(j) mutate(b_imp_transf[[j]], imp = j
 # Stack, check race and smoking sum to 1
 # Exponentiate log-SDs
 c_bind <- bind_rows(c_iter) %>% 
-  select(imp, trial_id:male, asian:former_never, everything())
+  select(imp, trial_id:male, asian:former_never, everything()) %>% 
+  mutate(across(ends_with("_d"), ~ exp(.)))
 
 # Impute con meds and comorbs --------------------------------------------------
 

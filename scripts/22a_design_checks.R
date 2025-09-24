@@ -96,6 +96,66 @@ betas <- a_imp_res %>%
   cbind(data.frame(var = colnames(a_imp_df$X))) %>% 
   select(var, everything())
 
+betas %>% 
+  mutate(
+    var = case_match(
+      var,
+      "age_lower" ~ "Eligibility: Lower age limit",
+      "age_upper" ~ "Eligibility: Upper age limit",
+      "blindingdouble" ~ "Double blinding",
+      "blindingquadruple" ~ "Quadruple blinding",
+      "blindingtriple" ~ "Triple blinding",
+      "duration" ~ "Total follow-up time (years)",
+      "max_bmi" ~ "Eligibility: Upper BMI limit",
+      "max_egfr" ~ "Eligibility: Upper eGFR limit",
+      "min_bmi" ~ "Eligibility: Lower BMI limit",
+      "min_egfr" ~ "Eligibility: Lower eGFR limit",
+      "n_arms" ~ "Number of arms",
+      "n_facilities" ~ "Number of facilities/sites",
+      "n_log" ~ "Sample size",
+      "one_pom" ~ "Single primary outcome",
+      "phase" ~ "Phase",
+      "reg_afr" ~ "Sites in African regions",
+      "reg_am" ~ "Sites in the Americas",
+      "reg_em" ~ "Sites in Eastern Medi.",
+      "reg_eur" ~ "Sites in Europe",
+      "reg_sea" ~ "Sites in SE Asia",
+      "reg_wpac" ~ "Sites in Western Pacific",
+      "trttype" ~ "Treatment type",
+      .default = var
+    ),
+    var = factor(
+      var,
+      levels = c(
+        "Eligibility: Upper age limit",
+        "Eligibility: Lower age limit",
+        "Eligibility: Upper BMI limit",
+        "Eligibility: Lower BMI limit",
+        "Eligibility: Upper eGFR limit",
+        "Eligibility: Lower eGFR limit",
+        "Total follow-up time (years)",
+        "Treatment type",
+        "Phase",
+        "Sample size",
+        "Number of arms",
+        "Number of facilities/sites",
+        "Single primary outcome",
+        "Double blinding",
+        "Quadruple blinding",
+        "Triple blinding",
+        "Sites in African regions",
+        "Sites in the Americas",
+        "Sites in Eastern Medi.",
+        "Sites in Europe",
+        "Sites in SE Asia",
+        "Sites in Western Pacific"
+      )
+    )
+  ) %>% 
+  select(-c(beta, order)) %>% 
+  mutate(across(mean:`97.5%`, ~ round(., 3))) %>% 
+  write_csv("outputs/design_model/design_features_draws_sum.csv")
+
 betas_plot <- betas %>% 
   mutate(
     var = case_match(

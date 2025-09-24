@@ -35,6 +35,49 @@ b_ma_tidy <- tidy(b_ma) %>%
   select(term:estimate, lo, hi, hr, lo_hr, hi_hr, everything()) %>% 
   mutate(across(estimate:p.value, ~ round(., 3)))
 
+b_ma_tidy %>% 
+  select(-type) %>% 
+  mutate(
+    term = case_match(
+      term,
+      "age10" ~ "Age (decades)",
+      "bmi" ~ "BMI (kg/m2)",
+      "chol_hdl" ~ "HDL cholesterol (mmol/L)",
+      "chol_total" ~ "Total cholesterol (mmol/L)",
+      "comorbs" ~ "Number of comorbidities",
+      "durn" ~ "Duration of type 2 diabetes (years)",
+      "egfr" ~ "eGFR (ml/min/1.73m2)",
+      "hba1c" ~ "HbA1c (%)",
+      "n_atc" ~ "Number of concomitant medications",
+      "raceasian" ~ "Asian",
+      "raceblack_aa" ~ "Black/African American",
+      "raceother" ~ "Other race",
+      "sbp" ~ "Systolic blood pressure (mmHg)",
+      "sex" ~ "Male",
+      "smoke" ~ "Current smoker",
+      "trttypeac" ~ "Treatment type (active comparator)",
+      .default = term
+    ),
+    term = factor(
+      term,
+      levels = c(
+        "Age (decades)", "Male", "Asian", "Black/African American", "Other race",
+        "Current smoker", "Duration of type 2 diabetes (years)", "BMI (kg/m2)",
+        "Number of comorbidities", "Number of concomitant medications",
+        "HbA1c (%)", "eGFR (ml/min/1.73m2)", "Systolic blood pressure (mmHg)",
+        "HDL cholesterol (mmol/L)", "Total cholesterol (mmol/L)",
+        "Treatment type (active comparator)"
+      )
+    )
+  ) %>% 
+  select(term:hi_hr) %>% 
+  rename(
+    loghr = estimate,
+    lo_loghr = lo,
+    hi_loghr = hi
+  ) %>% 
+  write_csv("outputs/conduct_model/cox_ma/ma_res_tidy.csv")
+
 saveRDS(b_ma_tidy, "outputs/conduct_model/cox_ma/ma_res.rds")
 
 # Plot pooled log-hazard
