@@ -105,4 +105,4 @@ i_tidy_beta <- as_tibble(h_mvr_beta) %>%
 
 # Save
 saveRDS(i_tidy, "scratch_data/mvr_draws_post_testing.rds")
-saveRDS(i_tidy_beta, "scratch_data/mvr_draws_beta.rds")
+saveRDS(i_tidy_beta, "scratch_data/mvr_draws")
