@@ -35,11 +35,11 @@ b_elig <- a_imp_elig %>%
       TRUE ~ age_upper
     ),
     bmi_lower = case_when(
-      is.na(bmi_lower) ~ ">=20",
+      is.na(bmi_lower) ~ "None",
       TRUE ~ bmi_lower
     ),
     bmi_upper = case_when(
-      is.na(bmi_upper) ~ "<=45",
+      is.na(bmi_upper) ~ "None",
       TRUE ~ bmi_upper
     ),
     egfr_lower = case_when(
@@ -193,14 +193,16 @@ h_tidy <- g_attr_fixed %>%
     across(c(n_arms, n_poms), as.factor),
     one_pom = if_else(n_poms == 1, 0L, 1L),
     age_lower = if_else(age_lower_dbl == 18, 0L, 1L),
-    age_upper = if_else(age_upper_dbl == 80, 0L, 1L),
+    age_upper = if_else(age_upper_dbl <= 80, 0L, 1L),
     min_bmi = case_when(
-      as.numeric(str_extract(bmi_lower, "[0-9]+")) <= 25 ~ 0L,
-      TRUE ~ 1L
+      bmi_lower == "None" ~ 0L,
+      as.numeric(str_extract(bmi_lower, "[0-9]+")) <= 25 ~ 1L,
+      TRUE ~ 2L
     ),
     max_bmi = case_when(
-      as.numeric(str_extract(bmi_upper, "[0-9]+")) <= 40 ~ 0L,
-      TRUE ~ 1L
+      bmi_upper == "None" ~ 0L,
+      as.numeric(str_extract(bmi_upper, "[0-9]+")) <= 40 ~ 1L,
+      TRUE ~ 2L
     ),
     min_egfr = case_when(
       egfr_lower == "None" ~ 0L,
@@ -208,15 +210,15 @@ h_tidy <- g_attr_fixed %>%
       TRUE ~ 2L
     ),
     max_egfr = case_when(
-      egfr_lower == "None" ~ 0L,
-      egfr_lower == "<=60" ~ 1L,
+      egfr_upper == "None" ~ 0L,
+      egfr_upper == "<=60" ~ 1L,
       TRUE ~ 2L
     ),
     n_arms = case_when(
-      n_arms == 2 ~ 1L,
-      n_arms == 3 ~ 2L,
-      n_arms == 4 ~ 3L,
-      TRUE ~ 4L
+      n_arms == 2 ~ 0L,
+      n_arms == 3 ~ 1L,
+      n_arms == 4 ~ 2L,
+      TRUE ~ 3L
     ),
     n_log = n,
     across(c(n_log, n_facilities), ~ log(.)),
@@ -334,6 +336,11 @@ k_dur <- j_join %>%
     n_log = log(n)
   ) %>% 
   select(-dur_new)
+
+k_dur %>% 
+  reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+  pivot_longer(everything(), names_to = "var", values_to = "na") %>% 
+  filter(na != 0)
 
 # Save
 saveRDS(k_dur, "processed_data/latest_dataset.rds")

@@ -6,7 +6,7 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 #SBATCH --partition=nodes
-#SBATCH --time=0-00:59:00
+#SBATCH --time=0-10:00:00
 #SBATCH --mem=10G
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
