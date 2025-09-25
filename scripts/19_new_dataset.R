@@ -342,5 +342,22 @@ k_dur %>%
   pivot_longer(everything(), names_to = "var", values_to = "na") %>% 
   filter(na != 0)
 
+# Fix categories for three trials where duplicated introduced after
+# updating treatment type
+l_fix <- k_dur %>% 
+  mutate(
+    bmi_lower = case_when(
+      trial_id %in% c("NCT00103857", "NCT00798161", "NCT01076088") & bmi_lower == "None" ~ NA,
+      TRUE ~ bmi_lower
+    ),
+    bmi_upper = case_when(
+      trial_id %in% c("NCT00103857", "NCT00798161", "NCT01076088") & bmi_upper == "None" ~ NA,
+      TRUE ~ bmi_upper
+    )
+  ) %>% 
+  filter(!is.na(bmi_lower) & !is.na(bmi_upper))
+
+# l_fix %>% count(trial_id) %>% filter(n > 1)
+
 # Save
-saveRDS(k_dur, "processed_data/latest_dataset.rds")
+saveRDS(l_fix, "processed_data/latest_dataset.rds")
