@@ -15,6 +15,10 @@ a_imp_res <- readRDS("mars/design_model/outputs/design_sum_draws.rds")
 a_imp_mdl <- readRDS("mars/design_model/outputs/design_fit.rds")
 a_imp_rhat <- read_csv("mars/design_model/outputs/sum_rhat_ess.csv")
 
+# Get draws matrix
+b_draws <- as_draws_matrix(as.array(a_imp_mdl))
+saveRDS(b_draws, "outputs/design_model/design_draws.rds")
+
 # Trace plots ------------------------------------------------------------------
 
 # Trace plots for global parameters
