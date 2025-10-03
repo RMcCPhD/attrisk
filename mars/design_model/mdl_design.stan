@@ -57,7 +57,7 @@ transformed parameters {
   
   // a for each row (conditioned on log-rate, linear predictor and error)
   // parameters from shape model fit externally
-  vector[I] a = log_b * beta_rate + lp + error;       
+  vector[I] a = b * beta_rate + lp + error;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          

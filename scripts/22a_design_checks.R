@@ -96,65 +96,65 @@ betas <- a_imp_res %>%
   cbind(data.frame(var = colnames(a_imp_df$X))) %>% 
   select(var, everything())
 
-betas %>% 
-  mutate(
-    var = case_match(
-      var,
-      "age_lower" ~ "Eligibility: Lower age limit",
-      "age_upper" ~ "Eligibility: Upper age limit",
-      "blindingdouble" ~ "Double blinding",
-      "blindingquadruple" ~ "Quadruple blinding",
-      "blindingtriple" ~ "Triple blinding",
-      "duration" ~ "Total follow-up time (years)",
-      "max_bmi" ~ "Eligibility: Upper BMI limit",
-      "max_egfr" ~ "Eligibility: Upper eGFR limit",
-      "min_bmi" ~ "Eligibility: Lower BMI limit",
-      "min_egfr" ~ "Eligibility: Lower eGFR limit",
-      "n_arms" ~ "Number of arms",
-      "n_facilities" ~ "Number of facilities/sites",
-      "n_log" ~ "Sample size",
-      "one_pom" ~ "Single primary outcome",
-      "phase" ~ "Phase",
-      "reg_afr" ~ "Sites in African regions",
-      "reg_am" ~ "Sites in the Americas",
-      "reg_em" ~ "Sites in Eastern Medi.",
-      "reg_eur" ~ "Sites in Europe",
-      "reg_sea" ~ "Sites in SE Asia",
-      "reg_wpac" ~ "Sites in Western Pacific",
-      "trttype" ~ "Treatment type",
-      .default = var
-    ),
-    var = factor(
-      var,
-      levels = c(
-        "Eligibility: Upper age limit",
-        "Eligibility: Lower age limit",
-        "Eligibility: Upper BMI limit",
-        "Eligibility: Lower BMI limit",
-        "Eligibility: Upper eGFR limit",
-        "Eligibility: Lower eGFR limit",
-        "Total follow-up time (years)",
-        "Treatment type",
-        "Phase",
-        "Sample size",
-        "Number of arms",
-        "Number of facilities/sites",
-        "Single primary outcome",
-        "Double blinding",
-        "Quadruple blinding",
-        "Triple blinding",
-        "Sites in African regions",
-        "Sites in the Americas",
-        "Sites in Eastern Medi.",
-        "Sites in Europe",
-        "Sites in SE Asia",
-        "Sites in Western Pacific"
-      )
-    )
-  ) %>% 
-  select(-c(beta, order)) %>% 
-  mutate(across(mean:`97.5%`, ~ round(., 3))) %>% 
-  write_csv("outputs/design_model/design_features_draws_sum.csv")
+# betas %>% 
+#   mutate(
+#     var = case_match(
+#       var,
+#       "age_lower" ~ "Eligibility: Lower age limit",
+#       "age_upper" ~ "Eligibility: Upper age limit",
+#       "blindingdouble" ~ "Double blinding",
+#       "blindingquadruple" ~ "Quadruple blinding",
+#       "blindingtriple" ~ "Triple blinding",
+#       "duration" ~ "Total follow-up time (years)",
+#       "max_bmi" ~ "Eligibility: Upper BMI limit",
+#       "max_egfr" ~ "Eligibility: Upper eGFR limit",
+#       "min_bmi" ~ "Eligibility: Lower BMI limit",
+#       "min_egfr" ~ "Eligibility: Lower eGFR limit",
+#       "n_arms" ~ "Number of arms",
+#       "n_facilities" ~ "Number of facilities/sites",
+#       "n_log" ~ "Sample size",
+#       "one_pom" ~ "Single primary outcome",
+#       "phase" ~ "Phase",
+#       "reg_afr" ~ "Sites in African regions",
+#       "reg_am" ~ "Sites in the Americas",
+#       "reg_em" ~ "Sites in Eastern Medi.",
+#       "reg_eur" ~ "Sites in Europe",
+#       "reg_sea" ~ "Sites in SE Asia",
+#       "reg_wpac" ~ "Sites in Western Pacific",
+#       "trttype" ~ "Treatment type",
+#       .default = var
+#     ),
+#     var = factor(
+#       var,
+#       levels = c(
+#         "Eligibility: Upper age limit",
+#         "Eligibility: Lower age limit",
+#         "Eligibility: Upper BMI limit",
+#         "Eligibility: Lower BMI limit",
+#         "Eligibility: Upper eGFR limit",
+#         "Eligibility: Lower eGFR limit",
+#         "Total follow-up time (years)",
+#         "Treatment type",
+#         "Phase",
+#         "Sample size",
+#         "Number of arms",
+#         "Number of facilities/sites",
+#         "Single primary outcome",
+#         "Double blinding",
+#         "Quadruple blinding",
+#         "Triple blinding",
+#         "Sites in African regions",
+#         "Sites in the Americas",
+#         "Sites in Eastern Medi.",
+#         "Sites in Europe",
+#         "Sites in SE Asia",
+#         "Sites in Western Pacific"
+#       )
+#     )
+#   ) %>% 
+#   select(-c(beta, order)) %>% 
+#   mutate(across(mean:`97.5%`, ~ round(., 3))) %>% 
+#   write_csv("outputs/design_model/design_features_draws_sum.csv")
 
 betas_plot <- betas %>% 
   mutate(
@@ -293,6 +293,8 @@ auc_dens <- ggplot(tibble(auc = auc_vals), aes(x = auc)) +
   scale_x_continuous(n.breaks = 6) +
   labs(x = "AUC", y = "Density")
 
+auc_dens
+
 ggsave(
   "outputs/design_model/valid/auc_dist.png",
   auc_dens,
@@ -332,6 +334,8 @@ roc_plot <- roc_sum %>%
     x = "False positive rate (1 - specificity)",
     y = "True positive rate (sensitivity)"
   )
+
+roc_plot
 
 ggsave(
   "outputs/design_model/valid/roc_plot.png",
@@ -402,6 +406,8 @@ brier_plot <- brier %>%
   scale_x_continuous(n.breaks = 6) +
   labs(x = "Brier score", y = "Density")
 
+brier_plot
+
 brier_arm_plot <- brier_arm %>% 
   mutate(trttype = if_else(trttype == 0L, "Placebo", "Active")) %>% 
   ggplot(aes(x = brier, fill = factor(trttype, levels = c("Placebo", "Active")))) +
@@ -409,6 +415,8 @@ brier_arm_plot <- brier_arm %>%
   theme_classic() +
   scale_x_continuous(n.breaks = 6) +
   labs(x = "Brier score", y = "Density", fill = "Treatment type")
+
+brier_arm_plot
 
 ggsave(
   "outputs/design_model/valid/brier_dist.png",

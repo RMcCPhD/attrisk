@@ -55,16 +55,6 @@ sum(c_tidy_rates$trial_id %in% z_ipd_trials)
 # Join model datasets, 76 trials
 d_join_mdl <- b_mdl_res %>% full_join(c_tidy_rates)
 
-# Test
-# d_join_mdl %>% 
-#   mutate(
-#     t = map(trial_id, ~ seq(0, 1, by = 0.1)),
-#     gomp = map2(shape, rate, ~ hgompertz(seq(0, 1, by = 0.1), shape = .x, rate = exp(.y)))
-#   ) %>% 
-#   unnest(c(t, gomp)) %>% 
-#   ggplot(aes(x = t, y = gomp, group = trial_id)) +
-#   geom_line()
-
 # Join characteristics
 # Transform rate
 e_join_chars <- d_join_mdl %>% left_join(a_imp_df)
@@ -183,7 +173,8 @@ ggsave(
 f_design_df <- e_join_chars %>% 
   select(-c(
     source, male_prop, bmi_lower:bmi_upper, contains(c("mean", "dbl"))
-  ))
+  )) %>% 
+  mutate(rate = exp(rate))
 
 # Prepare model formula
 z_covars_names <- names(f_design_df[c(3, 8:27)])
@@ -334,159 +325,3 @@ summary(f_mdl2)
 # Including blinding significantly improves model fit (quadruple)
 f_anova <- anova(f_mdl2, f_mdl)
 summary(f_anova)
-
-# Conduct model ----------------------------------------------------------------
-
-# Data
-g_conduct_df <- e_join_chars %>% 
-  select(-c(source, bmi_lower:bmi_upper, contains("dbl")))
-
-# Prepare model formula
-z_covars2_names <- names(g_conduct_df[c(3, 8:33)])
-z_covars2 <- paste0(z_covars2_names, collapse = " + ")
-z_fml2 <- as.formula(paste0("shape ~ ", z_covars2))
-
-# Construct glmnet formula and conduct matrices
-z_cv_fml <- as.formula(paste0("~ ", z_covars2))
-conduct_X <- model.matrix(z_cv_fml, data = g_conduct_df)[, -1]
-conduct_y <- g_conduct_df$shape
-
-# Fit linear model with shrinkage via glmnet
-cv_fit2 <- cv.glmnet(conduct_X, conduct_y, alpha = 1)
-plot(cv_fit2)
-
-# Get betas with lowest lambda
-conduct_betas <- as.numeric(coef(cv_fit2, s = "lambda.1se")[-1,])
-
-# Get residual standard deviation
-cv_pred2 <- predict(cv_fit2, newx = conduct_X, s = "lambda.1se")
-cv_resid2 <- conduct_y - cv_pred2
-cv_n2 <- length(cv_pred2)
-cv_p2 <- length(coef(cv_fit2))
-cv_resid_sd2 <- sqrt(sum(cv_resid2^2) / (cv_n2 - cv_p2))
-
-# Fit linear model
-# Same design predictors
-# No baseline characteristic predicts shape
-g_mdl <- lm(z_fml2, data = g_conduct_df)
-summary(g_mdl)
-
-# Compute residual standard dev to compare to RMSE from glmnet residuals
-g_resid <- residuals(g_mdl)
-g_n <- length(g_resid)
-g_p <- length(coef(g_mdl))
-g_resid_sd <- sqrt(sum(g_resid^2) / (g_n - g_p))
-
-# Save
-glm_res2 <- list(
-  betas = conduct_betas,
-  resid_sd = cv_resid_sd2
-)
-
-saveRDS(glm_res2, "outputs/model_shape/conduct/lm_res_shrinkage.rds")
-
-# Diagnostics for linear model
-g_diag <- broom::glance(g_mdl)
-
-# Tidy outputs
-g_res <- broom::tidy(g_mdl) %>% 
-  mutate(
-    lci = estimate - 1.96 * std.error,
-    uci = estimate + 1.96 * std.error
-  )
-
-# Plot coefficients
-plot_coefs2 <- g_res %>% 
-  filter(!term == "(Intercept)") %>% 
-  mutate(
-    term = as.factor(term),
-    term = fct_relevel(term, "rate")
-  ) %>% 
-  ggplot(aes(x = fct_rev(term), y = estimate, ymin = lci, ymax = uci)) +
-  geom_point() + 
-  geom_linerange() +
-  scale_y_continuous(n.breaks = 10) +
-  coord_flip() +
-  theme_bw() +
-  geom_hline(yintercept = 0, colour = "red") +
-  labs(x = NULL, y = "Coefficient (95% CI)")
-
-# Get predicted shape and residuals
-g_resid <- broom::augment(g_mdl) %>% 
-  as_tibble() %>% 
-  rename(
-    shape_pred = .fitted,
-    resid = .resid
-  ) %>% 
-  select(shape, rate, shape_pred, resid)
-
-# Plot residuals
-plot_resid <- g_resid %>% 
-  ggplot(aes(x = resid)) + 
-  geom_density() + 
-  theme_bw() +
-  labs(x = "Model residuals", y = "Density")
-
-# Predicted vs observed
-plot_pred_obs <- g_resid %>% 
-  ggplot(aes(x = shape_pred, y = shape)) +
-  geom_point() +
-  geom_abline(slope = 1, intercept = 0, colour = "red", linetype = "dashed") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = "Observed shape")
-
-# Residuals vs predicted
-plot_pred_resid <- g_resid %>% 
-  ggplot(aes(x = shape_pred, y = resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0, color = "red") +
-  theme_bw() +
-  labs(x = "Predicted shape", y = "Residuals")
-
-# Save results
-write_csv(g_res, "outputs/model_shape/conduct/lm_res.csv")
-write_csv(g_diag, "outputs/model_shape/conduct/lm_diags.csv")
-write_csv(g_resid, "outputs/model_shape/conduct/lm_pred_resid.csv")
-
-ggsave(
-  "outputs/model_shape/conduct/01_lm_res_coefs.png",
-  plot_coefs,
-  width = 8,
-  height = 8,
-  units = "in"
-)
-
-ggsave(
-  "outputs/model_shape/conduct/02_lm_residuals.png",
-  plot_resid,
-  width = 6,
-  height = 6,
-  units = "in"
-)
-
-ggsave(
-  "outputs/model_shape/conduct/03_lm_obs_pred_shape.png",
-  plot_pred_obs,
-  width = 6,
-  height = 6,
-  units = "in"
-)
-
-ggsave(
-  "outputs/model_shape/conduct/04_lm_pred_resid.png",
-  plot_pred_resid,
-  width = 6,
-  height = 6,
-  units = "in"
-)
-
-# Fit model without blinding
-z_covars2_anova <- gsub("\\+ blinding ", "", z_covars2)
-z_fml2_anova <- as.formula(paste0("shape ~ rate + ", z_covars2_anova))
-g_mdl2 <- lm(z_fml2_anova, data = g_conduct_df)
-summary(g_mdl2)
-
-# ANOVA test - significance
-# Including blinding significantly improves model fit (quadruple)
-g_anova <- anova(g_mdl2, g_mdl)
-summary(g_anova)

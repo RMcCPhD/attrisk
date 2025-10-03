@@ -6,7 +6,6 @@
 
 source("scripts/00_config.R")
 library(tidyverse)
-library(multinma)
 library(posterior)
 
 # Import pre-CITL model, get draws
@@ -62,8 +61,7 @@ gompertz_prob <- function(b, a, dt, lp) {
 uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5) {
   flo <- f(lo)
   fhi <- f(hi)
-  k <- 0
-  while (sign(flo) == sign(fhi) && k < max_expand) {
+  while (sign(flo) == sign(fhi)) {
     lo <- lo - step
     hi <- hi + step
     flo <- f(lo)
