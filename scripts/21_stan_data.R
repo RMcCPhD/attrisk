@@ -11,10 +11,15 @@ a_imp_mdl_beta <- readRDS("outputs/model_shape/design/lm_res_shrinkage.rds")
 
 # Remove baseline characteristics
 b_design_df <- a_imp_df %>% 
-  select(-c(contains("dbl"), bmi_lower:bmi_upper, male_prop:egfr_mean))
+  select(-c(
+    contains("dbl"), bmi_lower:bmi_upper, n_log, duration
+  ))
+  # select(-c(
+  #   contains("dbl"), bmi_lower:bmi_upper, male_prop:egfr_mean, n_log, duration
+  # ))
 
 # Create model matrix for predictors
-b_vars <- names(b_design_df[7:26])
+b_vars <- names(b_design_df[7:25])
 b_fml <- as.formula(paste0("~ ", paste0(b_vars, collapse = " + ")))
 b_design_mat <- model.matrix(b_fml, data = b_design_df)[, -1]
 
@@ -33,7 +38,7 @@ b_coefs_beta <- tibble(term = b_coefs_names, estimate = a_imp_mdl_beta$betas) %>
 b_coefs_mat <- model.matrix(b_coefs_fml, data = b_coefs_beta)[-1]
 
 # Create linear predictor
-b_lp <- as.vector(b_design_mat %*% b_coefs_mat[2:23])
+b_lp <- as.vector(b_design_mat %*% b_coefs_mat[2:22])
 b_resid_sd <- a_imp_mdl_beta$resid_sd
 
 # Prepare STAN data
@@ -43,7 +48,7 @@ b_design_stan <- list(
   K = ncol(b_design_mat),       # Number of covariates
   r = b_design_df$attr,         # Arm-level attrition counts
   N = b_design_df$arm_n,        # Arm n
-  dt = b_design_df$duration,    # Total trial duration
+  dt = a_imp_df$duration,       # Total trial duration
   lp = b_lp,                    # Linear predictor for shape
   beta_rate = b_coefs_mat[1],   # Rate beta for shape model
   resid_sd = b_resid_sd,        # Lm residual SD (uncertainty for shape model)

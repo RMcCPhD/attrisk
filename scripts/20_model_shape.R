@@ -109,7 +109,7 @@ f_df <- a_imp_df %>% inner_join(e_join_chars)
 plot_shape_dbl <- f_df %>% 
   select(shape, where(is.double)) %>% 
   select(-c(n:attr, rate)) %>% 
-  pivot_longer(duration:egfr_mean) %>% 
+  pivot_longer(duration:age_upper_dbl) %>% 
   ggplot(aes(x = value, y = shape)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = TRUE) +
@@ -169,15 +169,16 @@ ggsave(
 
 # Design model -----------------------------------------------------------------
 
-# Data
+# Data - duration removed
 f_design_df <- e_join_chars %>% 
-  select(-c(
-    source, male_prop, bmi_lower:bmi_upper, contains(c("mean", "dbl"))
-  )) %>% 
+  select(-c(source, bmi_lower:bmi_upper, contains("dbl"), n_log, duration)) %>% 
+  # select(-c(
+  #   source, male_prop, bmi_lower:bmi_upper, contains(c("mean", "dbl"))
+  # )) %>% 
   mutate(rate = exp(rate))
 
 # Prepare model formula
-z_covars_names <- names(f_design_df[c(3, 8:27)])
+z_covars_names <- names(f_design_df[c(3, 8:26)])
 z_covars <- paste0(z_covars_names, collapse = " + ")
 z_fml <- as.formula(paste0("shape ~ ", z_covars))
 
@@ -322,6 +323,6 @@ f_mdl2 <- lm(z_fml_anova, data = f_design_df)
 summary(f_mdl2)
 
 # ANOVA test - significance
-# Including blinding significantly improves model fit (quadruple)
+# Including blinding does significantly improves model fit (quadruple)
 f_anova <- anova(f_mdl2, f_mdl)
 summary(f_anova)

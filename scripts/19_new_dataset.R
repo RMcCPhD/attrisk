@@ -180,6 +180,24 @@ g_attr_fixed %>%
 # Reduced ordinal for number of arms and facilities
 # 1 - 2 arms, 2 - 3 arms, 3 - 4 arms, 4 - >4 arms
 # Log-transformed number of facilities and sample size
+
+# Update 07.10.25
+# Collapsing sample size into categorical variable (i.e. small/med/large)
+# Non-sensical otherwise - users would not have a definitive number, dependent
+# on number of things including recruitment targets
+# Sample: Small (<250), Medium (250 - <500), Large (>=500)
+# g_attr_fixed %>% 
+#   ggplot(aes(x = n)) + 
+#   geom_density() + 
+#   scale_x_continuous(n.breaks = 10) +
+#   theme_classic()
+# 
+# summary(g_attr_fixed$n)
+#
+#
+# N facilities also collapsed into categorical variable (integers)
+# Small (<50), Medium (50-<100), Large (>=100)
+
 h_tidy <- g_attr_fixed %>% 
   rename(
     age_lower_dbl = age_lower,
@@ -220,14 +238,25 @@ h_tidy <- g_attr_fixed %>%
       n_arms == 4 ~ 2L,
       TRUE ~ 3L
     ),
-    n_log = n,
-    across(c(n_log, n_facilities), ~ log(.)),
-    across(c(hba1c_mean, sbp_mean:egfr_mean), ~ log(.))
+    sample = case_when(
+      n < 500 ~ 0L,
+      n >= 500 & n < 1000 ~ 1L,
+      n >= 1000 ~ 2L
+    ),
+    n_facilities = case_when(
+      n_facilities < 50 ~ 0L,
+      n_facilities >= 50 & n_facilities < 100 ~ 1L,
+      n_facilities >= 100 ~ 2L
+    ),
+    # n_facilities = log(n_facilities)
+    # n_log = n,
+    # across(c(n_log, n_facilities), ~ log(.)),
+    # across(c(hba1c_mean, sbp_mean:egfr_mean), ~ log(.))
   ) %>% 
   select(
     source:age_upper_dbl, age_lower:age_upper, bmi_lower:bmi_upper, 
-    min_bmi:max_egfr, n_log, phase:n_facilities, one_pom,
-    male_prop, age10_mean:egfr_mean
+    min_bmi:max_egfr, sample, phase:n_facilities, one_pom
+    # male_prop, age10_mean:egfr_mean
   ) %>% 
   select(source:class, n:attr, trttype, everything())
 
@@ -241,7 +270,8 @@ h_tidy %>%
 # Isolate counts and baseline characteristics
 # Collapse multiarms into one (0 - placebo, 1 - ac, 2 - placebo/ac)
 i_vars <- h_tidy %>% 
-  select(trial_id, atc:trttype, male_prop:egfr_mean) %>% 
+  select(trial_id, atc:trttype) %>% 
+  # select(trial_id, atc:trttype, male_prop:egfr_mean) %>% 
   group_by(trial_id) %>% 
   mutate(
     trttype = case_when(
@@ -284,36 +314,37 @@ i_clp_trttype <- i_clp_arms %>%
 i_clp_bl <- i_vars %>% 
   group_by(trial_id, trttype) %>% 
   reframe(
-    total_n = sum(arm_n),
-    male_prop = weighted.mean(male_prop, arm_n),
-    across(c(age10_mean:egfr_mean), ~ weighted.mean(.x, arm_n))
+    total_n = sum(arm_n)
+    # male_prop = weighted.mean(male_prop, arm_n),
+    # across(c(age10_mean:egfr_mean), ~ weighted.mean(.x, arm_n))
   ) %>% 
   select(-total_n)
 
 # Check distributions before and after collapse
-i_vars %>%
-  pivot_longer(contains("mean")) %>% 
-  ggplot(aes(x = value)) + 
-  geom_density() +
-  facet_wrap(~ name, scales = "free") +
-  theme_bw()
-
-i_clp_bl %>%
-  pivot_longer(contains("mean")) %>% 
-  ggplot(aes(x = value)) + 
-  geom_density() +
-  facet_wrap(~ name, scales = "free") +
-  theme_bw()
+# i_vars %>%
+#   pivot_longer(contains("mean")) %>% 
+#   ggplot(aes(x = value)) + 
+#   geom_density() +
+#   facet_wrap(~ name, scales = "free") +
+#   theme_bw()
+# 
+# i_clp_bl %>%
+#   pivot_longer(contains("mean")) %>% 
+#   ggplot(aes(x = value)) + 
+#   geom_density() +
+#   facet_wrap(~ name, scales = "free") +
+#   theme_bw()
 
 # Combine collapsed rows
-i_join <- i_clp_trttype %>% left_join(i_clp_bl)
+i_join <- i_clp_trttype %>% select(-trttype) %>% left_join(i_clp_bl)
 check_nas(i_join)
 
 # Join with trial design features
 j_join <- i_join %>% 
   left_join(
     h_tidy %>% 
-      select(-c(arm_id, atc, class, n:trttype, male_prop:egfr_mean)) %>% 
+      select(-c(arm_id, atc, class, n:trttype)) %>%
+      # select(-c(arm_id, atc, class, n:trttype, male_prop:egfr_mean)) %>% 
       distinct()
   ) %>% 
   select(
