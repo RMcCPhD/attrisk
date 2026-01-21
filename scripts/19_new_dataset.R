@@ -186,13 +186,21 @@ g_attr_fixed %>%
 # Non-sensical otherwise - users would not have a definitive number, dependent
 # on number of things including recruitment targets
 # Sample: Small (<250), Medium (250 - <500), Large (>=500)
-# g_attr_fixed %>% 
-#   ggplot(aes(x = n)) + 
-#   geom_density() + 
-#   scale_x_continuous(n.breaks = 10) +
-#   theme_classic()
-# 
-# summary(g_attr_fixed$n)
+g_attr_fixed %>%
+  ggplot(aes(x = n)) +
+  geom_histogram() +
+  scale_x_continuous(n.breaks = 10) +
+  theme_classic()
+
+summary(g_attr_fixed$n)
+
+g_attr_fixed %>%
+  ggplot(aes(x = n_facilities)) +
+  geom_histogram() +
+  scale_x_continuous(n.breaks = 10) +
+  theme_classic()
+
+summary(g_attr_fixed$n_facilities)
 #
 #
 # N facilities also collapsed into categorical variable (integers)

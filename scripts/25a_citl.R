@@ -13,7 +13,7 @@ a_imp_mdl <- readRDS("mars/conduct_model/outputs/conduct_fit.rds")
 a_draws <- as_draws(a_imp_mdl)
 
 # Import pre-CITL dataset
-a_imp_standf <- readRDS("mars/conduct_model/latest_stan_conduct.rds")
+a_imp_standf <- readRDS("mars/design_model/latest_stan_design.rds")
 
 # Import sobol outputs
 a_imp_sobol <- readRDS("processed_data/sobol_lst.rds")
@@ -167,18 +167,12 @@ calib_sum <- tibble(
   r_obs = r,
   r_pred = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE)),
   r_citl = apply(pred_count_post, 2, \(x) median(x, na.rm=TRUE)),
-  p_obs = r/N,
-  p_pred = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
-  p_citl = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
+  risk_obs = r/N,
+  risk_pred = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
+  risk_citl = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
   delta_med     = apply(delta_mat, 2, \(x) median(x, na.rm=TRUE)),
   delta_lo      = apply(delta_mat, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
   delta_hi      = apply(delta_mat, 2, \(x) quantile(x, 0.975, na.rm=TRUE))
-  # risk_pre_med  = apply(avg_risk_pre, 2, \(x) median(x, na.rm=TRUE)),
-  # risk_pre_lo   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
-  # risk_pre_hi   = apply(avg_risk_pre, 2, \(x) quantile(x, 0.975, na.rm=TRUE)),
-  # risk_post_med = apply(avg_risk_post, 2, \(x) median(x, na.rm=TRUE)),
-  # risk_post_lo  = apply(avg_risk_post, 2, \(x) quantile(x, 0.025, na.rm=TRUE)),
-  # risk_post_hi  = apply(avg_risk_post, 2, \(x) quantile(x, 0.975, na.rm=TRUE))
 )
 
 # Save summary
@@ -188,6 +182,11 @@ write_csv(calib_sum, "outputs/conduct_model/citl/delta_risk_sum.csv")
 # At or very close to zero a good sign
 res <- avg_risk_post - rep(r / N, nrow(avg_risk_post))
 summary(as.numeric(res))
+
+# 64 Sobol
+# New model w/o duration, categorical sample size and sites
+# Min.     1st Qu.      Median        Mean     3rd Qu.        Max. 
+# -0.88091589 -0.08704349 -0.00000009 -0.00000028  0.08704311  0.88092033 
 
 # 64 Sobol
 # Min.      1st Qu.   Median   Mean     3rd Qu.  Max. 
