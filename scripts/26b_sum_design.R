@@ -316,8 +316,10 @@ e_risk <- map_dfr(seq_along(e_covars), function(i){
   tibble(
     covar = var,
     mean = mean(diff),
-    lo = quantile(diff, .025),
-    hi = quantile(diff, .975)
+    median = median(diff),
+    sd = sd(diff),
+    `2.5%` = quantile(diff, .025),
+    `97.5%` = quantile(diff, .975)
   )
   
 })
@@ -328,25 +330,28 @@ e_risk_tidy <- b_var_names %>%
   left_join(e_risk)
 
 e_risk_plot <- e_risk_tidy %>% 
-  ggplot(aes(x = mean, xmin = lo, xmax = hi, y = fct_rev(covar_name))) +
+  ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(covar_name))) +
   geom_point() +
   geom_linerange() +
   geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
   scale_x_continuous(limits = c(-0.3, 0.3), n.breaks = 6) +
   theme_classic() +
   labs(
-    x = "Mean effect on predicted attrition risk (95% credible intervals)", 
+    x = "Mean difference in predicted attrition risk (95% credible intervals)", 
     y = NULL
   )
 
 # Save
-write_csv(e_risk_tidy, "outputs/summaries/design_model/trial_chars_risk.csv")
+write_csv(
+  e_risk_tidy %>% mutate(across(mean:`97.5%`, ~ round(., 3))), 
+  "outputs/summaries/design_model/trial_chars_risk.csv"
+)
 
 ggsave(
   "outputs/plots/design_trial_chars_risk.png",
   e_risk_plot,
   height = 6,
-  width = 6,
+  width = 7,
   units = "in"
 )
 
@@ -501,24 +506,25 @@ f_cv_plot <- ggplot() +
   geom_point(
     data = f_cv_df,
     aes(x = risk_pred, y = risk_obs),
-    alpha = 0.2
+    size = 0.5,
+    alpha = 0.1
   ) +
   # binned calibration curve
   geom_line(
     data = f_calib_df,
     aes(x = pred_mean, y = obs_mean),
     colour = "steelblue",
-    linewidth = 1
+    linewidth = 0.5
   ) +
   geom_point(
     data = f_calib_df,
     aes(x = pred_mean, y = obs_mean),
     colour = "steelblue",
-    size = 3
+    size = 1
   ) +
   theme_classic() +
-  scale_y_continuous(limits = c(0, 0.85), n.breaks = 6) +
-  scale_x_continuous(limits = c(0, 0.85, n.breaks = 6)) +
+  scale_y_continuous(limits = c(0, 0.9), n.breaks = 8) +
+  scale_x_continuous(limits = c(0, 0.6), n.breaks = 8) +
   labs(
     x = "Predicted attrition risk",
     y = "Observed attrition risk"
@@ -527,7 +533,7 @@ f_cv_plot <- ggplot() +
 ggsave(
   "outputs/plots/design_valid_calibration_plot.png",
   f_cv_plot,
-  width = 6,
-  height = 6,
+  width = 4,
+  height = 4,
   units = "in"
 )
