@@ -12,6 +12,7 @@ library(broom)
 
 # Import trial-level Cox model outputs
 a_imp_res <- read_csv("vivli/01_res.csv")
+a_imp_diag <- read_csv("vivli/02_diag.csv")
 a_imp_vcov <- read_csv("vivli/03_cor.csv")
 
 # Tidy covar names
@@ -99,6 +100,10 @@ c_rdy <- c_compl %>%
 # Save
 write_csv(c_rdy, "outputs/summaries/conduct_model/ipd_cox_model_res.csv")
 
+# Summarise model diagnostics
+c_diag <- a_imp_diag
+write_csv(c_diag, "outputs/summaries/conduct_model/ipd_cox_model_diag.csv")
+
 # MA: Pooled log-hazard and hazard ratios --------------------------------------
 
 # Correctly order estimates
@@ -181,3 +186,115 @@ ggsave(
   width = 6,
   units = "in"
 )
+
+# Calibration-in-the-large -----------------------------------------------------
+
+# Import materials from CITL
+e_citl_draws <- readRDS("outputs/conduct_model/citl/delta_draws.rds")
+
+# Import CITL summary
+# Add trial ID
+e_citl_sum <- read_csv("outputs/conduct_model/citl/delta_risk_sum.csv") %>% 
+  cbind(
+    tibble(
+      trial_id = readRDS("processed_data/latest_dataset.rds") %>% 
+        pull(trial_id)
+    )
+  ) %>% 
+  as_tibble()
+
+# Summarise distribution of delta (intercept shifts)
+e_citl_overall <- tibble(
+  mean   = mean(e_citl_draws),
+  median = median(e_citl_draws),
+  sd     = sd(e_citl_draws),
+  lo     = quantile(e_citl_draws, 0.025),
+  hi     = quantile(e_citl_draws, 0.975)
+)
+
+# Summarise trial-level delta draws
+e_citl_trial <- tibble(
+  trial_id = e_citl_sum$trial_id,
+  trial_arm = seq_len(ncol(e_citl_draws)),
+  delta_mean = colMeans(e_citl_draws),
+  delta_median = apply(e_citl_draws, 2, median),
+  delta_lo = apply(e_citl_draws, 2, quantile, 0.025),
+  delta_hi = apply(e_citl_draws, 2, quantile, 0.975)
+)
+
+# Summarise distribution of calibration shifts
+e_citl_dist <- tibble(delta = as.vector(e_citl_draws)) %>%
+  ggplot(aes(x = delta)) +
+  geom_density(fill = "steelblue", alpha = .4) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  theme_classic() +
+  labs(
+    x = "Calibration intercept shift (δ)",
+    y = "Density"
+  )
+
+# Summarise pre and post-CITL predicted risk
+e_citl_risk <- e_citl_sum %>% 
+  reframe(
+    obs_mean  = mean(p_obs),
+    pred_pre_mean  = mean(p_pred),
+    pred_post_mean = mean(p_citl)
+  )
+
+# Summarise absolute calibration error
+e_citl_error <- e_citl_sum %>%
+  mutate(
+    err_pre  = abs(p_pred - p_obs),
+    err_post = abs(p_citl - p_obs)
+  ) %>%
+  reframe(
+    mae_pre  = mean(err_pre),
+    mae_post = mean(err_post)
+  )
+
+# Calibration plot
+e_citl_plot_dat <- tibble(
+  arm = rep(e_citl_sum$arm, 2),
+  obs = rep(e_citl_sum$p_obs, 2),
+  pred = c(e_citl_sum$p_pred, e_citl_sum$p_citl),
+  stage = rep(c("Pre-CITL", "Post-CITL"), each = nrow(e_citl_sum))
+)
+
+e_citl_plot <- e_citl_plot_dat %>%
+  ggplot(aes(x = obs, y = pred, colour = stage)) +
+  geom_abline(linetype = 2) +
+  geom_point(size = 0.5) +
+  theme_classic() +
+  labs(
+    x = "Observed attrition risk",
+    y = "Predicted attrition risk",
+    colour = NULL
+  ) +
+  scale_x_continuous(limits = c(0, 1), n.breaks = 5)
+
+# Save summaries
+write_csv(e_citl_overall, "outputs/summaries/conduct_model/citl_delta_sum_overall.csv")
+write_csv(e_citl_sum, "outputs/summaries/conduct_model/citl_delta_sum_trial.csv")
+write_csv(e_citl_risk, "outputs/summaries/conduct_model/citl_risk_sum.csv")
+write_csv(e_citl_error, "outputs/summaries/conduct_model/citl_error.csv")
+
+write_csv(e_citl_trial, "outputs/summaries/conduct_model/citl_tmp.csv")
+
+# Save plots
+ggsave(
+  "outputs/plots/conduct_citl_delta.png",
+  e_citl_dist,
+  width = 4,
+  height = 4,
+  units = "in"
+)
+
+ggsave(
+  "outputs/plots/conduct_citl_calibration.png",
+  e_citl_plot,
+  width = 4,
+  height = 4,
+  units = "in"
+)
+
+# Case scenario attrition risk prediction --------------------------------------
