@@ -303,13 +303,13 @@ ggsave(
 f_design_mdl <- readRDS("mars/design_model/outputs/design_fit.rds")
 f_design_df <- readRDS("mars/design_model/latest_stan_design.rds")
 
-f_design_df$X %>% 
-  as_tibble() %>% 
-  pivot_longer(everything()) %>% 
-  group_by(name, value) %>% 
-  distinct() %>% 
-  arrange(name, value) %>% 
-  print(n = 51)
+# f_design_df$X %>% 
+#   as_tibble() %>% 
+#   pivot_longer(everything()) %>% 
+#   group_by(name, value) %>% 
+#   distinct() %>% 
+#   arrange(name, value) %>% 
+#   print(n = 51)
 
 # Get posterior draws
 f_design_draws <- as_draws_matrix(as.array(f_design_mdl))
@@ -363,9 +363,34 @@ rate_base <- exp(log_rate_base)
 shape <- rowMeans(f_design_draws[, grepl("^a\\[", colnames(f_design_draws))])
 
 # Create participant profiles (low to high risk)
+# Female and male participants, age and race fixed for each group
 f_profile1 <- tibble(
   profile = "low_risk",
   param = names(f_sobol$loghr),
+  sex = "female",
+  value = c(
+    age10 = 56 / 10,
+    bmi = 26 / 5.57,
+    hdl = 1.3,
+    total = 4.2,
+    current = 0,
+    t2dur = 6 / 6.14,
+    egfr = 90 / 20.59,
+    hba1c = 7.2,
+    asian = 1,
+    black_aa = 0,
+    other = 0,
+    sbp = 125 / 15.94,
+    sex = 0,
+    comorbs = 0,
+    n_atc = 1
+  )
+)
+
+f_profile2 <- tibble(
+  profile = "low_risk",
+  param = names(f_sobol$loghr),
+  sex = "male",
   value = c(
     age10 = 56 / 10,
     bmi = 26 / 5.57,
@@ -385,9 +410,33 @@ f_profile1 <- tibble(
   )
 )
 
-f_profile2 <- tibble(
+f_profile3 <- tibble(
   profile = "med_risk",
   param = names(f_sobol$loghr),
+  sex = "female",
+  value = c(
+    age10 = 56 / 10,
+    bmi = 27 / 5.57,
+    hdl = 1.1,
+    total = 4.5,
+    current = 0,
+    t2dur = 10,
+    egfr = 75 / 20.59,
+    hba1c = 8.5,
+    asian = 0,
+    black_aa = 0,
+    other = 0,
+    sbp = 135 / 15.94,
+    sex = 0,
+    comorbs = 2,
+    n_atc = 2
+  )
+)
+
+f_profile4 <- tibble(
+  profile = "med_risk",
+  param = names(f_sobol$loghr),
+  sex = "male",
   value = c(
     age10 = 56 / 10,
     bmi = 27 / 5.57,
@@ -407,9 +456,33 @@ f_profile2 <- tibble(
   )
 )
 
-f_profile3 <- tibble(
+f_profile5 <- tibble(
   profile = "higher_risk",
   param = names(f_sobol$loghr),
+  sex = "female",
+  value = c(
+    age10 = 56 / 10,
+    bmi = 33 / 5.57,
+    hdl = 0.9,
+    total = 5.2,
+    current = 1,
+    t2dur = 15,
+    egfr = 50 / 20.59,
+    hba1c = 10,
+    asian = 0,
+    black_aa = 1,
+    other = 0,
+    sbp = 150 / 15.94,
+    sex = 0,
+    comorbs = 4,
+    n_atc = 4
+  )
+)
+
+f_profile6 <- tibble(
+  profile = "higher_risk",
+  param = names(f_sobol$loghr),
+  sex = "male",
   value = c(
     age10 = 56 / 10,
     bmi = 33 / 5.57,
@@ -430,16 +503,16 @@ f_profile3 <- tibble(
 )
 
 # Nest to automate estimation
-f_profiles <- reduce(mget(ls(pattern = "f_profile")), bind_rows) %>% 
-  group_by(profile) %>% 
+f_join <- reduce(mget(ls(pattern = "f_profile")), bind_rows) %>% 
+  group_by(profile, sex) %>% 
   nest()
 
 # Compute linear predictors
 # Build risk parameters and estimate risk
-t_yrs <- seq(0, 1, length.out = 100)
+t_yrs <- seq(0, 1, length.out = 53)
 t_wks <- t_yrs * 52
 
-f_risk <- f_profiles %>% 
+f_risk <- f_join %>% 
   mutate(
     risk = map(data, ~ {
       lp <- .x %>% 
@@ -471,7 +544,7 @@ f_risk_sum <- f_risk %>%
 
 # Plot
 f_risk_plot <- f_risk_sum %>% 
-  select(profile, risk_sum) %>% 
+  select(profile, sex, risk_sum) %>% 
   unnest(risk_sum) %>% 
   mutate(
     profile = case_match(
@@ -484,27 +557,76 @@ f_risk_plot <- f_risk_sum %>%
       profile,
       levels = c("Participant 1", "Participant 2", "Participant 3")
     ),
+    sex = case_match(
+      sex,
+      "female" ~ "Female",
+      "male" ~ "Male"
+    ),
+    sex = factor(sex, levels = c("Female", "Male")),
     across(starts_with("risk_"), ~ . * 100)
   ) %>% 
-  ggplot(aes(x = week, y = risk_q50)) +
+  ggplot(aes(x = week, y = risk_q50, colour = sex)) +
   geom_line() +
   geom_ribbon(
-    aes(ymin = risk_q025, ymax = risk_q975),
-    alpha = 0.2,
-    fill = "steelblue"
+    aes(ymin = risk_q025, ymax = risk_q975, colour = sex),
+    alpha = 0,
+    fill = "steelblue",
+    linetype = "dashed"
   ) +
   scale_y_continuous(limits = c(0, 100), n.breaks = 5) +
+  scale_x_continuous(limits = c(0, 52), n.breaks = 5) + 
   facet_wrap(~profile, scales = "free_y") +
   theme_classic() +
   labs(
     x = "Follow-up time (weeks)",
-    y = "Predicted attrition risk (%)"
+    y = "Predicted attrition risk (%)",
+    colour = "Sex"
   )
 
 ggsave(
   "outputs/plots/conduct_scenario.png",
   f_risk_plot,
   height = 4,
-  width = 6,
+  width = 8,
   units = "in"
 )
+
+# Save risk summary
+f_risk_sum_tidy <- f_risk_sum %>% 
+  select(profile, sex, risk_sum) %>% 
+  unnest(risk_sum) %>% 
+  mutate(
+    week = round(week),
+    profile = case_match(
+      profile,
+      "low_risk" ~ "Participant 1",
+      "med_risk" ~ "Participant 2",
+      "higher_risk" ~ "Participant 3"
+    ),
+    profile = factor(
+      profile,
+      levels = c("Participant 1", "Participant 2", "Participant 3")
+    ),
+    sex = case_match(
+      sex,
+      "female" ~ "Female",
+      "male" ~ "Male"
+    ),
+    sex = factor(sex, levels = c("Female", "Male")),
+    across(contains("risk_"), ~ . * 100),
+    across(contains("risk_"), ~ round(., 1))
+  ) %>% 
+  pivot_wider(
+    names_from = "sex", values_from = c("risk_q50", "risk_q025", "risk_q975")
+  ) %>% 
+  mutate(
+    risk_female = paste0(
+      risk_q50_Female, " [", risk_q025_Female, ", ", risk_q975_Female, "]"
+    ),
+    risk_male = paste0(
+      risk_q50_Male, " [", risk_q025_Male, ", ", risk_q975_Male, "]"
+    )
+  ) %>% 
+  select(profile, week, risk_female, risk_male)
+
+write_csv(f_risk_sum_tidy, "outputs/summaries/conduct_model/conduct_scenario.csv")
