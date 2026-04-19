@@ -52,15 +52,21 @@ c_tidy_rates <- a_imp_mdl_rates %>%
 # 4 additional trials present
 sum(c_tidy_rates$trial_id %in% z_ipd_trials)
 
-# Join model datasets, 76 trials
-d_join_mdl <- b_mdl_res %>% full_join(c_tidy_rates)
+# Join model datasets, 74 trials
+d_join_mdl <- b_mdl_res %>% 
+  full_join(c_tidy_rates) %>% 
+  inner_join(
+    read_csv("vivli/01_res.csv") %>% 
+      distinct(nct_id) %>% 
+      rename(trial_id = nct_id)
+  )
 
 # Join characteristics
 # Transform rate
 e_join_chars <- d_join_mdl %>% left_join(a_imp_df)
 
 # Correlation
-cor(e_join_chars$shape, e_join_chars$rate, method = "pearson")
+cor.test(e_join_chars$shape, e_join_chars$rate, method = "pearson")
 
 # Plot distributions -----------------------------------------------------------
 
@@ -70,8 +76,8 @@ plot_gomp <- d_join_mdl %>%
   mutate(
     parameter = case_match(
       parameter,
-      "shape" ~ "shape",
-      "rate" ~ "log-rate"
+      "shape" ~ "Shape",
+      "rate" ~ "Log-rate"
     )
   ) %>% 
   ggplot(aes(x = est)) +
@@ -88,12 +94,38 @@ ggsave(
   units = "in"
 )
 
+# Plot correlation -------------------------------------------------------------
+
+plot_cor <- d_join_mdl %>% 
+  ggplot(aes(x = shape, y = rate)) +
+  geom_point() +
+  annotate(
+    "text",
+    x = Inf, y = Inf,
+    label = paste0(
+      "Pearson's r = ", "-0.40",
+      "\np = ", "<0.01"
+    ),
+    hjust = 1.1, vjust = 1.5
+  ) +
+  theme_classic() +
+  labs(x = "Shape", y = "Log-rate")
+
+ggsave(
+  "outputs/plots/design_expl_shape_rate_cor.png",
+  plot_cor,
+  width = 6,
+  height = 4,
+  units = "in"
+)
+
+
 # Fit shape model --------------------------------------------------------------
 
 # Data - duration removed
 f_design_df <- e_join_chars %>% 
-  select(-c(source, bmi_lower:bmi_upper, contains("dbl"), n_log, duration)) %>% 
-  mutate(rate = exp(rate))
+  select(-c(source, bmi_lower:bmi_upper, contains("dbl"), n_log, duration))
+  # mutate(rate = exp(rate))
 
 # Prepare model formula
 z_covars_names <- names(f_design_df[c(3, 8:26)])
@@ -277,6 +309,16 @@ ggsave(
 ggsave(
   "outputs/model_shape/design/03_lm_obs_pred_shape.png",
   plot_pred_obs,
+  width = 6,
+  height = 6,
+  units = "in"
+)
+
+ggsave(
+  "outputs/model_shape/design/03b_lm_resid_obs_pred.png",
+  cowplot::plot_grid(
+    plot_resid, plot_pred_obs, ncol = 2, labels = c("A", "B")
+  ),
   width = 6,
   height = 6,
   units = "in"

@@ -135,7 +135,9 @@ b_imp_ipd <- read_csv("../attrition_rates_modelling/usable_data/total_attrition/
   filter(condition == "Type 2 diabetes")
 
 # Sample size (28335)
+# Test it with the actual IPD sample size (17937)
 b_ipd_n <- sum(b_imp_ipd$n)
+b_ipd_n <- 17937
 
 # Median event rate and follow-up (0.107, 1.10)
 b_ipd_rate_fu <- b_imp_ipd %>% 
