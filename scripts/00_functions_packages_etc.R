@@ -14,6 +14,13 @@ library(flexsurv)
 options(scipen = 999)
 Sys.setenv(STANC3 = TRUE)
 
+# Function to check dataset missingness quickly
+check_nas <- function(dat) {
+  dat %>% 
+    reframe(across(everything(), ~ sum(is.na(.)))) %>% 
+    pivot_longer(everything())
+}
+
 # Function to find the nearest neighbour IPD trial to an aggregate trial
 # Use the fu_ratio of the nearest neighbour as an approximate fu ratio for the
 # respective aggregate trials

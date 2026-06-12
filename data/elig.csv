@@ -1,5 +1,6 @@
 datasource,trial_id,minimum_age,maximum_age,minimum_age_unit,maximum_age_unit,bmi,bmi_unit,less_than_bmi_excluded,more_than_bmi_excluded,hba1c_min,hba1c_max,hba1c_unit,t2dm_duration,t2dm_duration_unit,ttt_duration,ttt_duration_unit,renal_function_measure,renal_function_range,renal_function_unit,sbp,bp_unit,carers,alcohol_and_drugs,heart_failure,non_cardiovascular_comorbidities,other_medicines,physical_disability,mental_disability,investigations,investigator_discretion
 glp1,NCT02229383,18,90,Years,Years,>45,kg/m2,,,7.5,12,%,,,,weeks,,,,,,no,no,Do not exclude even if they have HF,anyother,none,no,no,none,no
+manual,NCT04170998,19,150,Years,Years,>40,kg/m2,18.5,<40,,,,,,,,,,,,,,,,,,,,,
 glp1,NCT01632163,18,,Years,,<20,kg/m2,,,7,10.5,%,<1,years,<3,months,,,,,,no,no,Do not exclude even if they have HF,anyother,none,no,no,none,no
 glp1,NCT02254291,20,,Years,,,,,,6.5,9.5,%,,,<30,days,eGFR,<60,mL/min/1.73m2,,,no,no,Class IV,comprehensive,none,no,no,none,yes
 glp1,NCT02305381,18,,Years,,,,,,7,10,%,,,<90,days,eGFR,<30,mL/min/1.73m2,,,no,no,Class IV,anyother,none,no,no,none,no

@@ -1,0 +1,19 @@
+# Format of user inputs vs prepared for risk estimates
+
+Duration - weeks (converted to years for model)
+Sample size - number (converted to log)
+Number of sites - number (converted to log)
+Number of arms - 0 (2), 1 (3), 2 (4), 3 (>4)
+
+Age lower - 0 (18), 1 (>18)
+Age upper - 0 (<=80), 1 (>80)
+BMI lower - 0 (None), 1 (<=25kgm2), 2 (>25kgm2)
+BMI upper - 0 (None), 1 (<=40kgm2), 2 (>40kgm2)
+eGFR lower - 0 (None), 1 (<=30ml), 2 (>30ml)
+eGFR upper - 0 (None), 1 (<=60ml), 2 (>60ml)
+
+Phase - 0 (3), 1 (4)
+Number of POMS - 0 (1), 1 (>1)
+Treatment type - 0 (Placebo), 1 (AC), 2 (Both)
+Blinding - kept as text
+WHO regions

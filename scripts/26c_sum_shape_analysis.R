@@ -319,7 +319,7 @@ ggsave(
   cowplot::plot_grid(
     plot_resid, plot_pred_obs, ncol = 2, labels = c("A", "B")
   ),
-  width = 6,
+  width = 8,
   height = 6,
   units = "in"
 )
