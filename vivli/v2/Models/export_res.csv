@@ -1,0 +1,1021 @@
+sponsor,nct_id,term,estimate,std.error,statistic,p.value
+astrazeneca,NCT01606007,age10,-0.516,0.455,-1.133,0.257
+astrazeneca,NCT01606007,sex,-1.779,0.852,-2.09,0.037
+astrazeneca,NCT01606007,bmi,-0.019,0.471,-0.04,0.968
+astrazeneca,NCT01606007,durn,0.588,0.368,1.597,0.11
+astrazeneca,NCT01606007,sbp,-0.648,0.484,-1.339,0.181
+astrazeneca,NCT01606007,chol_hdl,-0.666,0.2,-3.337,0.001
+astrazeneca,NCT01606007,chol_total,0.309,0.3,1.033,0.302
+astrazeneca,NCT01606007,hba1c,0.616,0.301,2.045,0.041
+astrazeneca,NCT01606007,egfr,-0.669,0.489,-1.368,0.171
+astrazeneca,NCT01606007,conmeds,-0.088,0.111,-0.786,0.432
+astrazeneca,NCT02471404,age10,-0.432,0.479,-0.902,0.367
+astrazeneca,NCT02471404,sex,0.604,0.757,0.798,0.425
+astrazeneca,NCT02471404,bmi,0.048,0.52,0.093,0.926
+astrazeneca,NCT02471404,durn,0.647,0.39,1.657,0.097
+astrazeneca,NCT02471404,sbp,-0.436,0.386,-1.129,0.259
+astrazeneca,NCT02471404,chol_hdl,-0.904,0.453,-1.995,0.046
+astrazeneca,NCT02471404,chol_total,0.638,0.342,1.864,0.062
+astrazeneca,NCT02471404,hba1c,-0.477,0.512,-0.931,0.352
+astrazeneca,NCT02471404,egfr,0.147,0.549,0.267,0.79
+astrazeneca,NCT02471404,comorbs,-0.628,0.438,-1.432,0.152
+astrazeneca,NCT02471404,conmeds,-0.084,0.176,-0.476,0.634
+boehringer,NCT00601250,age10,0.118,0.416,0.284,0.776
+boehringer,NCT00601250,sex,-0.398,0.662,-0.601,0.548
+boehringer,NCT00601250,bmi,-0.773,0.44,-1.755,0.079
+boehringer,NCT00601250,durn,0.617,0.573,1.077,0.282
+boehringer,NCT00601250,smoke,-0.991,1.145,-0.866,0.387
+boehringer,NCT00601250,sbp,-0.318,0.368,-0.863,0.388
+boehringer,NCT00601250,chol_hdl,-0.649,0.416,-1.563,0.118
+boehringer,NCT00601250,chol_total,0.243,0.346,0.703,0.482
+boehringer,NCT00601250,hba1c,-0.408,0.366,-1.113,0.266
+boehringer,NCT00601250,egfr,-0.542,0.477,-1.137,0.256
+boehringer,NCT00601250,comorbs,0.197,0.296,0.666,0.505
+boehringer,NCT00601250,conmeds,-0.152,0.162,-0.943,0.346
+boehringer,NCT00601250,raceasian,-0.984,0.969,-1.015,0.31
+boehringer,NCT00602472,age10,-1.023,0.44,-2.323,0.02
+boehringer,NCT00602472,sex,-0.09,0.499,-0.18,0.857
+boehringer,NCT00602472,bmi,-0.769,0.397,-1.936,0.053
+boehringer,NCT00602472,durn,-0.398,0.415,-0.959,0.338
+boehringer,NCT00602472,smoke,0.296,0.679,0.435,0.663
+boehringer,NCT00602472,sbp,0.398,0.181,2.197,0.028
+boehringer,NCT00602472,chol_hdl,0.61,0.217,2.811,0.005
+boehringer,NCT00602472,chol_total,-0.425,0.286,-1.483,0.138
+boehringer,NCT00602472,hba1c,0.484,0.258,1.877,0.061
+boehringer,NCT00602472,egfr,-0.316,0.351,-0.9,0.368
+boehringer,NCT00602472,comorbs,0.083,0.195,0.428,0.669
+boehringer,NCT00602472,conmeds,0.245,0.096,2.555,0.011
+boehringer,NCT00602472,raceasian,-2.548,0.703,-3.623,0
+boehringer,NCT00602472,raceother_na_unk,-0.009,1.135,-0.008,0.994
+boehringer,NCT00621140,age10,-0.478,0.44,-1.084,0.278
+boehringer,NCT00621140,sex,0.506,0.616,0.822,0.411
+boehringer,NCT00621140,bmi,-0.44,0.396,-1.11,0.267
+boehringer,NCT00621140,durn,1.576,0.548,2.876,0.004
+boehringer,NCT00621140,smoke,-0.739,1.138,-0.649,0.516
+boehringer,NCT00621140,sbp,0.463,0.316,1.466,0.143
+boehringer,NCT00621140,chol_hdl,-0.434,0.402,-1.08,0.28
+boehringer,NCT00621140,chol_total,-0.367,0.377,-0.975,0.329
+boehringer,NCT00621140,hba1c,0.265,0.276,0.961,0.336
+boehringer,NCT00621140,egfr,0.258,0.482,0.535,0.592
+boehringer,NCT00621140,comorbs,0.156,0.25,0.625,0.532
+boehringer,NCT00621140,conmeds,0.069,0.151,0.459,0.647
+boehringer,NCT00621140,raceasian,1.564,0.796,1.964,0.049
+boehringer,NCT00622284,age10,0.004,0.125,0.028,0.977
+boehringer,NCT00622284,sex,-0.289,0.169,-1.705,0.088
+boehringer,NCT00622284,bmi,-0.317,0.114,-2.792,0.005
+boehringer,NCT00622284,durn,-0.19,0.159,-1.198,0.231
+boehringer,NCT00622284,smoke,0.283,0.212,1.333,0.183
+boehringer,NCT00622284,sbp,-0.046,0.086,-0.529,0.596
+boehringer,NCT00622284,chol_hdl,-0.028,0.093,-0.297,0.766
+boehringer,NCT00622284,chol_total,-0.023,0.09,-0.259,0.796
+boehringer,NCT00622284,hba1c,0.104,0.083,1.252,0.211
+boehringer,NCT00622284,egfr,-0.076,0.118,-0.646,0.519
+boehringer,NCT00622284,comorbs,0.054,0.061,0.881,0.378
+boehringer,NCT00622284,conmeds,-0.003,0.027,-0.1,0.92
+boehringer,NCT00622284,raceasian,-0.559,0.302,-1.848,0.065
+boehringer,NCT00622284,raceblack_aa,0.465,0.425,1.095,0.273
+boehringer,NCT00622284,raceother_na_unk,2.346,0.753,3.117,0.002
+boehringer,NCT00641043,age10,0.583,0.386,1.511,0.131
+boehringer,NCT00641043,sex,0.037,0.603,0.061,0.952
+boehringer,NCT00641043,bmi,-0.232,0.385,-0.604,0.546
+boehringer,NCT00641043,durn,-0.011,0.388,-0.028,0.977
+boehringer,NCT00641043,smoke,-1.816,1.084,-1.675,0.094
+boehringer,NCT00641043,sbp,-0.53,0.306,-1.73,0.084
+boehringer,NCT00641043,chol_hdl,0.091,0.328,0.278,0.781
+boehringer,NCT00641043,chol_total,0.202,0.315,0.642,0.521
+boehringer,NCT00641043,hba1c,0.678,0.263,2.578,0.01
+boehringer,NCT00641043,egfr,0.075,0.386,0.193,0.847
+boehringer,NCT00641043,comorbs,0.085,0.266,0.32,0.749
+boehringer,NCT00641043,conmeds,0.013,0.182,0.073,0.942
+boehringer,NCT00641043,raceasian,-0.381,0.806,-0.472,0.637
+boehringer,NCT00740051,age10,0.597,0.392,1.522,0.128
+boehringer,NCT00740051,sex,0.262,0.643,0.407,0.684
+boehringer,NCT00740051,bmi,0.23,0.385,0.596,0.551
+boehringer,NCT00740051,durn,-0.245,0.66,-0.372,0.71
+boehringer,NCT00740051,smoke,0.833,0.784,1.062,0.288
+boehringer,NCT00740051,sbp,0.002,0.341,0.007,0.995
+boehringer,NCT00740051,chol_hdl,-0.575,0.46,-1.25,0.211
+boehringer,NCT00740051,chol_total,0.279,0.314,0.889,0.374
+boehringer,NCT00740051,hba1c,-0.2,0.373,-0.537,0.591
+boehringer,NCT00740051,egfr,-0.092,0.344,-0.266,0.79
+boehringer,NCT00740051,comorbs,-0.371,0.26,-1.43,0.153
+boehringer,NCT00740051,conmeds,0.082,0.109,0.751,0.453
+boehringer,NCT00740051,raceasian,-0.167,0.85,-0.196,0.844
+boehringer,NCT00740051,raceblack_aa,1.333,1.459,0.914,0.361
+boehringer,NCT00798161,trttype,-0.671,0.305,-2.2,0.028
+boehringer,NCT00798161,age10,-0.388,0.208,-1.864,0.062
+boehringer,NCT00798161,sex,0.133,0.31,0.43,0.667
+boehringer,NCT00798161,bmi,-0.06,0.204,-0.293,0.769
+boehringer,NCT00798161,durn,0.7,0.278,2.519,0.012
+boehringer,NCT00798161,smoke,-0.693,0.5,-1.387,0.166
+boehringer,NCT00798161,sbp,0.268,0.173,1.554,0.12
+boehringer,NCT00798161,chol_hdl,-0.113,0.18,-0.627,0.531
+boehringer,NCT00798161,chol_total,0.121,0.154,0.787,0.431
+boehringer,NCT00798161,hba1c,0.523,0.15,3.491,0
+boehringer,NCT00798161,egfr,-0.461,0.23,-2.01,0.044
+boehringer,NCT00798161,comorbs,-0.002,0.137,-0.015,0.988
+boehringer,NCT00798161,conmeds,-0.012,0.082,-0.144,0.885
+boehringer,NCT00798161,raceasian,-0.142,0.384,-0.369,0.712
+boehringer,NCT00798161,raceblack_aa,1.344,1.073,1.253,0.21
+boehringer,NCT00800683,age10,-1.045,0.372,-2.81,0.005
+boehringer,NCT00800683,sex,-0.435,0.791,-0.551,0.582
+boehringer,NCT00800683,bmi,-0.303,0.327,-0.928,0.353
+boehringer,NCT00800683,smoke,-0.643,0.91,-0.707,0.479
+boehringer,NCT00800683,sbp,0.135,0.322,0.42,0.674
+boehringer,NCT00800683,chol_hdl,-0.526,0.385,-1.365,0.172
+boehringer,NCT00800683,chol_total,-0.106,0.312,-0.34,0.734
+boehringer,NCT00800683,hba1c,0.415,0.198,2.1,0.036
+boehringer,NCT00800683,egfr,0.827,0.892,0.928,0.354
+boehringer,NCT00800683,comorbs,0.11,0.133,0.833,0.405
+boehringer,NCT00800683,conmeds,0.033,0.064,0.513,0.608
+boehringer,NCT00800683,raceasian,-0.839,1.127,-0.744,0.457
+boehringer,NCT00800683,raceblack_aa,-0.145,1.043,-0.139,0.889
+boehringer,NCT00800683,raceother_na_unk,1.675,1.343,1.247,0.212
+boehringer,NCT00915772,age10,-0.187,0.253,-0.741,0.459
+boehringer,NCT00915772,sex,-0.345,0.383,-0.901,0.368
+boehringer,NCT00915772,bmi,0.057,0.222,0.256,0.798
+boehringer,NCT00915772,durn,0.34,0.358,0.95,0.342
+boehringer,NCT00915772,smoke,0.759,0.468,1.622,0.105
+boehringer,NCT00915772,sbp,-0.02,0.141,-0.142,0.887
+boehringer,NCT00915772,chol_hdl,0.601,0.219,2.749,0.006
+boehringer,NCT00915772,chol_total,-0.092,0.227,-0.403,0.687
+boehringer,NCT00915772,hba1c,0.538,0.157,3.427,0.001
+boehringer,NCT00915772,egfr,-0.839,0.326,-2.577,0.01
+boehringer,NCT00915772,conmeds,-0.026,0.051,-0.504,0.614
+boehringer,NCT00915772,raceasian,0.818,0.528,1.548,0.122
+boehringer,NCT00954447,age10,-0.039,0.137,-0.283,0.777
+boehringer,NCT00954447,sex,0.235,0.218,1.076,0.282
+boehringer,NCT00954447,bmi,-0.013,0.127,-0.099,0.921
+boehringer,NCT00954447,durn,0.249,0.196,1.271,0.204
+boehringer,NCT00954447,smoke,0.37,0.272,1.36,0.174
+boehringer,NCT00954447,sbp,-0.031,0.104,-0.298,0.766
+boehringer,NCT00954447,chol_hdl,0.094,0.114,0.821,0.411
+boehringer,NCT00954447,chol_total,-0.029,0.113,-0.257,0.798
+boehringer,NCT00954447,hba1c,0.084,0.107,0.784,0.433
+boehringer,NCT00954447,egfr,-0.114,0.116,-0.984,0.325
+boehringer,NCT00954447,comorbs,0.141,0.064,2.19,0.029
+boehringer,NCT00954447,conmeds,-0.004,0.034,-0.11,0.912
+boehringer,NCT00954447,raceasian,-0.117,0.344,-0.34,0.734
+boehringer,NCT00954447,raceblack_aa,0.099,0.432,0.229,0.819
+boehringer,NCT00954447,raceother_na_unk,-0.194,1.017,-0.19,0.849
+boehringer,NCT00996658,age10,0.639,0.633,1.009,0.313
+boehringer,NCT00996658,sex,0.994,0.854,1.164,0.244
+boehringer,NCT00996658,bmi,-0.288,0.561,-0.514,0.607
+boehringer,NCT00996658,durn,-0.486,0.752,-0.647,0.518
+boehringer,NCT00996658,sbp,1.183,0.627,1.886,0.059
+boehringer,NCT00996658,chol_hdl,0.081,0.594,0.136,0.892
+boehringer,NCT00996658,chol_total,0.33,0.433,0.762,0.446
+boehringer,NCT00996658,hba1c,-0.082,0.398,-0.206,0.837
+boehringer,NCT00996658,egfr,0.738,0.529,1.396,0.163
+boehringer,NCT00996658,comorbs,-0.564,0.581,-0.971,0.331
+boehringer,NCT00996658,conmeds,0.283,0.185,1.53,0.126
+boehringer,NCT00996658,raceasian,-1.124,1.004,-1.119,0.263
+boehringer,NCT00996658,raceother_na_unk,1.175,1.506,0.781,0.435
+boehringer,NCT01087502,age10,0.001,0.244,0.006,0.995
+boehringer,NCT01087502,sex,-0.351,0.449,-0.782,0.434
+boehringer,NCT01087502,bmi,-0.272,0.22,-1.236,0.216
+boehringer,NCT01087502,durn,-0.399,0.331,-1.207,0.227
+boehringer,NCT01087502,smoke,0.107,0.613,0.174,0.862
+boehringer,NCT01087502,sbp,-0.046,0.15,-0.305,0.761
+boehringer,NCT01087502,chol_hdl,-0.149,0.265,-0.561,0.575
+boehringer,NCT01087502,chol_total,-0.241,0.288,-0.838,0.402
+boehringer,NCT01087502,hba1c,0.04,0.204,0.194,0.846
+boehringer,NCT01087502,egfr,-0.517,0.311,-1.664,0.096
+boehringer,NCT01087502,comorbs,-0.157,0.104,-1.507,0.132
+boehringer,NCT01087502,conmeds,0.076,0.053,1.43,0.153
+boehringer,NCT01087502,raceasian,-0.908,0.711,-1.278,0.201
+boehringer,NCT01087502,raceblack_aa,1.028,0.589,1.745,0.081
+boehringer,NCT01159600,age10,0.064,0.249,0.257,0.798
+boehringer,NCT01159600,sex,-0.307,0.357,-0.86,0.39
+boehringer,NCT01159600,bmi,-0.378,0.218,-1.731,0.083
+boehringer,NCT01159600,durn,0.28,0.182,1.535,0.125
+boehringer,NCT01159600,smoke,0.318,0.435,0.731,0.465
+boehringer,NCT01159600,sbp,-0.029,0.159,-0.185,0.853
+boehringer,NCT01159600,chol_hdl,-0.237,0.198,-1.199,0.23
+boehringer,NCT01159600,chol_total,0.054,0.184,0.294,0.769
+boehringer,NCT01159600,hba1c,0.018,0.175,0.104,0.917
+boehringer,NCT01159600,egfr,0.021,0.254,0.084,0.933
+boehringer,NCT01159600,comorbs,0.133,0.14,0.948,0.343
+boehringer,NCT01159600,conmeds,0.055,0.072,0.762,0.446
+boehringer,NCT01159600,raceasian,-0.411,0.38,-1.083,0.279
+boehringer,NCT01159600,raceblack_aa,0.666,0.805,0.827,0.408
+boehringer,NCT01164501,age10,-0.322,0.21,-1.536,0.125
+boehringer,NCT01164501,sex,0.703,0.363,1.936,0.053
+boehringer,NCT01164501,bmi,0.102,0.185,0.55,0.582
+boehringer,NCT01164501,durn,0.057,0.205,0.28,0.779
+boehringer,NCT01164501,smoke,0.015,0.537,0.028,0.978
+boehringer,NCT01164501,sbp,-0.045,0.136,-0.328,0.743
+boehringer,NCT01164501,chol_hdl,-0.134,0.183,-0.73,0.465
+boehringer,NCT01164501,chol_total,0.337,0.178,1.895,0.058
+boehringer,NCT01164501,hba1c,0.274,0.176,1.555,0.12
+boehringer,NCT01164501,egfr,-0.501,0.18,-2.782,0.005
+boehringer,NCT01164501,comorbs,0.084,0.121,0.694,0.488
+boehringer,NCT01164501,conmeds,-0.015,0.056,-0.272,0.786
+boehringer,NCT01164501,raceasian,-0.709,0.418,-1.695,0.09
+boehringer,NCT01164501,raceother_na_unk,-0.468,1.063,-0.44,0.66
+boehringer,NCT01167881,age10,-0.156,0.108,-1.443,0.149
+boehringer,NCT01167881,sex,-0.236,0.159,-1.483,0.138
+boehringer,NCT01167881,bmi,0.044,0.088,0.507,0.612
+boehringer,NCT01167881,durn,-0.044,0.104,-0.42,0.675
+boehringer,NCT01167881,smoke,0.44,0.184,2.393,0.017
+boehringer,NCT01167881,sbp,0.051,0.069,0.741,0.459
+boehringer,NCT01167881,chol_hdl,-0.193,0.099,-1.951,0.051
+boehringer,NCT01167881,chol_total,-0.09,0.094,-0.961,0.337
+boehringer,NCT01167881,hba1c,0.163,0.08,2.043,0.041
+boehringer,NCT01167881,egfr,-0.049,0.138,-0.357,0.721
+boehringer,NCT01167881,comorbs,0.126,0.079,1.604,0.109
+boehringer,NCT01167881,conmeds,-0.037,0.028,-1.301,0.193
+boehringer,NCT01167881,raceasian,-0.464,0.2,-2.322,0.02
+boehringer,NCT01167881,raceblack_aa,1.094,0.467,2.345,0.019
+boehringer,NCT01177813,trttype,-0.906,0.307,-2.95,0.003
+boehringer,NCT01177813,age10,-0.361,0.188,-1.917,0.055
+boehringer,NCT01177813,sex,-0.264,0.296,-0.893,0.372
+boehringer,NCT01177813,bmi,-0.281,0.192,-1.468,0.142
+boehringer,NCT01177813,durn,0.145,0.22,0.657,0.511
+boehringer,NCT01177813,smoke,0.768,0.313,2.45,0.014
+boehringer,NCT01177813,sbp,0.154,0.118,1.302,0.193
+boehringer,NCT01177813,chol_hdl,-0.085,0.168,-0.507,0.612
+boehringer,NCT01177813,chol_total,-0.22,0.167,-1.318,0.188
+boehringer,NCT01177813,hba1c,0.006,0.167,0.037,0.971
+boehringer,NCT01177813,egfr,-0.304,0.228,-1.331,0.183
+boehringer,NCT01177813,comorbs,-0.185,0.165,-1.122,0.262
+boehringer,NCT01177813,conmeds,-0.027,0.073,-0.374,0.709
+boehringer,NCT01177813,raceasian,-0.722,0.386,-1.873,0.061
+boehringer,NCT01177813,raceblack_aa,0.052,0.727,0.072,0.943
+boehringer,NCT01194830,age10,0.098,0.263,0.371,0.711
+boehringer,NCT01194830,sex,-0.04,0.402,-0.099,0.921
+boehringer,NCT01194830,bmi,-0.031,0.202,-0.154,0.878
+boehringer,NCT01194830,durn,0.136,0.225,0.604,0.546
+boehringer,NCT01194830,smoke,-0.55,0.768,-0.716,0.474
+boehringer,NCT01194830,sbp,0.283,0.192,1.476,0.14
+boehringer,NCT01194830,chol_hdl,0.23,0.174,1.326,0.185
+boehringer,NCT01194830,chol_total,-0.114,0.228,-0.499,0.618
+boehringer,NCT01194830,hba1c,0.123,0.153,0.805,0.421
+boehringer,NCT01194830,egfr,0.286,0.258,1.109,0.268
+boehringer,NCT01194830,comorbs,-0.133,0.199,-0.667,0.505
+boehringer,NCT01194830,conmeds,0.02,0.085,0.237,0.813
+boehringer,NCT01210001,age10,-0.715,0.387,-1.844,0.065
+boehringer,NCT01210001,sex,-0.307,0.634,-0.484,0.628
+boehringer,NCT01210001,bmi,0.142,0.339,0.42,0.674
+boehringer,NCT01210001,durn,0.415,0.288,1.442,0.149
+boehringer,NCT01210001,smoke,1.09,0.797,1.368,0.171
+boehringer,NCT01210001,sbp,-0.369,0.291,-1.27,0.204
+boehringer,NCT01210001,chol_hdl,0.323,0.347,0.933,0.351
+boehringer,NCT01210001,chol_total,-0.529,0.364,-1.451,0.147
+boehringer,NCT01210001,hba1c,-0.077,0.302,-0.255,0.799
+boehringer,NCT01210001,egfr,-0.614,0.353,-1.739,0.082
+boehringer,NCT01210001,comorbs,0.404,0.223,1.815,0.07
+boehringer,NCT01210001,conmeds,0.038,0.104,0.36,0.719
+boehringer,NCT01210001,raceasian,0.377,0.747,0.504,0.614
+boehringer,NCT01214239,age10,-0.741,0.474,-1.563,0.118
+boehringer,NCT01214239,sex,-1.123,0.635,-1.769,0.077
+boehringer,NCT01214239,bmi,-0.169,0.515,-0.328,0.743
+boehringer,NCT01214239,durn,0.335,0.513,0.654,0.513
+boehringer,NCT01214239,smoke,0.669,1.145,0.585,0.559
+boehringer,NCT01214239,sbp,0.236,0.284,0.831,0.406
+boehringer,NCT01214239,chol_hdl,-0.003,0.296,-0.009,0.993
+boehringer,NCT01214239,chol_total,-0.081,0.43,-0.188,0.851
+boehringer,NCT01214239,hba1c,0.3,0.322,0.931,0.352
+boehringer,NCT01214239,egfr,-0.351,0.537,-0.654,0.513
+boehringer,NCT01215097,age10,-0.198,0.38,-0.519,0.603
+boehringer,NCT01215097,sex,-0.361,0.676,-0.534,0.593
+boehringer,NCT01215097,bmi,0.062,0.419,0.148,0.882
+boehringer,NCT01215097,durn,0.24,0.343,0.701,0.483
+boehringer,NCT01215097,smoke,0.673,0.777,0.866,0.387
+boehringer,NCT01215097,sbp,-0.263,0.341,-0.77,0.442
+boehringer,NCT01215097,chol_hdl,-0.281,0.403,-0.699,0.485
+boehringer,NCT01215097,chol_total,-0.272,0.369,-0.738,0.46
+boehringer,NCT01215097,hba1c,-0.123,0.334,-0.367,0.714
+boehringer,NCT01215097,egfr,-0.183,0.457,-0.399,0.69
+boehringer,NCT01215097,comorbs,-0.842,0.656,-1.283,0.199
+boehringer,NCT01215097,conmeds,0.305,0.187,1.631,0.103
+boehringer,NCT01306214,age10,0.022,0.328,0.066,0.948
+boehringer,NCT01306214,sex,-0.538,0.448,-1.201,0.23
+boehringer,NCT01306214,bmi,-0.372,0.305,-1.22,0.222
+boehringer,NCT01306214,durn,-0.025,0.235,-0.104,0.917
+boehringer,NCT01306214,smoke,1.201,0.461,2.606,0.009
+boehringer,NCT01306214,sbp,-0.078,0.216,-0.363,0.717
+boehringer,NCT01306214,chol_hdl,0.25,0.207,1.206,0.228
+boehringer,NCT01306214,chol_total,-0.129,0.201,-0.644,0.52
+boehringer,NCT01306214,hba1c,0.311,0.272,1.146,0.252
+boehringer,NCT01306214,egfr,0.092,0.409,0.225,0.822
+boehringer,NCT01306214,comorbs,0.079,0.135,0.586,0.558
+boehringer,NCT01306214,conmeds,0.042,0.062,0.677,0.499
+boehringer,NCT01306214,raceblack_aa,1.448,0.713,2.032,0.042
+boehringer,NCT01370005,age10,-0.356,0.456,-0.78,0.435
+boehringer,NCT01370005,sex,-1.051,0.62,-1.694,0.09
+boehringer,NCT01370005,bmi,0.131,0.359,0.366,0.714
+boehringer,NCT01370005,durn,-0.048,0.363,-0.132,0.895
+boehringer,NCT01370005,smoke,0.458,0.85,0.54,0.589
+boehringer,NCT01370005,sbp,-0.374,0.475,-0.789,0.43
+boehringer,NCT01370005,chol_hdl,0.123,0.332,0.37,0.711
+boehringer,NCT01370005,chol_total,-0.36,0.383,-0.94,0.347
+boehringer,NCT01370005,hba1c,0.361,0.344,1.049,0.294
+boehringer,NCT01370005,egfr,-0.189,0.51,-0.37,0.711
+boehringer,NCT01370005,comorbs,0.035,0.31,0.114,0.909
+boehringer,NCT01370005,conmeds,-0.109,0.154,-0.71,0.477
+boehringer,NCT01370005,raceasian,5.057,1.321,3.829,0
+boehringer,NCT01370005,raceblack_aa,-0.093,1.2,-0.077,0.938
+boehringer,NCT01422876,age10,-0.107,0.207,-0.515,0.606
+boehringer,NCT01422876,sex,0.29,0.37,0.782,0.434
+boehringer,NCT01422876,bmi,0.2,0.177,1.131,0.258
+boehringer,NCT01422876,durn,-0.25,0.258,-0.971,0.331
+boehringer,NCT01422876,smoke,0.569,0.392,1.454,0.146
+boehringer,NCT01422876,sbp,-0.067,0.182,-0.368,0.713
+boehringer,NCT01422876,chol_hdl,0.186,0.22,0.846,0.397
+boehringer,NCT01422876,chol_total,0.08,0.18,0.446,0.656
+boehringer,NCT01422876,hba1c,0.051,0.176,0.291,0.771
+boehringer,NCT01422876,egfr,-0.002,0.28,-0.007,0.994
+boehringer,NCT01422876,comorbs,0.176,0.144,1.221,0.222
+boehringer,NCT01422876,conmeds,-0.011,0.073,-0.154,0.878
+boehringer,NCT01422876,raceasian,1.355,0.491,2.759,0.006
+boehringer,NCT01422876,raceblack_aa,-0.429,0.559,-0.768,0.443
+boehringer,NCT01438814,age10,0.321,1.388,0.231,0.817
+boehringer,NCT01438814,sex,-3.112,6.19,-0.503,0.615
+boehringer,NCT01438814,bmi,0.16,1.237,0.129,0.897
+boehringer,NCT01438814,durn,0.202,0.784,0.257,0.797
+boehringer,NCT01438814,smoke,0.614,1.247,0.492,0.623
+boehringer,NCT01438814,sbp,0.168,0.912,0.184,0.854
+boehringer,NCT01438814,chol_hdl,-4.194,12.189,-0.344,0.731
+boehringer,NCT01438814,chol_total,-5.124,7.731,-0.663,0.508
+boehringer,NCT01438814,hba1c,0.384,0.56,0.686,0.493
+boehringer,NCT01438814,egfr,-0.155,0.802,-0.194,0.846
+boehringer,NCT01438814,comorbs,-1.058,0.656,-1.613,0.107
+boehringer,NCT01438814,conmeds,-0.285,0.353,-0.807,0.42
+boehringer,NCT01438814,raceasian,-1.772,1.592,-1.113,0.266
+boehringer,NCT01438814,raceother_na_unk,-0.724,1.243,-0.582,0.56
+boehringer,NCT01708902,age10,0.154,0.325,0.475,0.635
+boehringer,NCT01708902,sex,-0.343,0.495,-0.692,0.489
+boehringer,NCT01708902,bmi,0.026,0.388,0.068,0.946
+boehringer,NCT01708902,durn,-0.066,0.614,-0.108,0.914
+boehringer,NCT01708902,smoke,0.288,0.555,0.519,0.604
+boehringer,NCT01708902,sbp,-0.099,0.227,-0.435,0.664
+boehringer,NCT01708902,chol_hdl,0.212,0.284,0.748,0.455
+boehringer,NCT01708902,chol_total,-0.182,0.238,-0.764,0.445
+boehringer,NCT01708902,hba1c,-0.076,0.191,-0.399,0.69
+boehringer,NCT01708902,egfr,0.015,0.438,0.033,0.974
+boehringer,NCT01719003,age10,0.109,0.231,0.474,0.635
+boehringer,NCT01719003,sex,0.14,0.36,0.389,0.697
+boehringer,NCT01719003,bmi,0.268,0.193,1.386,0.166
+boehringer,NCT01719003,durn,0.598,0.255,2.35,0.019
+boehringer,NCT01719003,smoke,0.074,0.441,0.168,0.866
+boehringer,NCT01719003,sbp,-0.014,0.171,-0.082,0.935
+boehringer,NCT01719003,chol_hdl,0.132,0.203,0.65,0.516
+boehringer,NCT01719003,chol_total,0.1,0.169,0.591,0.554
+boehringer,NCT01719003,hba1c,-0.04,0.152,-0.263,0.793
+boehringer,NCT01719003,egfr,0.277,0.32,0.864,0.388
+boehringer,NCT01719003,comorbs,-0.156,0.171,-0.912,0.362
+boehringer,NCT01719003,conmeds,-0.001,0.09,-0.012,0.99
+boehringer,NCT01719003,raceasian,0.633,0.428,1.476,0.14
+boehringer,NCT01719003,raceblack_aa,-0.57,1.043,-0.546,0.585
+boehringer,NCT01719003,raceother_na_unk,-0.192,0.556,-0.345,0.73
+boehringer,NCT02182830,age10,0.686,0.5,1.372,0.17
+boehringer,NCT02182830,sex,-2.615,0.837,-3.125,0.002
+boehringer,NCT02182830,bmi,-0.294,0.232,-1.267,0.205
+boehringer,NCT02182830,durn,-0.095,0.291,-0.325,0.745
+boehringer,NCT02182830,smoke,5.916,1.331,4.444,0
+boehringer,NCT02182830,sbp,-0.34,0.468,-0.726,0.468
+boehringer,NCT02182830,chol_hdl,-0.251,0.295,-0.851,0.395
+boehringer,NCT02182830,chol_total,0.219,0.409,0.535,0.593
+boehringer,NCT02182830,hba1c,0.865,0.395,2.188,0.029
+boehringer,NCT02182830,egfr,-0.494,0.409,-1.209,0.226
+boehringer,NCT02182830,comorbs,0.508,0.202,2.518,0.012
+boehringer,NCT02182830,conmeds,-0.589,0.201,-2.933,0.003
+eli lilly,NCT01064687,age10,0.144,0.378,0.381,0.704
+eli lilly,NCT01064687,sex,0.43,0.565,0.761,0.447
+eli lilly,NCT01064687,bmi,-0.25,0.289,-0.864,0.387
+eli lilly,NCT01064687,durn,0.047,0.28,0.17,0.865
+eli lilly,NCT01064687,smoke,-0.635,1.062,-0.599,0.55
+eli lilly,NCT01064687,sbp,0.001,0.269,0.003,0.998
+eli lilly,NCT01064687,chol_hdl,-0.065,0.305,-0.214,0.83
+eli lilly,NCT01064687,chol_total,0.127,0.292,0.434,0.665
+eli lilly,NCT01064687,hba1c,0.103,0.171,0.603,0.547
+eli lilly,NCT01064687,egfr,-0.513,0.322,-1.592,0.111
+eli lilly,NCT01064687,comorbs,-0.174,0.207,-0.842,0.4
+eli lilly,NCT01064687,conmeds,-0.023,0.102,-0.227,0.821
+eli lilly,NCT01064687,raceother_na_unk,-1.091,0.833,-1.309,0.191
+eli lilly,NCT01075282,age10,-0.322,0.328,-0.981,0.327
+eli lilly,NCT01075282,sex,0.011,0.483,0.023,0.982
+eli lilly,NCT01075282,bmi,0.47,0.239,1.962,0.05
+eli lilly,NCT01075282,durn,0.272,0.25,1.089,0.276
+eli lilly,NCT01075282,smoke,0.132,0.594,0.223,0.824
+eli lilly,NCT01075282,sbp,0.294,0.232,1.267,0.205
+eli lilly,NCT01075282,chol_hdl,0.343,0.265,1.293,0.196
+eli lilly,NCT01075282,chol_total,-0.043,0.267,-0.162,0.871
+eli lilly,NCT01075282,hba1c,0.024,0.206,0.118,0.906
+eli lilly,NCT01075282,egfr,0.275,0.418,0.658,0.511
+eli lilly,NCT01075282,comorbs,0.246,0.12,2.053,0.04
+eli lilly,NCT01075282,conmeds,-0.249,0.121,-2.057,0.04
+eli lilly,NCT01075282,raceasian,0.206,0.72,0.286,0.775
+eli lilly,NCT01075282,raceother_na_unk,0.561,0.613,0.915,0.36
+eli lilly,NCT01126580,age10,0.049,0.208,0.235,0.814
+eli lilly,NCT01126580,sex,0.082,0.306,0.268,0.789
+eli lilly,NCT01126580,bmi,0.023,0.169,0.135,0.893
+eli lilly,NCT01126580,durn,0.468,0.434,1.078,0.281
+eli lilly,NCT01126580,smoke,0.249,0.346,0.72,0.472
+eli lilly,NCT01126580,sbp,0.054,0.142,0.383,0.702
+eli lilly,NCT01126580,chol_hdl,0.209,0.178,1.171,0.242
+eli lilly,NCT01126580,chol_total,0.049,0.317,0.155,0.877
+eli lilly,NCT01126580,hba1c,0.122,0.167,0.733,0.463
+eli lilly,NCT01126580,egfr,0.018,0.236,0.075,0.94
+eli lilly,NCT01126580,comorbs,0.013,0.134,0.1,0.921
+eli lilly,NCT01126580,conmeds,0.002,0.067,0.023,0.981
+eli lilly,NCT01126580,raceasian,-0.294,0.626,-0.469,0.639
+eli lilly,NCT01126580,raceblack_aa,0.065,0.624,0.104,0.917
+eli lilly,NCT01126580,raceother_na_unk,-0.249,0.491,-0.506,0.613
+eli lilly,NCT01191268,age10,-0.271,0.201,-1.344,0.179
+eli lilly,NCT01191268,sex,0.168,0.33,0.51,0.61
+eli lilly,NCT01191268,bmi,0.094,0.166,0.565,0.572
+eli lilly,NCT01191268,durn,0.19,0.15,1.264,0.206
+eli lilly,NCT01191268,smoke,0.489,0.36,1.358,0.174
+eli lilly,NCT01191268,sbp,-0.224,0.144,-1.559,0.119
+eli lilly,NCT01191268,chol_hdl,-0.246,0.196,-1.255,0.209
+eli lilly,NCT01191268,chol_total,0.437,0.171,2.565,0.01
+eli lilly,NCT01191268,hba1c,0.032,0.134,0.239,0.811
+eli lilly,NCT01191268,egfr,0.083,0.185,0.446,0.655
+eli lilly,NCT01191268,comorbs,-0.058,0.128,-0.453,0.65
+eli lilly,NCT01191268,conmeds,0.081,0.052,1.559,0.119
+eli lilly,NCT01191268,raceblack_aa,0.131,0.491,0.268,0.789
+eli lilly,NCT01191268,raceother_na_unk,-0.132,0.477,-0.276,0.782
+eli lilly,NCT01558271,age10,0.062,0.686,0.09,0.928
+eli lilly,NCT01558271,sex,-1.329,0.968,-1.372,0.17
+eli lilly,NCT01558271,bmi,0.781,0.928,0.842,0.4
+eli lilly,NCT01558271,durn,0.04,0.564,0.07,0.944
+eli lilly,NCT01558271,smoke,-1.291,1.186,-1.089,0.276
+eli lilly,NCT01558271,sbp,-0.323,0.438,-0.738,0.46
+eli lilly,NCT01558271,chol_hdl,1.353,0.758,1.785,0.074
+eli lilly,NCT01558271,chol_total,-2.17,1.51,-1.437,0.151
+eli lilly,NCT01558271,hba1c,1.188,0.546,2.175,0.03
+eli lilly,NCT01558271,egfr,0.029,0.905,0.032,0.974
+eli lilly,NCT01558271,comorbs,0.012,0.552,0.022,0.983
+eli lilly,NCT01558271,conmeds,-0.026,0.154,-0.172,0.863
+eli lilly,NCT01621178,age10,0.127,0.259,0.49,0.624
+eli lilly,NCT01621178,sex,0.039,0.415,0.094,0.925
+eli lilly,NCT01621178,bmi,-0.345,0.239,-1.446,0.148
+eli lilly,NCT01621178,durn,0.11,0.133,0.827,0.408
+eli lilly,NCT01621178,smoke,-0.517,1.052,-0.492,0.623
+eli lilly,NCT01621178,sbp,0.395,0.259,1.525,0.127
+eli lilly,NCT01621178,chol_hdl,-0.028,0.223,-0.127,0.899
+eli lilly,NCT01621178,chol_total,0.244,0.16,1.524,0.128
+eli lilly,NCT01621178,hba1c,0.062,0.181,0.34,0.734
+eli lilly,NCT01621178,egfr,-0.503,0.318,-1.581,0.114
+eli lilly,NCT01621178,comorbs,0.009,0.096,0.091,0.928
+eli lilly,NCT01621178,conmeds,0.014,0.06,0.233,0.816
+eli lilly,NCT01621178,raceblack_aa,-0.936,0.771,-1.214,0.225
+eli lilly,NCT01621178,raceother_na_unk,-0.589,0.602,-0.979,0.327
+eli lilly,NCT01648582,age10,-0.591,0.31,-1.909,0.056
+eli lilly,NCT01648582,sex,0.596,0.477,1.249,0.212
+eli lilly,NCT01648582,bmi,0.746,0.411,1.816,0.069
+eli lilly,NCT01648582,durn,-0.037,0.289,-0.129,0.897
+eli lilly,NCT01648582,smoke,-1.581,0.81,-1.951,0.051
+eli lilly,NCT01648582,sbp,-0.129,0.253,-0.51,0.61
+eli lilly,NCT01648582,chol_hdl,0.945,0.638,1.482,0.138
+eli lilly,NCT01648582,chol_total,0.108,0.697,0.154,0.877
+eli lilly,NCT01648582,hba1c,0.011,0.199,0.055,0.956
+eli lilly,NCT01648582,egfr,-0.453,0.346,-1.309,0.191
+eli lilly,NCT01648582,comorbs,0.448,0.331,1.354,0.176
+eli lilly,NCT01648582,conmeds,-0.169,0.174,-0.973,0.331
+eli lilly,NCT01648582,raceasian,1.146,0.898,1.276,0.202
+eli lilly,NCT02152371,age10,-0.94,0.422,-2.228,0.026
+eli lilly,NCT02152371,sex,0.988,0.668,1.479,0.139
+eli lilly,NCT02152371,bmi,0.027,0.345,0.077,0.939
+eli lilly,NCT02152371,durn,0.304,0.235,1.295,0.195
+eli lilly,NCT02152371,smoke,-1.073,1.061,-1.011,0.312
+eli lilly,NCT02152371,sbp,0.263,0.289,0.91,0.363
+eli lilly,NCT02152371,chol_hdl,-0.261,0.372,-0.701,0.483
+eli lilly,NCT02152371,chol_total,-0.119,0.309,-0.384,0.701
+eli lilly,NCT02152371,hba1c,-0.209,0.308,-0.678,0.498
+eli lilly,NCT02152371,egfr,-0.385,0.37,-1.04,0.298
+eli lilly,NCT02152371,conmeds,0.109,0.1,1.086,0.277
+gsk,NCT00838903,trttype,-0.322,0.181,-1.784,0.074
+gsk,NCT00838903,age10,-0.113,0.117,-0.964,0.335
+gsk,NCT00838903,sex,-0.083,0.178,-0.467,0.64
+gsk,NCT00838903,bmi,-0.052,0.092,-0.561,0.575
+gsk,NCT00838903,durn,-0.066,0.1,-0.655,0.512
+gsk,NCT00838903,smoke,0.197,0.231,0.854,0.393
+gsk,NCT00838903,sbp,0.054,0.096,0.561,0.575
+gsk,NCT00838903,chol_hdl,0.083,0.107,0.769,0.442
+gsk,NCT00838903,chol_total,0.035,0.103,0.338,0.736
+gsk,NCT00838903,hba1c,0.012,0.087,0.142,0.887
+gsk,NCT00838903,egfr,-0.053,0.131,-0.405,0.685
+gsk,NCT00838903,comorbs,0.116,0.104,1.116,0.264
+gsk,NCT00838903,conmeds,-0.036,0.026,-1.403,0.161
+gsk,NCT00838903,raceasian,-0.357,0.391,-0.912,0.362
+gsk,NCT00838903,raceblack_aa,-0.005,0.233,-0.023,0.982
+gsk,NCT00838903,raceother_na_unk,-2.365,0.718,-3.294,0.001
+gsk,NCT00838916,age10,-0.16,0.158,-1.019,0.308
+gsk,NCT00838916,sex,0.068,0.264,0.257,0.798
+gsk,NCT00838916,bmi,0.115,0.14,0.818,0.414
+gsk,NCT00838916,durn,-0.043,0.145,-0.298,0.765
+gsk,NCT00838916,smoke,0.35,0.325,1.076,0.282
+gsk,NCT00838916,sbp,0.05,0.135,0.37,0.712
+gsk,NCT00838916,chol_hdl,0.074,0.152,0.491,0.623
+gsk,NCT00838916,chol_total,0.361,0.134,2.698,0.007
+gsk,NCT00838916,hba1c,0.103,0.116,0.887,0.375
+gsk,NCT00838916,egfr,-0.044,0.155,-0.284,0.776
+gsk,NCT00838916,comorbs,0.121,0.154,0.788,0.43
+gsk,NCT00838916,conmeds,-0.066,0.045,-1.46,0.144
+gsk,NCT00838916,raceasian,-0.615,0.622,-0.988,0.323
+gsk,NCT00838916,raceblack_aa,0.333,0.27,1.23,0.219
+gsk,NCT00839527,trttype,-0.428,0.165,-2.591,0.01
+gsk,NCT00839527,age10,-0.098,0.109,-0.9,0.368
+gsk,NCT00839527,sex,-0.496,0.17,-2.918,0.004
+gsk,NCT00839527,bmi,-0.152,0.09,-1.688,0.091
+gsk,NCT00839527,durn,0.027,0.085,0.316,0.752
+gsk,NCT00839527,smoke,-0.014,0.226,-0.061,0.952
+gsk,NCT00839527,sbp,0.137,0.081,1.696,0.09
+gsk,NCT00839527,chol_hdl,-0.291,0.105,-2.769,0.006
+gsk,NCT00839527,chol_total,-0.084,0.091,-0.923,0.356
+gsk,NCT00839527,hba1c,0.098,0.081,1.216,0.224
+gsk,NCT00839527,egfr,-0.177,0.11,-1.604,0.109
+gsk,NCT00839527,comorbs,0.152,0.089,1.704,0.088
+gsk,NCT00839527,conmeds,-0.042,0.027,-1.533,0.125
+gsk,NCT00839527,raceasian,-1.442,0.36,-4.004,0
+gsk,NCT00839527,raceblack_aa,-0.073,0.281,-0.258,0.796
+gsk,NCT00839527,raceother_na_unk,-1.492,0.525,-2.845,0.004
+gsk,NCT00849017,age10,-0.417,0.205,-2.037,0.042
+gsk,NCT00849017,sex,0.504,0.391,1.289,0.197
+gsk,NCT00849017,bmi,0.058,0.18,0.321,0.748
+gsk,NCT00849017,durn,0.501,0.191,2.622,0.009
+gsk,NCT00849017,smoke,0.864,0.392,2.201,0.028
+gsk,NCT00849017,sbp,0.151,0.188,0.8,0.424
+gsk,NCT00849017,chol_hdl,0.198,0.248,0.797,0.425
+gsk,NCT00849017,chol_total,-0.37,0.223,-1.66,0.097
+gsk,NCT00849017,hba1c,-0.4,0.21,-1.903,0.057
+gsk,NCT00849017,egfr,-0.05,0.256,-0.194,0.846
+gsk,NCT00849017,comorbs,0.087,0.194,0.448,0.654
+gsk,NCT00849017,conmeds,-0.07,0.06,-1.177,0.239
+gsk,NCT00849017,raceasian,-0.586,1.093,-0.536,0.592
+gsk,NCT00849017,raceblack_aa,-1.645,0.702,-2.344,0.019
+gsk,NCT00849017,raceother_na_unk,-0.09,0.651,-0.138,0.89
+gsk,NCT00849056,age10,-0.188,0.219,-0.86,0.39
+gsk,NCT00849056,sex,-0.634,0.292,-2.17,0.03
+gsk,NCT00849056,bmi,0.391,0.149,2.617,0.009
+gsk,NCT00849056,durn,0.064,0.138,0.466,0.641
+gsk,NCT00849056,smoke,0.202,0.397,0.508,0.612
+gsk,NCT00849056,sbp,0.078,0.162,0.482,0.63
+gsk,NCT00849056,chol_hdl,-0.063,0.195,-0.321,0.748
+gsk,NCT00849056,chol_total,-0.038,0.152,-0.247,0.805
+gsk,NCT00849056,hba1c,0.037,0.148,0.249,0.803
+gsk,NCT00849056,egfr,-0.287,0.186,-1.547,0.122
+gsk,NCT00849056,comorbs,-0.385,0.178,-2.167,0.03
+gsk,NCT00849056,conmeds,0.001,0.035,0.018,0.985
+gsk,NCT00849056,raceasian,-0.773,1.053,-0.735,0.463
+gsk,NCT00849056,raceblack_aa,0.055,0.376,0.147,0.883
+gsk,NCT00849056,raceother_na_unk,-0.69,0.615,-1.123,0.262
+gsk,NCT01098539,age10,-0.339,0.168,-2.021,0.043
+gsk,NCT01098539,sex,-0.573,0.287,-1.998,0.046
+gsk,NCT01098539,bmi,-0.007,0.174,-0.043,0.966
+gsk,NCT01098539,durn,0.092,0.103,0.894,0.371
+gsk,NCT01098539,smoke,0.626,0.405,1.545,0.122
+gsk,NCT01098539,sbp,0.215,0.137,1.569,0.117
+gsk,NCT01098539,chol_hdl,-0.028,0.161,-0.172,0.863
+gsk,NCT01098539,chol_total,-0.109,0.157,-0.695,0.487
+gsk,NCT01098539,hba1c,-0.082,0.122,-0.668,0.504
+gsk,NCT01098539,egfr,-0.336,0.129,-2.6,0.009
+gsk,NCT01098539,comorbs,-0.094,0.161,-0.582,0.56
+gsk,NCT01098539,conmeds,0.034,0.032,1.077,0.281
+gsk,NCT01098539,raceasian,0.017,0.407,0.042,0.967
+gsk,NCT01098539,raceblack_aa,-0.09,0.389,-0.231,0.818
+gsk,NCT01098539,raceother_na_unk,0.27,0.501,0.539,0.59
+gsk,NCT01733758,age10,-0.323,0.549,-0.588,0.556
+gsk,NCT01733758,sex,-0.397,0.593,-0.669,0.503
+gsk,NCT01733758,bmi,0.217,0.504,0.429,0.668
+gsk,NCT01733758,durn,0.44,0.411,1.07,0.285
+gsk,NCT01733758,smoke,-0.121,0.609,-0.2,0.842
+gsk,NCT01733758,sbp,0.042,0.346,0.122,0.903
+gsk,NCT01733758,chol_hdl,-0.4,0.351,-1.139,0.255
+gsk,NCT01733758,chol_total,0.362,0.52,0.696,0.487
+gsk,NCT01733758,hba1c,0.334,0.309,1.081,0.28
+gsk,NCT01733758,egfr,0.44,0.914,0.482,0.63
+gsk,NCT01733758,conmeds,0.002,0.13,0.013,0.99
+gsk,NCT02229227,age10,0.108,0.202,0.537,0.591
+gsk,NCT02229227,sex,0.236,0.291,0.811,0.418
+gsk,NCT02229227,bmi,0.114,0.179,0.636,0.525
+gsk,NCT02229227,durn,-0.04,0.131,-0.307,0.759
+gsk,NCT02229227,smoke,0.005,0.456,0.011,0.991
+gsk,NCT02229227,sbp,-0.014,0.145,-0.1,0.92
+gsk,NCT02229227,chol_hdl,-0.139,0.178,-0.779,0.436
+gsk,NCT02229227,chol_total,-0.014,0.172,-0.083,0.933
+gsk,NCT02229227,hba1c,-0.046,0.2,-0.23,0.818
+gsk,NCT02229227,egfr,-0.072,0.153,-0.469,0.639
+gsk,NCT02229227,comorbs,0.206,0.167,1.234,0.217
+gsk,NCT02229227,conmeds,-0.004,0.044,-0.083,0.934
+gsk,NCT02229227,raceasian,-0.266,0.628,-0.424,0.672
+gsk,NCT02229227,raceblack_aa,-0.467,0.604,-0.772,0.44
+gsk,NCT02229227,raceother_na_unk,0.775,0.384,2.021,0.043
+janssen,NCT00968812,age10,-0.224,0.127,-1.762,0.078
+janssen,NCT00968812,sex,-0.247,0.172,-1.43,0.153
+janssen,NCT00968812,bmi,0.056,0.09,0.62,0.535
+janssen,NCT00968812,durn,0.163,0.101,1.61,0.107
+janssen,NCT00968812,smoke,-0.068,0.268,-0.255,0.798
+janssen,NCT00968812,sbp,0.1,0.093,1.078,0.281
+janssen,NCT00968812,chol_hdl,0.106,0.101,1.042,0.297
+janssen,NCT00968812,chol_total,-0.169,0.101,-1.679,0.093
+janssen,NCT00968812,hba1c,0.119,0.091,1.313,0.189
+janssen,NCT00968812,egfr,-0.037,0.137,-0.266,0.79
+janssen,NCT00968812,comorbs,0.151,0.063,2.393,0.017
+janssen,NCT00968812,conmeds,-0.03,0.013,-2.338,0.019
+janssen,NCT01081834,age10,-0.171,0.207,-0.827,0.408
+janssen,NCT01081834,sex,0.051,0.313,0.164,0.87
+janssen,NCT01081834,bmi,0.01,0.146,0.07,0.944
+janssen,NCT01081834,durn,-0.111,0.219,-0.506,0.613
+janssen,NCT01081834,smoke,-0.443,0.458,-0.968,0.333
+janssen,NCT01081834,sbp,0.063,0.173,0.365,0.715
+janssen,NCT01081834,chol_hdl,0.143,0.204,0.7,0.484
+janssen,NCT01081834,chol_total,0.279,0.151,1.852,0.064
+janssen,NCT01081834,hba1c,0.448,0.113,3.958,0
+janssen,NCT01081834,egfr,0.06,0.254,0.235,0.814
+janssen,NCT01081834,comorbs,-0.257,0.166,-1.545,0.122
+janssen,NCT01081834,conmeds,0.155,0.059,2.647,0.008
+janssen,NCT01081834,raceasian,-0.364,0.446,-0.816,0.415
+janssen,NCT01081834,raceblack_aa,-0.107,0.613,-0.174,0.862
+janssen,NCT01081834,raceother_na_unk,-0.442,0.496,-0.89,0.373
+janssen,NCT01106625,age10,0.084,0.217,0.386,0.699
+janssen,NCT01106625,sex,0.114,0.305,0.373,0.709
+janssen,NCT01106625,bmi,0.125,0.136,0.921,0.357
+janssen,NCT01106625,durn,-0.033,0.166,-0.197,0.844
+janssen,NCT01106625,smoke,1.196,0.353,3.392,0.001
+janssen,NCT01106625,sbp,0.187,0.145,1.291,0.197
+janssen,NCT01106625,chol_hdl,-0.103,0.165,-0.624,0.533
+janssen,NCT01106625,chol_total,0.102,0.141,0.721,0.471
+janssen,NCT01106625,hba1c,0.241,0.135,1.78,0.075
+janssen,NCT01106625,egfr,0.192,0.239,0.804,0.421
+janssen,NCT01106625,comorbs,-0.116,0.099,-1.173,0.241
+janssen,NCT01106625,conmeds,0.138,0.05,2.766,0.006
+janssen,NCT01106625,raceblack_aa,0.1,0.49,0.204,0.838
+janssen,NCT01106625,raceother_na_unk,0.478,0.436,1.097,0.273
+janssen,NCT01106651,age10,0.441,0.247,1.784,0.074
+janssen,NCT01106651,sex,-0.023,0.258,-0.088,0.93
+janssen,NCT01106651,bmi,-0.13,0.158,-0.827,0.408
+janssen,NCT01106651,durn,-0.041,0.128,-0.319,0.75
+janssen,NCT01106651,smoke,-0.137,0.423,-0.324,0.746
+janssen,NCT01106651,sbp,0.027,0.146,0.185,0.853
+janssen,NCT01106651,chol_hdl,-0.043,0.155,-0.278,0.781
+janssen,NCT01106651,chol_total,0.158,0.151,1.046,0.296
+janssen,NCT01106651,hba1c,0.388,0.132,2.93,0.003
+janssen,NCT01106651,egfr,0.011,0.192,0.057,0.954
+janssen,NCT01106651,comorbs,0.027,0.102,0.26,0.795
+janssen,NCT01106651,conmeds,0.005,0.036,0.13,0.896
+janssen,NCT01106651,raceasian,0.512,0.416,1.231,0.218
+janssen,NCT01106651,raceblack_aa,0.789,0.352,2.241,0.025
+janssen,NCT01106651,raceother_na_unk,0.086,0.546,0.157,0.875
+janssen,NCT01106677,trttype,-0.105,0.191,-0.548,0.584
+janssen,NCT01106677,age10,-0.328,0.141,-2.327,0.02
+janssen,NCT01106677,sex,-0.154,0.196,-0.786,0.432
+janssen,NCT01106677,bmi,0.144,0.097,1.482,0.138
+janssen,NCT01106677,durn,0.021,0.124,0.17,0.865
+janssen,NCT01106677,smoke,-0.643,0.324,-1.987,0.047
+janssen,NCT01106677,sbp,0.116,0.11,1.052,0.293
+janssen,NCT01106677,chol_hdl,0.181,0.12,1.511,0.131
+janssen,NCT01106677,chol_total,-0.046,0.114,-0.401,0.688
+janssen,NCT01106677,hba1c,0.269,0.093,2.908,0.004
+janssen,NCT01106677,egfr,-0.316,0.15,-2.107,0.035
+janssen,NCT01106677,comorbs,0.101,0.075,1.354,0.176
+janssen,NCT01106677,conmeds,-0.019,0.021,-0.913,0.361
+janssen,NCT01106677,raceasian,0.551,0.28,1.966,0.049
+janssen,NCT01106677,raceblack_aa,0.611,0.419,1.457,0.145
+janssen,NCT01106677,raceother_na_unk,-0.549,0.41,-1.339,0.181
+janssen,NCT01106690,age10,-0.164,0.257,-0.638,0.524
+janssen,NCT01106690,sex,0.363,0.431,0.842,0.4
+janssen,NCT01106690,bmi,-0.124,0.178,-0.694,0.487
+janssen,NCT01106690,durn,-0.253,0.229,-1.105,0.269
+janssen,NCT01106690,smoke,-0.205,0.678,-0.303,0.762
+janssen,NCT01106690,sbp,0.326,0.228,1.432,0.152
+janssen,NCT01106690,chol_hdl,0.013,0.225,0.059,0.953
+janssen,NCT01106690,chol_total,0.083,0.228,0.363,0.717
+janssen,NCT01106690,hba1c,0.012,0.16,0.072,0.942
+janssen,NCT01106690,egfr,-0.029,0.316,-0.091,0.928
+janssen,NCT01106690,comorbs,0.106,0.151,0.705,0.481
+janssen,NCT01106690,conmeds,-0.005,0.063,-0.08,0.936
+janssen,NCT01106690,raceasian,0.256,0.549,0.465,0.642
+janssen,NCT01106690,raceblack_aa,1.089,0.789,1.381,0.167
+janssen,NCT01106690,raceother_na_unk,0.897,0.556,1.612,0.107
+janssen,NCT01137812,age10,-0.157,0.12,-1.313,0.189
+janssen,NCT01137812,sex,-0.3,0.17,-1.763,0.078
+janssen,NCT01137812,bmi,0.049,0.078,0.622,0.534
+janssen,NCT01137812,durn,0.019,0.088,0.214,0.831
+janssen,NCT01137812,smoke,-0.236,0.274,-0.861,0.39
+janssen,NCT01137812,sbp,0.081,0.091,0.885,0.376
+janssen,NCT01137812,chol_hdl,-0.127,0.105,-1.201,0.23
+janssen,NCT01137812,chol_total,-0.079,0.092,-0.867,0.386
+janssen,NCT01137812,hba1c,0.495,0.083,5.989,0
+janssen,NCT01137812,egfr,-0.263,0.126,-2.087,0.037
+janssen,NCT01137812,comorbs,0.105,0.067,1.568,0.117
+janssen,NCT01137812,conmeds,-0.024,0.031,-0.76,0.447
+janssen,NCT01137812,raceasian,-0.126,0.24,-0.525,0.6
+janssen,NCT01137812,raceblack_aa,-0.339,0.273,-1.24,0.215
+janssen,NCT01137812,raceother_na_unk,-0.399,0.352,-1.133,0.257
+janssen,NCT01809327,age10,-0.401,0.259,-1.547,0.122
+janssen,NCT01809327,sex,0.236,0.463,0.509,0.611
+janssen,NCT01809327,bmi,-0.304,0.191,-1.593,0.111
+janssen,NCT01809327,durn,-0.185,0.371,-0.498,0.618
+janssen,NCT01809327,smoke,0.108,0.513,0.21,0.834
+janssen,NCT01809327,sbp,0.254,0.239,1.066,0.287
+janssen,NCT01809327,chol_hdl,-0.141,0.321,-0.437,0.662
+janssen,NCT01809327,chol_total,-0.782,0.267,-2.935,0.003
+janssen,NCT01809327,hba1c,0.502,0.161,3.118,0.002
+janssen,NCT01809327,egfr,0.065,0.388,0.168,0.867
+janssen,NCT01809327,comorbs,-0.063,0.185,-0.343,0.732
+janssen,NCT01809327,conmeds,0.089,0.067,1.334,0.182
+janssen,NCT01809327,raceblack_aa,-0.681,1.072,-0.636,0.525
+janssen,NCT01809327,raceother_na_unk,-2.061,1.056,-1.953,0.051
+janssen,NCT02025907,age10,0.937,3.734,0.251,0.802
+janssen,NCT02025907,sex,3.208,4.038,0.794,0.427
+janssen,NCT02025907,bmi,14.125,14.792,0.955,0.34
+janssen,NCT02025907,durn,0.802,1.149,0.698,0.485
+janssen,NCT02025907,smoke,1.122,1.453,0.772,0.44
+janssen,NCT02025907,sbp,7.433,13.85,0.537,0.592
+janssen,NCT02025907,chol_hdl,1.709,1.58,1.082,0.279
+janssen,NCT02025907,chol_total,-0.25,1.321,-0.189,0.85
+janssen,NCT02025907,hba1c,0.148,0.384,0.385,0.7
+janssen,NCT02025907,egfr,0.849,0.845,1.005,0.315
+janssen,NCT02025907,conmeds,-0.455,0.483,-0.942,0.346
+janssen,NCT02025907,raceblack_aa,0.921,1.742,0.529,0.597
+sanofi,NCT00712673,age10,0.148,0.254,0.584,0.559
+sanofi,NCT00712673,sex,-0.235,0.35,-0.67,0.503
+sanofi,NCT00712673,bmi,-0.085,0.16,-0.533,0.594
+sanofi,NCT00712673,durn,-0.49,0.371,-1.32,0.187
+sanofi,NCT00712673,smoke,-0.136,0.509,-0.267,0.789
+sanofi,NCT00712673,sbp,-0.674,0.233,-2.889,0.004
+sanofi,NCT00712673,chol_hdl,-0.566,0.268,-2.111,0.035
+sanofi,NCT00712673,chol_total,0.417,0.132,3.165,0.002
+sanofi,NCT00712673,hba1c,0.049,0.164,0.299,0.765
+sanofi,NCT00712673,egfr,-0.149,0.296,-0.503,0.615
+sanofi,NCT00712673,comorbs,-0.173,0.174,-0.999,0.318
+sanofi,NCT00712673,conmeds,0.266,0.073,3.655,0
+sanofi,NCT00712673,raceother_na_unk,-1.679,1.036,-1.621,0.105
+sanofi,NCT00713830,age10,0.014,0.169,0.081,0.935
+sanofi,NCT00713830,sex,-0.371,0.242,-1.53,0.126
+sanofi,NCT00713830,bmi,-0.115,0.14,-0.819,0.413
+sanofi,NCT00713830,durn,-0.029,0.137,-0.211,0.833
+sanofi,NCT00713830,smoke,-0.974,0.405,-2.406,0.016
+sanofi,NCT00713830,sbp,0.01,0.14,0.074,0.941
+sanofi,NCT00713830,chol_hdl,-0.225,0.149,-1.508,0.132
+sanofi,NCT00713830,chol_total,-0.011,0.131,-0.087,0.931
+sanofi,NCT00713830,hba1c,0.212,0.126,1.681,0.093
+sanofi,NCT00713830,egfr,0.355,0.185,1.913,0.056
+sanofi,NCT00713830,comorbs,0.004,0.09,0.05,0.96
+sanofi,NCT00713830,conmeds,0.05,0.043,1.153,0.249
+sanofi,NCT00713830,raceasian,-0.322,0.302,-1.067,0.286
+sanofi,NCT00713830,raceblack_aa,0.897,0.567,1.58,0.114
+sanofi,NCT00715624,age10,-0.353,0.215,-1.641,0.101
+sanofi,NCT00715624,sex,0.028,0.347,0.08,0.937
+sanofi,NCT00715624,bmi,0.455,0.164,2.779,0.005
+sanofi,NCT00715624,durn,-0.015,0.163,-0.093,0.926
+sanofi,NCT00715624,smoke,0.857,0.416,2.06,0.039
+sanofi,NCT00715624,sbp,0.526,0.18,2.925,0.003
+sanofi,NCT00715624,chol_hdl,-0.5,0.285,-1.754,0.079
+sanofi,NCT00715624,chol_total,-0.002,0.258,-0.006,0.995
+sanofi,NCT00715624,hba1c,0.072,0.184,0.389,0.697
+sanofi,NCT00715624,egfr,-0.419,0.157,-2.666,0.008
+sanofi,NCT00715624,comorbs,-0.248,0.15,-1.653,0.098
+sanofi,NCT00715624,conmeds,0.074,0.059,1.254,0.21
+sanofi,NCT00715624,raceasian,0.386,0.443,0.871,0.384
+sanofi,NCT00715624,raceother_na_unk,-1.389,1.097,-1.266,0.205
+sanofi,NCT00763451,age10,0.471,0.326,1.444,0.149
+sanofi,NCT00763451,sex,0.452,0.403,1.121,0.262
+sanofi,NCT00763451,bmi,0.511,0.241,2.115,0.034
+sanofi,NCT00763451,durn,0.271,0.283,0.956,0.339
+sanofi,NCT00763451,smoke,0.576,0.524,1.1,0.271
+sanofi,NCT00763451,sbp,0.034,0.201,0.171,0.864
+sanofi,NCT00763451,chol_hdl,-0.141,0.303,-0.465,0.642
+sanofi,NCT00763451,chol_total,0.246,0.298,0.826,0.409
+sanofi,NCT00763451,hba1c,-0.383,0.226,-1.693,0.09
+sanofi,NCT00763451,egfr,0.456,0.346,1.321,0.187
+sanofi,NCT00763451,comorbs,0.005,0.154,0.033,0.974
+sanofi,NCT00763451,conmeds,0.056,0.096,0.579,0.563
+sanofi,NCT00763451,raceasian,0.725,0.813,0.892,0.372
+sanofi,NCT00763815,age10,-0.091,0.215,-0.423,0.672
+sanofi,NCT00763815,sex,0.064,0.32,0.199,0.842
+sanofi,NCT00763815,bmi,0.216,0.138,1.567,0.117
+sanofi,NCT00763815,durn,0.241,0.225,1.073,0.283
+sanofi,NCT00763815,smoke,-1.031,0.734,-1.406,0.16
+sanofi,NCT00763815,sbp,-0.414,0.197,-2.106,0.035
+sanofi,NCT00763815,chol_hdl,0.27,0.162,1.674,0.094
+sanofi,NCT00763815,chol_total,-0.004,0.173,-0.022,0.983
+sanofi,NCT00763815,hba1c,0.043,0.179,0.239,0.811
+sanofi,NCT00763815,egfr,0.1,0.197,0.507,0.612
+sanofi,NCT00763815,comorbs,0.136,0.097,1.398,0.162
+sanofi,NCT00763815,conmeds,0.023,0.035,0.665,0.506
+sanofi,NCT00763815,raceother_na_unk,-0.597,0.456,-1.31,0.19
+sanofi,NCT00866658,age10,1.106,0.462,2.392,0.017
+sanofi,NCT00866658,sex,0.942,0.773,1.219,0.223
+sanofi,NCT00866658,bmi,0.584,0.464,1.257,0.209
+sanofi,NCT00866658,durn,-2.334,1.115,-2.093,0.036
+sanofi,NCT00866658,smoke,-0.129,0.742,-0.174,0.862
+sanofi,NCT00866658,sbp,-0.245,0.314,-0.781,0.435
+sanofi,NCT00866658,chol_hdl,-0.009,0.26,-0.033,0.974
+sanofi,NCT00866658,chol_total,0.018,0.4,0.045,0.964
+sanofi,NCT00866658,hba1c,-0.364,0.35,-1.04,0.298
+sanofi,NCT00866658,egfr,0.193,0.391,0.493,0.622
+sanofi,NCT00866658,comorbs,-0.094,0.301,-0.313,0.754
+sanofi,NCT00866658,conmeds,-0.071,0.14,-0.504,0.614
+sanofi,NCT00975286,age10,0.231,0.406,0.57,0.569
+sanofi,NCT00975286,sex,0.859,0.707,1.214,0.225
+sanofi,NCT00975286,bmi,-0.136,0.329,-0.413,0.68
+sanofi,NCT00975286,durn,-0.487,0.497,-0.98,0.327
+sanofi,NCT00975286,smoke,0.656,0.626,1.048,0.295
+sanofi,NCT00975286,sbp,-0.281,0.391,-0.717,0.473
+sanofi,NCT00975286,chol_hdl,-3.008,1.987,-1.514,0.13
+sanofi,NCT00975286,chol_total,-0.768,0.41,-1.873,0.061
+sanofi,NCT00975286,hba1c,-0.079,0.519,-0.152,0.88
+sanofi,NCT00975286,egfr,0.096,0.513,0.187,0.852
+sanofi,NCT00975286,comorbs,-0.08,0.263,-0.302,0.762
+sanofi,NCT00975286,conmeds,0.005,0.139,0.035,0.972
+sanofi,NCT00976937,age10,-0.123,1.104,-0.112,0.911
+sanofi,NCT00976937,sex,1.538,1.323,1.163,0.245
+sanofi,NCT00976937,bmi,4.346,4.51,0.964,0.335
+sanofi,NCT00976937,durn,0.823,0.674,1.22,0.222
+sanofi,NCT00976937,smoke,-0.313,1.146,-0.273,0.785
+sanofi,NCT00976937,sbp,-0.273,0.655,-0.417,0.677
+sanofi,NCT00976937,chol_hdl,0.158,0.736,0.214,0.831
+sanofi,NCT00976937,chol_total,-0.368,0.55,-0.668,0.504
+sanofi,NCT00976937,hba1c,-0.161,0.36,-0.448,0.654
+sanofi,NCT00976937,egfr,0.174,0.633,0.275,0.784
+sanofi,NCT00976937,comorbs,-0.695,0.527,-1.317,0.188
+sanofi,NCT00976937,conmeds,0.02,0.162,0.12,0.904
+sanofi,NCT00976937,raceblack_aa,1.948,1.105,1.764,0.078
+sanofi,NCT01169779,age10,0.258,0.749,0.344,0.731
+sanofi,NCT01169779,sex,-0.312,1.001,-0.312,0.755
+sanofi,NCT01169779,bmi,-0.49,0.483,-1.014,0.311
+sanofi,NCT01169779,durn,-2.611,1.147,-2.277,0.023
+sanofi,NCT01169779,smoke,-0.013,0.918,-0.014,0.989
+sanofi,NCT01169779,sbp,1.162,0.445,2.61,0.009
+sanofi,NCT01169779,chol_hdl,-1,0.631,-1.584,0.113
+sanofi,NCT01169779,chol_total,0.651,0.499,1.303,0.192
+sanofi,NCT01169779,hba1c,0.79,0.589,1.34,0.18
+sanofi,NCT01169779,egfr,1.778,1.578,1.127,0.26
+sanofi,NCT01169779,comorbs,-1.505,0.893,-1.685,0.092
+sanofi,NCT01169779,conmeds,0.145,0.35,0.415,0.678
+sanofi,NCT01632163,age10,-0.732,0.355,-2.061,0.039
+sanofi,NCT01632163,sex,0.986,0.612,1.612,0.107
+sanofi,NCT01632163,bmi,0.103,0.471,0.219,0.827
+sanofi,NCT01632163,durn,-0.351,0.466,-0.753,0.451
+sanofi,NCT01632163,smoke,-1.196,0.873,-1.369,0.171
+sanofi,NCT01632163,sbp,-0.521,0.327,-1.595,0.111
+sanofi,NCT01632163,chol_hdl,0.079,0.348,0.226,0.821
+sanofi,NCT01632163,chol_total,0.158,0.256,0.615,0.539
+sanofi,NCT01632163,hba1c,1.207,0.348,3.467,0.001
+sanofi,NCT01632163,egfr,-0.92,0.373,-2.464,0.014
+sanofi,NCT01632163,comorbs,1.006,0.373,2.7,0.007
+sanofi,NCT01632163,conmeds,-0.158,0.176,-0.899,0.369
+sanofi,NCT01768559,age10,3.673,2.81,1.307,0.191
+sanofi,NCT01768559,sex,-13.204,10.709,-1.233,0.218
+sanofi,NCT01768559,bmi,-3.006,2.324,-1.293,0.196
+sanofi,NCT01768559,durn,1.422,1.182,1.203,0.229
+sanofi,NCT01768559,smoke,-2.227,2.256,-0.987,0.324
+sanofi,NCT01768559,sbp,1.111,0.771,1.442,0.149
+sanofi,NCT01768559,chol_hdl,-32.832,24.427,-1.344,0.179
+sanofi,NCT01768559,chol_total,-0.296,5.114,-0.058,0.954
+sanofi,NCT01768559,hba1c,-0.56,0.751,-0.746,0.456
+sanofi,NCT01768559,egfr,1.075,1.117,0.962,0.336
+sanofi,NCT01768559,comorbs,-0.351,0.373,-0.941,0.347
+sanofi,NCT01768559,conmeds,-0.156,0.205,-0.763,0.446
+sanofi,NCT01798706,age10,-0.179,0.658,-0.272,0.786
+sanofi,NCT01798706,sex,-0.058,0.577,-0.101,0.919
+sanofi,NCT01798706,bmi,-0.243,0.359,-0.677,0.498
+sanofi,NCT01798706,durn,0.168,0.179,0.943,0.346
+sanofi,NCT01798706,smoke,1.42,0.579,2.452,0.014
+sanofi,NCT01798706,sbp,0.092,0.229,0.4,0.689
+sanofi,NCT01798706,chol_hdl,-0.206,0.316,-0.651,0.515
+sanofi,NCT01798706,chol_total,-0.009,0.301,-0.031,0.975
+sanofi,NCT01798706,hba1c,0.621,0.299,2.077,0.038
+sanofi,NCT01798706,egfr,-0.83,0.322,-2.577,0.01
+sanofi,NCT01798706,comorbs,0.046,0.167,0.273,0.785
+sanofi,NCT01798706,conmeds,0.037,0.107,0.345,0.73
+sanofi,NCT01798706,raceother_na_unk,-0.21,0.589,-0.358,0.721
+takeda,NCT00286429,age10,-0.313,0.196,-1.596,0.111
+takeda,NCT00286429,sex,-0.335,0.299,-1.118,0.263
+takeda,NCT00286429,bmi,-0.026,0.151,-0.17,0.865
+takeda,NCT00286429,durn,0.272,0.113,2.414,0.016
+takeda,NCT00286429,smoke,-0.376,0.386,-0.973,0.331
+takeda,NCT00286429,sbp,0.145,0.144,1.01,0.313
+takeda,NCT00286429,chol_hdl,-0.309,0.168,-1.833,0.067
+takeda,NCT00286429,chol_total,0.122,0.116,1.056,0.291
+takeda,NCT00286429,hba1c,0.468,0.092,5.102,0
+takeda,NCT00286429,egfr,-0.06,0.201,-0.298,0.765
+takeda,NCT00286429,comorbs,0.096,0.143,0.674,0.501
+takeda,NCT00286429,conmeds,0.017,0.06,0.281,0.779
+takeda,NCT00286429,raceasian,-0.639,0.48,-1.329,0.184
+takeda,NCT00286429,raceblack_aa,0.545,0.42,1.298,0.194
+takeda,NCT00286429,raceother_na_unk,0.222,0.452,0.491,0.623
+takeda,NCT00286442,age10,0.31,0.27,1.146,0.252
+takeda,NCT00286442,sex,-1.292,0.506,-2.555,0.011
+takeda,NCT00286442,bmi,0.097,0.214,0.454,0.65
+takeda,NCT00286442,durn,0.485,0.251,1.936,0.053
+takeda,NCT00286442,smoke,-0.369,0.617,-0.599,0.549
+takeda,NCT00286442,sbp,0.117,0.215,0.546,0.585
+takeda,NCT00286442,chol_hdl,-1.214,0.335,-3.619,0
+takeda,NCT00286442,chol_total,-0.327,0.222,-1.471,0.141
+takeda,NCT00286442,hba1c,1.639,0.291,5.632,0
+takeda,NCT00286442,egfr,0.179,0.273,0.656,0.512
+takeda,NCT00286442,comorbs,0.335,0.236,1.421,0.155
+takeda,NCT00286442,conmeds,-0.197,0.092,-2.139,0.032
+takeda,NCT00286442,raceother_na_unk,-1.024,0.544,-1.882,0.06
+takeda,NCT00286455,age10,-0.981,0.408,-2.403,0.016
+takeda,NCT00286455,sex,2.583,0.968,2.667,0.008
+takeda,NCT00286455,bmi,0.871,0.37,2.352,0.019
+takeda,NCT00286455,durn,-0.035,0.356,-0.099,0.921
+takeda,NCT00286455,smoke,1.129,0.655,1.723,0.085
+takeda,NCT00286455,sbp,0.635,0.373,1.7,0.089
+takeda,NCT00286455,chol_hdl,0.405,0.493,0.821,0.412
+takeda,NCT00286455,chol_total,-0.523,0.298,-1.756,0.079
+takeda,NCT00286455,hba1c,1.663,0.466,3.567,0
+takeda,NCT00286455,egfr,-0.417,0.588,-0.71,0.478
+takeda,NCT00286455,comorbs,0.537,0.208,2.584,0.01
+takeda,NCT00286455,conmeds,0.084,0.119,0.708,0.479
+takeda,NCT00286455,raceasian,-0.513,1.152,-0.445,0.656
+takeda,NCT00286455,raceblack_aa,-2.871,1.532,-1.874,0.061
+takeda,NCT00286455,raceother_na_unk,1.934,0.894,2.164,0.03
+takeda,NCT00286468,age10,0.019,0.269,0.072,0.943
+takeda,NCT00286468,sex,0.312,0.443,0.706,0.48
+takeda,NCT00286468,bmi,-0.088,0.211,-0.418,0.676
+takeda,NCT00286468,durn,0.124,0.253,0.49,0.624
+takeda,NCT00286468,smoke,-0.146,0.538,-0.272,0.786
+takeda,NCT00286468,sbp,-0.117,0.209,-0.559,0.576
+takeda,NCT00286468,chol_hdl,-0.347,0.315,-1.1,0.271
+takeda,NCT00286468,chol_total,-0.565,0.293,-1.927,0.054
+takeda,NCT00286468,hba1c,0.965,0.22,4.393,0
+takeda,NCT00286468,egfr,-0.056,0.264,-0.212,0.832
+takeda,NCT00286468,comorbs,-0.141,0.19,-0.743,0.458
+takeda,NCT00286468,conmeds,0.249,0.077,3.237,0.001
+takeda,NCT00286468,raceasian,-0.325,0.567,-0.573,0.567
+takeda,NCT00286468,raceother_na_unk,-0.457,0.602,-0.758,0.448
+takeda,NCT00286494,age10,0.167,0.291,0.575,0.565
+takeda,NCT00286494,sex,0.371,0.613,0.605,0.545
+takeda,NCT00286494,bmi,-0.182,0.223,-0.818,0.413
+takeda,NCT00286494,durn,-0.041,0.203,-0.2,0.841
+takeda,NCT00286494,smoke,0.749,0.527,1.422,0.155
+takeda,NCT00286494,sbp,0.38,0.256,1.481,0.139
+takeda,NCT00286494,chol_hdl,-0.117,0.267,-0.44,0.66
+takeda,NCT00286494,chol_total,-0.207,0.279,-0.742,0.458
+takeda,NCT00286494,hba1c,1.173,0.266,4.415,0
+takeda,NCT00286494,egfr,-0.089,0.344,-0.258,0.796
+takeda,NCT00707993,age10,-0.646,0.34,-1.902,0.057
+takeda,NCT00707993,sex,0,0.239,0.002,0.999
+takeda,NCT00707993,bmi,0.049,0.146,0.339,0.735
+takeda,NCT00707993,durn,0.084,0.097,0.869,0.385
+takeda,NCT00707993,sbp,0.254,0.125,2.035,0.042
+takeda,NCT00707993,chol_hdl,-0.171,0.144,-1.191,0.234
+takeda,NCT00707993,chol_total,0.171,0.125,1.37,0.171
+takeda,NCT00707993,hba1c,0.636,0.164,3.87,0
+takeda,NCT00707993,egfr,0.009,0.16,0.053,0.957
+takeda,NCT00707993,comorbs,0.041,0.112,0.369,0.712
+takeda,NCT00707993,conmeds,0.052,0.048,1.085,0.278
+takeda,NCT00707993,raceasian,0.524,0.299,1.752,0.08
+takeda,NCT00707993,raceblack_aa,-0.176,0.391,-0.45,0.653
+takeda,NCT00707993,raceother_na_unk,-0.257,0.422,-0.609,0.543
+takeda,NCT00856284,age10,-0.141,0.068,-2.072,0.038
+takeda,NCT00856284,sex,-0.1,0.101,-0.988,0.323
+takeda,NCT00856284,bmi,0.054,0.059,0.906,0.365
+takeda,NCT00856284,durn,0.201,0.088,2.285,0.022
+takeda,NCT00856284,sbp,0.021,0.071,0.298,0.765
+takeda,NCT00856284,chol_hdl,-0.078,0.061,-1.279,0.201
+takeda,NCT00856284,chol_total,0.066,0.051,1.286,0.198
+takeda,NCT00856284,hba1c,0.368,0.073,5.01,0
+takeda,NCT00856284,egfr,-0.128,0.074,-1.747,0.081
+takeda,NCT00856284,comorbs,0.07,0.041,1.687,0.092
+takeda,NCT00856284,conmeds,-0.035,0.017,-2.067,0.039
+takeda,NCT00856284,raceasian,-0.021,0.136,-0.151,0.88
+takeda,NCT00856284,raceblack_aa,0.292,0.157,1.857,0.063
+takeda,NCT00856284,raceother_na_unk,-0.215,0.223,-0.966,0.334
+takeda,NCT01023581,trttype,-0.54,0.253,-2.132,0.033
+takeda,NCT01023581,age10,0.019,0.178,0.105,0.916
+takeda,NCT01023581,sex,-0.232,0.284,-0.815,0.415
+takeda,NCT01023581,bmi,0.145,0.153,0.943,0.346
+takeda,NCT01023581,durn,0.175,0.177,0.991,0.322
+takeda,NCT01023581,sbp,0.109,0.179,0.61,0.542
+takeda,NCT01023581,chol_hdl,0.006,0.185,0.032,0.975
+takeda,NCT01023581,chol_total,-0.107,0.144,-0.743,0.457
+takeda,NCT01023581,hba1c,0.18,0.165,1.089,0.276
+takeda,NCT01023581,egfr,0.087,0.218,0.397,0.691
+takeda,NCT01023581,comorbs,-0.13,0.138,-0.94,0.347
+takeda,NCT01023581,conmeds,-0.014,0.062,-0.226,0.821
+takeda,NCT01023581,raceasian,0.734,0.352,2.088,0.037
+takeda,NCT01023581,raceblack_aa,0.754,0.433,1.74,0.082
+takeda,NCT01023581,raceother_na_unk,-1.016,1.02,-0.996,0.319
+takeda,NCT01289119,age10,-0.575,0.314,-1.832,0.067
+takeda,NCT01289119,sex,-0.256,0.469,-0.546,0.585
+takeda,NCT01289119,bmi,-0.188,0.444,-0.422,0.673
+takeda,NCT01289119,durn,0.032,0.212,0.153,0.878
+takeda,NCT01289119,sbp,0.26,0.236,1.099,0.272
+takeda,NCT01289119,chol_hdl,-0.014,0.259,-0.052,0.958
+takeda,NCT01289119,chol_total,-0.075,0.273,-0.275,0.783
+takeda,NCT01289119,hba1c,0.498,0.245,2.031,0.042
+takeda,NCT01289119,egfr,-0.477,0.279,-1.71,0.087
+takeda,NCT01289119,comorbs,0.038,0.323,0.116,0.907
+takeda,NCT01289119,conmeds,-0.041,0.201,-0.203,0.839
+takeda,NCT01890122,trttype,-1.135,0.245,-4.638,0
+takeda,NCT01890122,age10,-0.366,0.172,-2.13,0.033
+takeda,NCT01890122,sex,-0.309,0.242,-1.277,0.202
+takeda,NCT01890122,bmi,0.097,0.162,0.598,0.55
+takeda,NCT01890122,durn,0.219,0.217,1.009,0.313
+takeda,NCT01890122,sbp,0.035,0.128,0.272,0.786
+takeda,NCT01890122,chol_hdl,0.131,0.129,1.021,0.307
+takeda,NCT01890122,chol_total,-0.168,0.138,-1.219,0.223
+takeda,NCT01890122,hba1c,0.836,0.146,5.713,0
+takeda,NCT01890122,egfr,-0.039,0.248,-0.157,0.876
+takeda,NCT01890122,comorbs,0.169,0.149,1.134,0.257
+takeda,NCT01890122,conmeds,0.165,0.063,2.636,0.008
+takeda,NCT01890122,raceasian,-0.843,1.033,-0.816,0.414

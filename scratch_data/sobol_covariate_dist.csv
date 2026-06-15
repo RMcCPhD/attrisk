@@ -1,0 +1,8 @@
+dist,var,n
+lnorm,bmi,199
+lnorm,chol_hdl,202
+gamma,chol_total,107
+weibull,durn,73
+weibull,egfr,163
+lnorm,sbp,116
+lnorm,tot_hdl_ratio,200

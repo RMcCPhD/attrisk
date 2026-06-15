@@ -1,7 +1,4 @@
 
-rm(list = ls())
-gc()
-
 library(tidyverse)
 library(broom)
 library(rstan)
@@ -10,6 +7,8 @@ library(tidybayes)
 library(posterior)
 library(markdown)
 library(flexsurv)
+library(metafor)
+library(multinma)
 
 options(scipen = 999)
 Sys.setenv(STANC3 = TRUE)

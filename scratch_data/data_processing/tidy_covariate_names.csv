@@ -1,0 +1,32 @@
+raw_name,tidy_name
+trttypeactive,Active comparator arm
+trttypeplacebo_active,Placebo and active comparator arms
+n_cat250-499,Trial size: N = 250-499
+n_cat500-749,Trial size: N = 500-749
+n_cat750-999,Trial size: N = 750-999
+n_cat>=1000,Trial size: N >= 1000
+arm_n_cat100-199,Arm size: N = 100-199
+arm_n_cat200-299,Arm size: N = 200-299
+arm_n_cat>=300,Arm size: N >= 300
+n_arms_cat,Number of arms: >2
+n_sites_cat100-199,Number of sites: 100-199
+n_sites_cat>=200,Number of sites: >= 200
+n_poms_cat,Number of POMs: >1
+phase,Phase 4
+maskingdouble,Double blinding
+maskingtriple,Triple blinding
+maskingquadruple,Quadruple blinding
+region_of_the_americas,WHO region: Americas
+european_region,WHO region: Europe
+western_pacific_region,WHO region: Western pacific
+african_region,WHO region: Africa
+south_east_asia_region,WHO region: South-east Asia
+eastern_mediterranean_region,WHO region: Eastern mediterranean
+upper_age80,Eligibility: Upper age limit = 80
+upper_age>80,Eligibility: Upper age limit >80
+lower_age>18,Eligibility: Lower age limit >18
+upper_bmi>30,Eligibility: Upper BMI limit >30kg/m2
+upper_bmi>40,Eligibility: Upper BMI limit >40kg/m2
+lower_bmi<27,Eligibility: Lower BMI limit <27kg/m2
+lower_egfr<30,Eligibility: Lower eGFR limit <30mL/min/1.73m2
+lower_egfr<60,Eligibility: Lower eGFR limit <60mL/min/1.73m2
