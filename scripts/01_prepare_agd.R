@@ -292,8 +292,7 @@ elig_age <- elig_keep %>%
     ),
     upper_age = case_when(
       maximum_age <= 80 ~ "80",
-      maximum_age > 80 ~ ">80",
-      TRUE ~ "none"
+      TRUE ~ ">80"
     )
   )
 
@@ -477,7 +476,7 @@ tidy_format <- tidy_convert %>%
       masking,
       levels = c("open_label", "double", "triple", "quadruple")
     ),
-    upper_age = factor(upper_age, levels = c("none", "80", ">80")),
+    upper_age = factor(upper_age, levels = c("80", ">80")),
     lower_age = factor(lower_age, levels = c("18", ">18")),
     upper_bmi = factor(upper_bmi, levels = c("none", ">30", ">40")),
     lower_bmi = factor(lower_bmi, levels = c("none", "<27")),

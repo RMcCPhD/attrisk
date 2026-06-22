@@ -71,7 +71,7 @@ imp_bl %>%
   arrange(desc(n), .by_group = TRUE) %>% 
   slice(1) %>% 
   ungroup() %>% 
-  write_csv("scratch_data/sobol_covariate_dist.c")
+  write_csv("scratch_data/sobol_covariate_dist.csv")
 
 # Get mean and sd for numeric covariates
 # Converted depending on the distribution that best described covariates
@@ -615,6 +615,9 @@ compl_all <- compl_bl %>%
 # Double-check all AttRisk covariates are now present
 glimpse(compl_all)
 imp_covars
+
+# Save for manuscript summaries
+write_csv(compl_all, "outputs/manuscript_summaries/ipd_bl_sum.csv")
 
 # Prepare single-row Sobol distribution summary --------------------------------
 

@@ -30,7 +30,7 @@ stan_lst <- list(
   r = imp_agd$arm_attr,
   N = imp_agd$arm_n,
   dt = imp_agd$duration,
-  beta_rate = imp_expl$rate_beta,
+  beta_lograte = imp_expl$lograte_beta,
   alpha_shape = imp_expl$shape_alpha,
   resid_sd = imp_expl$uncertainty,
   X = imp_mat

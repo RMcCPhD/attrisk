@@ -85,7 +85,7 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
   
   # Shape exploratory analysis parameters
   alpha_shape <- imp_dat$alpha_shape
-  beta_shape_rate <- imp_dat$beta_rate
+  beta_shape_lograte <- imp_dat$beta_lograte
   resid_sd <- imp_dat$resid_sd
   
   # Store marginal predictions (a new trial drawn from same trial population)
@@ -114,7 +114,7 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
     b <- exp(log_b)
     
     z_shape_new <- rnorm(n_test, mean = 0, sd = 1)
-    a <- alpha_shape + beta_shape_rate * b + resid_sd * z_shape_new
+    a <- alpha_shape + beta_shape_lograte * log_b + resid_sd * z_shape_new
     
     p <- gompertz_prob(b = b, a = a, dt = dt_test)
     
@@ -129,7 +129,7 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
     log_b_typical <- as.vector(mu1_typical + X_test %*% beta_arr[s, ])
     b_typical <- exp(log_b_typical)
     
-    a_typical <- alpha_shape + beta_shape_rate * b_typical
+    a_typical <- alpha_shape + beta_shape_lograte * log_b_typical
     
     p_typical <- gompertz_prob(
       b = b_typical,

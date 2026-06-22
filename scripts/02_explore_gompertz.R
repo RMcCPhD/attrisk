@@ -75,11 +75,11 @@ emp_distr <- prep_rdy %>%
 
 # Parameter correlation
 # Annotate plot with correlation test
-emp_cor_tst <- cor.test(prep_rdy$rate, prep_rdy$shape, method = "pearson")
+emp_cor_tst <- cor.test(prep_rdy$log_rate, prep_rdy$shape, method = "pearson")
 emp_cor_lbl <- paste0("r = ", round(emp_cor_tst$estimate, 3), "; p <0.01")
 emp_cor_plot <- prep_rdy %>%
-  ggplot(aes(x = rate, y = shape)) +
-  geom_point(aes(x = rate, y = shape), alpha = 0.5) +
+  ggplot(aes(x = log_rate, y = shape)) +
+  geom_point(aes(x = log_rate, y = shape), alpha = 0.5) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.1) +
   theme_classic() +
   labs(x = "Log-rate", y = "Shape") +
@@ -116,12 +116,12 @@ ggsave(
 rel_dat <- prep_rdy %>% 
   unnest(chars) %>% 
   ungroup() %>%
-  pivot_longer(c(shape, rate)) %>%
+  pivot_longer(c(shape, log_rate)) %>%
   mutate(
     name = case_match(
       name,
       "shape" ~ "Shape",
-      "rate" ~ "Rate"
+      "log_rate" ~ "Log-rate"
     )
   )
 
@@ -214,14 +214,14 @@ ggsave(
 # Model parameters and covariates ----------------------------------------------
 
 # Exploration suggests no or weak relationship between shape and covariates
-# Covariates will be placed on rate only
+# Covariates will be placed on log_rate only
 # Parsimonious structure: log-rate explained by covariates, shape partially
-# explained by rate with some degree of uncertainty
+# explained by log_rate with some degree of uncertainty
 # Additionally avoids double-adjustment (i.e. covariates predict log-rate,
 # log-rate predicts shape; same covariates involved twice)
 
 # Fit model of shape on rate
-mdl_shape <- lm(shape ~ rate, data = prep_rdy)
+mdl_shape <- lm(shape ~ log_rate, data = prep_rdy)
 mdl_shape_sum <- tidy(mdl_shape)
 mdl_shape_diag <- glance(mdl_shape)
 
@@ -266,7 +266,7 @@ mdl_shape_rsd <- sigma(mdl_shape)
 # Extract outputs for model specification
 mdl_out <- tibble(
   shape_alpha = mdl_shape_sum$estimate[[1]],
-  rate_beta = mdl_shape_sum$estimate[[2]],
+  lograte_beta = mdl_shape_sum$estimate[[2]],
   uncertainty = mdl_shape_rsd
 )
 

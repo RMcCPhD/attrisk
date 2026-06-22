@@ -24,7 +24,7 @@ data {
   array[I] int<lower=0> r;              // observed attrition counts
   array[I] int<lower=0> N;              // number of randomised arm participants
   vector[I] dt;                         // total follow-up time in years
-  real beta_rate;                       // rate beta from linear model of shape
+  real beta_lograte;                    // log-rate beta from linear model of shape
   real alpha_shape;                     // intercept from linear model of shape
   real resid_sd;                        // residual SD from linear model of shape
   matrix[I, K] X;                       // covariate matrix
@@ -56,7 +56,7 @@ transformed parameters {
   vector[I] b = exp(log_b);      
   
   // a for each row (conditioned on log-rate, linear predictor and error)
-  vector[I] a = alpha_shape + b * beta_rate + error;       
+  vector[I] a = alpha_shape + log_b * beta_lograte + error;       
   
   // p for each row
   vector[I] p = gompertz_prob(b, a, dt);                          

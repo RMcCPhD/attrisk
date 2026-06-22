@@ -91,7 +91,7 @@ ppc_plot <- ppc_tbl %>%
   labs(
     x = "Trial arm", 
     y = "Attrition count",
-    title = "Observed versus posterior predicted attrition counts"
+    # title = "Observed versus posterior predicted attrition counts"
   )
 
 ggsave(
@@ -140,14 +140,14 @@ res_plot <- res_sum %>%
   theme_classic() +
   geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
   labs(
-    x = "Effect on log-rate", 
+    x = "Mean effect on Gompertz log-rate (95% credible intervals)", 
     y = NULL,
   )
 
 ggsave(
   "outputs/design/posterior_effects_log_rate.png",
   res_plot,
-  width = 8,
+  width = 10,
   height = 6,
   units = "in"
 )
