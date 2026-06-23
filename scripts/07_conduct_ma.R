@@ -258,29 +258,26 @@ out_tidy <- tidy(ma_fit) %>%
       )
     )
   ) %>% 
-  select(term_tidy, term:hi_hr) %>% 
-  rename(
-    loghr = estimate,
-    lo_loghr = lo,
-    hi_loghr = hi
-  )
+  filter(!term == "trttype") %>% 
+  select(term_tidy, hr, std.error, lo_hr, hi_hr, p.value)
 
 saveRDS(out_tidy, "outputs/conduct/ma/out/ma_tidy.rds")
+write_csv(out_tidy, "outputs/conduct/ma/out/ma_tidy.csv")
 
 # Plot hazard ratio
-out_hr_plot <- out_tidy %>% 
+out_hr_plot <- readRDS("outputs/conduct/ma/out/ma_tidy.rds") %>% 
   ggplot(aes(x = hr, y = fct_rev(term_tidy))) +
   geom_point() + 
   geom_linerange(aes(xmin = lo_hr, xmax = hi_hr)) +
   scale_x_continuous(limits = c(0.4, 1.6), n.breaks = 7) +
   geom_vline(xintercept = 1, colour = "red", linetype = "dashed") +
   theme_classic() +
-  labs(x = "Pooled hazard ratio", y = NULL)
+  labs(x = "Pooled mean hazard ratio (95% confidence intervals)", y = NULL)
 
 ggsave(
   "outputs/conduct/ma/out/ma_plot_hr.png",
   out_hr_plot,
   height = 6,
-  width = 8,
+  width = 6,
   units = "in"
 )

@@ -38,6 +38,61 @@ log_mean_exp <- function(x) {
   m + log(mean(exp(x - m)))
 }
 
+# Helper functions to summarise fold draws
+q025 <- function(x) {
+  quantile(x, 0.025, na.rm = TRUE, names = FALSE)
+}
+
+q975 <- function(x) {
+  quantile(x, 0.975, na.rm = TRUE, names = FALSE)
+}
+
+col_q025 <- function(x) {
+  apply(x, 2, q025)
+}
+
+col_q975 <- function(x) {
+  apply(x, 2, q975)
+}
+
+safe_cor <- function(x, y) {
+  ok <- complete.cases(x, y)
+  
+  if (sum(ok) < 2 || sd(x[ok]) == 0 || sd(y[ok]) == 0) {
+    return(NA_real_)
+  }
+  
+  cor(x[ok], y[ok])
+}
+
+make_draw_df <- function(
+    prediction,
+    fold,
+    test_idx,
+    N_test,
+    r_test,
+    risk_mat,
+    count_exp_mat,
+    log_lik_mat
+) {
+  
+  S <- nrow(risk_mat)
+  n_test <- ncol(risk_mat)
+  
+  tibble(
+    prediction = prediction,
+    fold = fold,
+    draw = rep(seq_len(S), times = n_test),
+    row = rep(test_idx, each = S),
+    N = rep(N_test, each = S),
+    r_obs = rep(r_test, each = S),
+    risk_obs = rep(r_test / N_test, each = S),
+    risk_pred = as.vector(risk_mat),
+    count_pred = as.vector(count_exp_mat),
+    log_lik = as.vector(log_lik_mat)
+  )
+}
+
 # Extract fold predictions
 get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
   
@@ -153,8 +208,8 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
   pred_risk_new_marginal <- sweep(pred_count_new_marginal, 2, N_test, "/")
   pred_risk_new_typical <- sweep(pred_count_new_typical, 2, N_test, "/")
   
-  # Summarise held-out predictions
-  tibble(
+  # Row-level held-out prediction summaries
+  pred_sum <- tibble(
     fold = k,
     row = test_idx,
     N = N_test,
@@ -165,20 +220,20 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
     # Marginal risk: latent attrition probability p
     risk_pred_mean = colMeans(pred_risk_marginal),
     risk_pred_median = apply(pred_risk_marginal, 2, median),
-    risk_pred_q025 = apply(pred_risk_marginal, 2, quantile, 0.025),
-    risk_pred_q975 = apply(pred_risk_marginal, 2, quantile, 0.975),
+    risk_pred_q025 = col_q025(pred_risk_marginal),
+    risk_pred_q975 = col_q975(pred_risk_marginal),
     
     # Marginal observed-risk posterior predictive interval r_new / N
-    risk_pp_q025 = apply(pred_risk_new_marginal, 2, quantile, 0.025),
-    risk_pp_q975 = apply(pred_risk_new_marginal, 2, quantile, 0.975),
+    risk_pp_q025 = col_q025(pred_risk_new_marginal),
+    risk_pp_q975 = col_q975(pred_risk_new_marginal),
     
     # Marginal expected counts
     count_pred_mean = colMeans(pred_count_exp_marginal),
     count_pred_median = apply(pred_count_exp_marginal, 2, median),
     
     # Marginal posterior predictive count intervals
-    count_pp_q025 = apply(pred_count_new_marginal, 2, quantile, 0.025),
-    count_pp_q975 = apply(pred_count_new_marginal, 2, quantile, 0.975),
+    count_pp_q025 = col_q025(pred_count_new_marginal),
+    count_pp_q975 = col_q975(pred_count_new_marginal),
     
     # Marginal held-out log predictive density
     elpd_i = apply(log_lik_marginal, 2, log_mean_exp),
@@ -186,30 +241,59 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
     # Typical risk: latent attrition probability p
     risk_typical_mean = colMeans(pred_risk_typical),
     risk_typical_median = apply(pred_risk_typical, 2, median),
-    risk_typical_q025 = apply(pred_risk_typical, 2, quantile, 0.025),
-    risk_typical_q975 = apply(pred_risk_typical, 2, quantile, 0.975),
+    risk_typical_q025 = col_q025(pred_risk_typical),
+    risk_typical_q975 = col_q975(pred_risk_typical),
     
     # Typical observed-risk posterior predictive interval r_new / N
-    risk_typical_pp_q025 = apply(pred_risk_new_typical, 2, quantile, 0.025),
-    risk_typical_pp_q975 = apply(pred_risk_new_typical, 2, quantile, 0.975),
+    risk_typical_pp_q025 = col_q025(pred_risk_new_typical),
+    risk_typical_pp_q975 = col_q975(pred_risk_new_typical),
     
     # Typical expected counts
     count_typical_mean = colMeans(pred_count_exp_typical),
     count_typical_median = apply(pred_count_exp_typical, 2, median),
     
     # Typical posterior predictive count intervals
-    count_typical_pp_q025 = apply(pred_count_new_typical, 2, quantile, 0.025),
-    count_typical_pp_q975 = apply(pred_count_new_typical, 2, quantile, 0.975),
+    count_typical_pp_q025 = col_q025(pred_count_new_typical),
+    count_typical_pp_q975 = col_q975(pred_count_new_typical),
     
     # Typical held-out log predictive density
     elpd_i_typical = apply(log_lik_typical, 2, log_mean_exp)
+  )
+  
+  # Draw-level predictions for credible intervals around summary metrics
+  pred_draws <- bind_rows(
+    make_draw_df(
+      prediction = "marginal",
+      fold = k,
+      test_idx = test_idx,
+      N_test = N_test,
+      r_test = r_test,
+      risk_mat = pred_risk_marginal,
+      count_exp_mat = pred_count_exp_marginal,
+      log_lik_mat = log_lik_marginal
+    ),
+    make_draw_df(
+      prediction = "typical",
+      fold = k,
+      test_idx = test_idx,
+      N_test = N_test,
+      r_test = r_test,
+      risk_mat = pred_risk_typical,
+      count_exp_mat = pred_count_exp_typical,
+      log_lik_mat = log_lik_typical
+    )
+  )
+  
+  list(
+    pred = pred_sum,
+    draws = pred_draws
   )
   
 }
 
 # Generate cross-validation predictions ----------------------------------------
 
-cv_df <- map_dfr(
+cv_out <- map(
   seq_len(K_folds),
   ~ get_fold_pred(
     k = .x,
@@ -220,143 +304,273 @@ cv_df <- map_dfr(
   )
 )
 
+cv_df <- map_dfr(cv_out, "pred")
+cv_draws <- map_dfr(cv_out, "draws")
+
 # Save
 saveRDS(cv_df, "outputs/design/internal_validation/out/cv_predictions.rds")
+saveRDS(cv_draws, "outputs/design/internal_validation/out/cv_prediction_draws.rds")
 
 # Performance summaries --------------------------------------------------------
 
-# Marginal predictions
-# Most important since this will used to generate risk for new trials 
-cv_sum_marginal <- cv_df %>%
-  mutate(
-    count_error = count_pred_mean - r_obs,
-    abs_count_error = abs(count_error),
-    sq_count_error = count_error^2,
-    rel_count_error = count_error / pmax(r_obs, 1),
-    abs_rel_count_error = abs(rel_count_error),
-    count_covered_95 = r_obs >= count_pp_q025 & r_obs <= count_pp_q975,
-    
-    risk_error = risk_pred_mean - risk_obs,
-    abs_risk_error = abs(risk_error),
-    sq_risk_error = risk_error^2,
-    rel_risk_error = risk_error / pmax(risk_obs, 1e-6),
-    abs_rel_risk_error = abs(rel_risk_error),
-    risk_pp_covered_95 = risk_obs >= risk_pp_q025 & risk_obs <= risk_pp_q975
-  ) %>%
-  reframe(
-    n = n(),
-    total_elpd = sum(elpd_i),
-    
-    mean_obs_risk = mean(risk_obs),
-    mean_pred_risk = mean(risk_pred_mean),
-    mean_calibration = mean(risk_pred_mean - risk_obs),
-    
-    aggregate_obs_risk = sum(r_obs) / sum(N),
-    aggregate_pred_risk = sum(count_pred_mean) / sum(N),
-    aggregate_calibration = aggregate_pred_risk - aggregate_obs_risk,
-    
-    mae_risk = mean(abs_risk_error),
-    rmse_risk = sqrt(mean(sq_risk_error)),
-    mean_rel_error_risk = mean(rel_risk_error),
-    mean_abs_rel_error_risk = mean(abs_rel_risk_error),
-    median_abs_rel_error_risk = median(abs_rel_risk_error),
-    coverage_95_risk_pp = mean(risk_pp_covered_95),
-    cor_risk = cor(risk_obs, risk_pred_mean),
-    
-    mae_count = mean(abs_count_error),
-    rmse_count = sqrt(mean(sq_count_error)),
-    mean_rel_error_count = mean(rel_count_error),
-    mean_abs_rel_error_count = mean(abs_rel_count_error),
-    median_abs_rel_error_count = median(abs_rel_count_error),
-    coverage_95_count = mean(count_covered_95),
-    cor_count = cor(r_obs, count_pred_mean)
-  ) %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3))) %>% 
-  pivot_longer(everything()) %>% 
-  rename(sum = name, marginal = value)
+# Functions to summarise performance for marginal and typical predictions
+# Marginal: New trial
+# Typical: Predictions without new-trial random-effect uncertainty
 
-# Typical predictions, single point estimates without uncertainty
-# Less important but summarising nonetheless
-cv_sum_typical <- cv_df %>%
-  mutate(
-    count_error = count_typical_mean - r_obs,
-    abs_count_error = abs(count_error),
-    sq_count_error = count_error^2,
-    rel_count_error = count_error / pmax(r_obs, 1),
-    abs_rel_count_error = abs(rel_count_error),
-    count_covered_95 = r_obs >= count_typical_pp_q025 & r_obs <= count_typical_pp_q975,
-    
-    risk_error = risk_typical_mean - risk_obs,
-    abs_risk_error = abs(risk_error),
-    sq_risk_error = risk_error^2,
-    rel_risk_error = risk_error / pmax(risk_obs, 1e-6),
-    abs_rel_risk_error = abs(rel_risk_error),
-    risk_pp_covered_95 = risk_obs >= risk_typical_pp_q025 & risk_obs <= risk_typical_pp_q975
-  ) %>%
-  reframe(
-    n = n(),
-    total_elpd = sum(elpd_i_typical),
-    
-    mean_obs_risk = mean(risk_obs),
-    mean_pred_risk = mean(risk_typical_mean),
-    mean_calibration = mean(risk_typical_mean - risk_obs),
-    
-    aggregate_obs_risk = sum(r_obs) / sum(N),
-    aggregate_pred_risk = sum(count_typical_mean) / sum(N),
-    aggregate_calibration = aggregate_pred_risk - aggregate_obs_risk,
-    
-    mae_risk = mean(abs_risk_error),
-    rmse_risk = sqrt(mean(sq_risk_error)),
-    mean_rel_error_risk = mean(rel_risk_error),
-    mean_abs_rel_error_risk = mean(abs_rel_risk_error),
-    median_abs_rel_error_risk = median(abs_rel_risk_error),
-    coverage_95_risk_pp = mean(risk_pp_covered_95),
-    cor_risk = cor(risk_obs, risk_typical_mean),
-    
-    mae_count = mean(abs_count_error),
-    rmse_count = sqrt(mean(sq_count_error)),
-    mean_rel_error_count = mean(rel_count_error),
-    mean_abs_rel_error_count = mean(abs_rel_count_error),
-    median_abs_rel_error_count = median(abs_rel_count_error),
-    coverage_95_count = mean(count_covered_95),
-    cor_count = cor(r_obs, count_typical_mean)
-  ) %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3))) %>% 
-  pivot_longer(everything()) %>% 
-  rename(sum = name, typical = value)
+posterior_metric_summary <- function(x) {
+  tibble(
+    mean = mean(x, na.rm = TRUE),
+    median = median(x, na.rm = TRUE),
+    sd = sd(x, na.rm = TRUE),
+    q025 = quantile(x, 0.025, na.rm = TRUE, names = FALSE),
+    q975 = quantile(x, 0.975, na.rm = TRUE, names = FALSE)
+  )
+}
 
-# Combine and save
-cv_sum_marginal %>% 
-  left_join(cv_sum_typical) %>% 
-  write_csv("outputs/design/internal_validation/out/cv_sum.csv")
+rename_summary_cols <- function(dat, prediction = c("marginal", "typical")) {
+  
+  prediction <- match.arg(prediction)
+  
+  dat %>%
+    rename_with(
+      .fn = ~ paste0(prediction, "_", .x),
+      .cols = c(mean, median, sd, q025, q975)
+    )
+}
+
+make_point_only_rows <- function(dat, prediction = c("marginal", "typical")) {
+  
+  prediction <- match.arg(prediction)
+  
+  vars <- switch(
+    prediction,
+    marginal = list(
+      risk_pp_q025 = "risk_pp_q025",
+      risk_pp_q975 = "risk_pp_q975",
+      count_pp_q025 = "count_pp_q025",
+      count_pp_q975 = "count_pp_q975",
+      elpd = "elpd_i"
+    ),
+    typical = list(
+      risk_pp_q025 = "risk_typical_pp_q025",
+      risk_pp_q975 = "risk_typical_pp_q975",
+      count_pp_q025 = "count_typical_pp_q025",
+      count_pp_q975 = "count_typical_pp_q975",
+      elpd = "elpd_i_typical"
+    )
+  )
+  
+  dat %>%
+    transmute(
+      N,
+      r_obs,
+      risk_obs,
+      risk_pp_q025 = .data[[vars$risk_pp_q025]],
+      risk_pp_q975 = .data[[vars$risk_pp_q975]],
+      count_pp_q025 = .data[[vars$count_pp_q025]],
+      count_pp_q975 = .data[[vars$count_pp_q975]],
+      elpd_i = .data[[vars$elpd]]
+    ) %>%
+    mutate(
+      count_covered_95 = r_obs >= count_pp_q025 & r_obs <= count_pp_q975,
+      risk_pp_covered_95 = risk_obs >= risk_pp_q025 & risk_obs <= risk_pp_q975
+    ) %>%
+    reframe(
+      total_elpd = sum(elpd_i),
+      coverage_95_risk_pp = mean(risk_pp_covered_95),
+      coverage_95_count = mean(count_covered_95)
+    ) %>%
+    pivot_longer(everything(), names_to = "sum", values_to = "mean") %>%
+    mutate(
+      median = NA_real_,
+      sd = NA_real_,
+      q025 = NA_real_,
+      q975 = NA_real_
+    ) %>%
+    rename_summary_cols(prediction = prediction)
+}
+
+make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
+  
+  prediction <- match.arg(prediction)
+  
+  draws %>%
+    filter(.data$prediction == prediction) %>%
+    mutate(
+      count_error = count_pred - r_obs,
+      abs_count_error = abs(count_error),
+      sq_count_error = count_error^2,
+      rel_count_error = count_error / pmax(r_obs, 1),
+      abs_rel_count_error = abs(rel_count_error),
+      
+      risk_error = risk_pred - risk_obs,
+      abs_risk_error = abs(risk_error),
+      sq_risk_error = risk_error^2,
+      rel_risk_error = risk_error / pmax(risk_obs, 1e-6),
+      abs_rel_risk_error = abs(rel_risk_error)
+    ) %>%
+    group_by(draw) %>%
+    reframe(
+      n = n(),
+      
+      mean_obs_risk = mean(risk_obs),
+      mean_pred_risk = mean(risk_pred),
+      mean_calibration = mean(risk_error),
+      
+      aggregate_obs_risk = sum(r_obs) / sum(N),
+      aggregate_pred_risk = sum(count_pred) / sum(N),
+      aggregate_calibration = sum(count_pred) / sum(N) - sum(r_obs) / sum(N),
+      
+      mae_risk = mean(abs_risk_error),
+      rmse_risk = sqrt(mean(sq_risk_error)),
+      mean_rel_error_risk = mean(rel_risk_error),
+      mean_abs_rel_error_risk = mean(abs_rel_risk_error),
+      median_abs_rel_error_risk = median(abs_rel_risk_error),
+      cor_risk = safe_cor(risk_obs, risk_pred),
+      
+      mae_count = mean(abs_count_error),
+      rmse_count = sqrt(mean(sq_count_error)),
+      mean_rel_error_count = mean(rel_count_error),
+      mean_abs_rel_error_count = mean(abs_rel_count_error),
+      median_abs_rel_error_count = median(abs_rel_count_error),
+      cor_count = safe_cor(r_obs, count_pred)
+    ) %>%
+    select(-draw) %>%
+    pivot_longer(everything(), names_to = "sum", values_to = "value") %>%
+    group_by(sum) %>%
+    reframe(posterior_metric_summary(value)) %>%
+    rename_summary_cols(prediction = prediction)
+}
+
+cv_sum_marginal <- bind_rows(
+  make_draw_summary(cv_draws, prediction = "marginal"),
+  make_point_only_rows(cv_df, prediction = "marginal")
+) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+cv_sum_typical <- bind_rows(
+  make_draw_summary(cv_draws, prediction = "typical"),
+  make_point_only_rows(cv_df, prediction = "typical")
+) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+cv_sum <- cv_sum_marginal %>%
+  left_join(cv_sum_typical, by = "sum") %>%
+  select(
+    sum,
+    marginal_mean,
+    marginal_median,
+    marginal_sd,
+    marginal_q025,
+    marginal_q975,
+    typical_mean,
+    typical_median,
+    typical_sd,
+    typical_q025,
+    typical_q975
+  )
+
+write_csv(
+  cv_sum,
+  "outputs/design/internal_validation/out/cv_sum.csv"
+)
 
 # Fold-specific summaries ------------------------------------------------------
 
-cv_sum_fold <- cv_df %>%
-  mutate(
-    risk_error = risk_pred_mean - risk_obs,
-    abs_risk_error = abs(risk_error),
-    sq_risk_error = risk_error^2,
-    
-    count_error = count_pred_mean - r_obs,
-    abs_count_error = abs(count_error),
-    sq_count_error = count_error^2
-  ) %>%
-  group_by(fold) %>%
-  reframe(
-    n = n(),
-    total_elpd = sum(elpd_i),
-    mean_obs_risk = mean(risk_obs),
-    mean_pred_risk = mean(risk_pred_mean),
-    aggregate_obs_risk = sum(r_obs) / sum(N),
-    aggregate_pred_risk = sum(count_pred_mean) / sum(N),
-    aggregate_calibration = aggregate_pred_risk - aggregate_obs_risk,
-    mae_risk = mean(abs_risk_error),
-    rmse_risk = sqrt(mean(sq_risk_error)),
-    mae_count = mean(abs_count_error),
-    rmse_count = sqrt(mean(sq_count_error))
-  ) %>%
+make_fold_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
+  
+  prediction <- match.arg(prediction)
+  
+  draws %>%
+    filter(.data$prediction == prediction) %>%
+    mutate(
+      risk_error = risk_pred - risk_obs,
+      abs_risk_error = abs(risk_error),
+      sq_risk_error = risk_error^2,
+      
+      count_error = count_pred - r_obs,
+      abs_count_error = abs(count_error),
+      sq_count_error = count_error^2
+    ) %>%
+    group_by(fold, draw) %>%
+    reframe(
+      n = n(),
+      mean_obs_risk = mean(risk_obs),
+      mean_pred_risk = mean(risk_pred),
+      aggregate_obs_risk = sum(r_obs) / sum(N),
+      aggregate_pred_risk = sum(count_pred) / sum(N),
+      aggregate_calibration = sum(count_pred) / sum(N) - sum(r_obs) / sum(N),
+      mae_risk = mean(abs_risk_error),
+      rmse_risk = sqrt(mean(sq_risk_error)),
+      mae_count = mean(abs_count_error),
+      rmse_count = sqrt(mean(sq_count_error))
+    ) %>%
+    select(-draw) %>%
+    pivot_longer(
+      cols = -fold,
+      names_to = "sum",
+      values_to = "value"
+    ) %>%
+    group_by(fold, sum) %>%
+    reframe(posterior_metric_summary(value)) %>%
+    rename_summary_cols(prediction = prediction)
+}
+
+make_fold_point_only_rows <- function(dat, prediction = c("marginal", "typical")) {
+  
+  prediction <- match.arg(prediction)
+  
+  vars <- switch(
+    prediction,
+    marginal = list(elpd = "elpd_i"),
+    typical = list(elpd = "elpd_i_typical")
+  )
+  
+  dat %>%
+    group_by(fold) %>%
+    reframe(total_elpd = sum(.data[[vars$elpd]])) %>%
+    pivot_longer(
+      cols = -fold,
+      names_to = "sum",
+      values_to = "mean"
+    ) %>%
+    mutate(
+      median = NA_real_,
+      sd = NA_real_,
+      q025 = NA_real_,
+      q975 = NA_real_
+    ) %>%
+    rename_summary_cols(prediction = prediction)
+}
+
+cv_sum_fold_marginal <- bind_rows(
+  make_fold_draw_summary(cv_draws, prediction = "marginal"),
+  make_fold_point_only_rows(cv_df, prediction = "marginal")
+) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+cv_sum_fold_typical <- bind_rows(
+  make_fold_draw_summary(cv_draws, prediction = "typical"),
+  make_fold_point_only_rows(cv_df, prediction = "typical")
+) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+cv_sum_fold <- cv_sum_fold_marginal %>%
+  left_join(cv_sum_fold_typical, by = c("fold", "sum")) %>%
+  select(
+    fold,
+    sum,
+    marginal_mean,
+    marginal_median,
+    marginal_sd,
+    marginal_q025,
+    marginal_q975,
+    typical_mean,
+    typical_median,
+    typical_sd,
+    typical_q025,
+    typical_q975
+  )
 
 write_csv(
   cv_sum_fold,
@@ -513,7 +727,7 @@ cv_resid_n <- cv_df %>%
   geom_smooth(method = "loess", se = TRUE) +
   theme_classic() +
   labs(
-    x = "Trial sample size",
+    x = "Trial arm size",
     y = "Prediction error on risk scale",
   )
 

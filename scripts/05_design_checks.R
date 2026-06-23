@@ -27,50 +27,127 @@ ppc_out <- extract(
   pars = c("r_new", "p", "log_lik", "beta")
 )
 
+# Helper for row-level posterior summaries
+# For r_new these are posterior predictive summaries
+# For p these are posterior summaries of the latent attrition probability
+posterior_col_summary <- function(x, prefix) {
+  tibble(
+    "{prefix}_mean" := colMeans(x, na.rm = TRUE),
+    "{prefix}_median" := apply(x, 2, median, na.rm = TRUE),
+    "{prefix}_sd" := apply(x, 2, sd, na.rm = TRUE),
+    "{prefix}_q025" := apply(
+      x,
+      2,
+      quantile,
+      probs = 0.025,
+      na.rm = TRUE,
+      names = FALSE
+    ),
+    "{prefix}_q975" := apply(
+      x,
+      2,
+      quantile,
+      probs = 0.975,
+      na.rm = TRUE,
+      names = FALSE
+    )
+  )
+}
+
 ppc_tbl <- tibble(
   row = seq_len(imp_dat$I),
   r_obs = imp_dat$r,
   N = imp_dat$N,
-  obs_risk = r_obs / N,
-  r_pred_mean = colMeans(ppc_out$r_new),
-  r_pred_q025 = apply(ppc_out$r_new, 2, quantile, 0.025),
-  r_pred_q50 = apply(ppc_out$r_new, 2, quantile, 0.50),
-  r_pred_q975 = apply(ppc_out$r_new, 2, quantile, 0.975),
-  p_mean = colMeans(ppc_out$p),
-  p_q025 = apply(ppc_out$p, 2, quantile, 0.025),
-  p_q50 = apply(ppc_out$p, 2, quantile, 0.50),
-  p_q975 = apply(ppc_out$p, 2, quantile, 0.975)
-)
+  obs_risk = r_obs / N
+) %>% 
+  bind_cols(
+    posterior_col_summary(ppc_out$r_new, "r_pred"),
+    posterior_col_summary(ppc_out$p, "p")
+  )
 
 write_csv(
   ppc_tbl %>% mutate(across(everything(), ~ round(., 3))), 
   "outputs/design/posterior_summary.csv"
 )
-
 # Performance summary
-# Model recovers observed counts very well
-ppc_performance <- ppc_tbl %>%
-  mutate(
-    covered_95 = r_obs >= r_pred_q025 & r_obs <= r_pred_q975,
-    error = r_pred_mean - r_obs,
-    abs_error = abs(error),
-    sq_error = error^2,
-    rel_error = (r_pred_mean - r_obs) / pmax(r_obs, 1),
-    abs_rel_error = abs(rel_error)
-  ) %>%
-  reframe(
-    n = n(),
-    covered_95 = mean(covered_95),
+# Helper for posterior summaries of scalar performance metrics
+posterior_scalar_summary <- function(x) {
+  tibble(
+    mean = mean(x, na.rm = TRUE),
+    median = median(x, na.rm = TRUE),
+    sd = sd(x, na.rm = TRUE),
+    q025 = quantile(x, 0.025, na.rm = TRUE, names = FALSE),
+    q975 = quantile(x, 0.975, na.rm = TRUE, names = FALSE)
+  )
+}
+
+# Helper for safe correlations by posterior draw
+safe_cor <- function(x, y) {
+  ok <- complete.cases(x, y)
+  
+  if (sum(ok) < 2 || sd(x[ok]) == 0 || sd(y[ok]) == 0) {
+    return(NA_real_)
+  }
+  
+  cor(x[ok], y[ok])
+}
+
+# Draw-level posterior predictive performance
+# Rows = posterior draws
+# Columns = trial arms
+r_pred_draws <- ppc_out$r_new
+
+performance_draws <- map_dfr(seq_len(nrow(r_pred_draws)), function(s) {
+  
+  r_pred_s <- r_pred_draws[s, ]
+  
+  error <- r_pred_s - imp_dat$r
+  abs_error <- abs(error)
+  sq_error <- error^2
+  rel_error <- error / pmax(imp_dat$r, 1)
+  abs_rel_error <- abs(rel_error)
+  
+  tibble(
+    draw = s,
+    n = imp_dat$I,
     mean_error = mean(error),
     rel_error = mean(rel_error),
     mae = mean(abs_error),
     rmse = sqrt(mean(sq_error)),
-    cor_obs_pred = cor(r_obs, r_pred_mean)
-  ) %>% 
-  mutate(across(everything(), ~ round(., 3)))
+    cor_obs_pred = safe_cor(imp_dat$r, r_pred_s)
+  )
+})
 
-write_csv(ppc_performance, "outputs/design/posterior_performance.csv")
+# Point estimate coverage from posterior predictive intervals
+# This is not draw-specific because it is defined using the full posterior interval
+coverage_point <- ppc_tbl %>%
+  summarise(
+    covered_95 = mean(r_obs >= r_pred_q025 & r_obs <= r_pred_q975)
+  ) %>%
+  pull(covered_95)
 
+# Summarise posterior distribution of performance metrics
+ppc_performance <- performance_draws %>%
+  select(-draw) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  group_by(metric) %>%
+  reframe(posterior_scalar_summary(value)) %>%
+  bind_rows(
+    tibble(
+      metric = "covered_95",
+      mean = coverage_point,
+      median = NA_real_,
+      sd = NA_real_,
+      q025 = NA_real_,
+      q975 = NA_real_
+    )
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+write_csv(
+  ppc_performance,
+  "outputs/design/posterior_performance.csv"
+)
 # Plot posterior recovery
 # Confirms adequate recovery
 ppc_plot <- ppc_tbl %>% 

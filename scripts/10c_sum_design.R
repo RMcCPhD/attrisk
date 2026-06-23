@@ -9,11 +9,11 @@ library(bayesplot)
 library(flexsurv)
 
 # Import AgD, posterior draws and model
-a_imp_agd <- readRDS("processed_data/latest_dataset.rds")
-a_imp_fit <- readRDS("mars/design_model/outputs/design_fit.rds")
+a_imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
+a_imp_fit <- readRDS("outputs/design/design_model.rds")
 
 # Import STAN dataset to identify covariates
-a_imp_stan <- readRDS("mars/design_model/latest_stan_design.rds")
+a_imp_stan <- readRDS("processed_data/stan_data.rds")
 
 # Get covariate names
 b_var_names <- tibble(
@@ -24,23 +24,11 @@ b_var_names <- tibble(
 # Add tidy names manually and import
 # write_csv(b_var_names, "scratch_data/tidy_covar_names.csv")
 
-b_var_names <- read_csv("scratch_data/tidy_covar_names.csv") %>% 
+b_var_names <- read_csv("scratch_data/data_processing/tidy_covariate_names.csv") %>% 
+  filter(!raw_name == "upper_age80") %>% 
   mutate(
-    covar_name = factor(
-      covar_name,
-      levels = c(
-        "Treatment type",
-        "Eligibility: Lower age limit", "Eligibility: Upper age limit", 
-        "Eligibility: Lower BMI limit", "Eligibility: Upper BMI limit", 
-        "Eligibility: Lower eGFR limit", "Eligibility: Upper eGFR limit",
-        "Trial size", "Trial phase", "Double-blinded", "Triple-blinded", 
-        "Quadruple-blinded", "Number of arms", "Number of facilities", 
-        "Number of POMs",
-        "African regions", "Regions of the Americas", 
-        "Eastern Mediterranean regions", "European regions", 
-        "Western Pacific regions", "Southeast Asian regions"
-      )
-    )
+    tidy_name = factor(tidy_name, levels = unique(tidy_name)),
+    variable = paste0("beta[", row_number(), "]")
   )
 
 # Some general posterior summaries ---------------------------------------------
@@ -70,7 +58,7 @@ b_add_names <- b_sum_tidy %>%
       left_join(b_var_names)
   ) %>% 
   arrange(parameter, draw) %>% 
-  select(parameter, draw, covar, everything())
+  select(parameter, draw, tidy_name, everything())
 
 # Keep core parameters
 b_sum_core <- b_add_names %>% 
@@ -101,15 +89,7 @@ c_char_plot <- c_char_sum %>%
   )
 
 # Save
-write_csv(c_char_sum, "outputs/summaries/design_model/trial_chars.csv")
-
-ggsave(
-  "outputs/plots/design_trial_chars.png",
-  c_char_plot,
-  height = 6,
-  width = 6,
-  units = "in"
-)
+write_csv(c_char_sum, "outputs/manuscript_summaries/design_trial_chars.csv")
 
 # Posterior summaries: Model parameters ----------------------------------------
 
@@ -117,7 +97,7 @@ ggsave(
 d_mdl_sum <- b_add_names %>% 
   select(-variable) %>% 
   filter(!parameter == "beta") %>% 
-  select(-covar, -covar_name)
+  select(-tidy_name, -raw_name)
 
 # Add nct_id (1:1 order with STAN data)
 # Split by type
@@ -188,9 +168,9 @@ d_mdl_shrink <- d_mdl_sum %>%
   filter(parameter %in% c("lambda_beta", "tau_beta", "z_beta")) %>% 
   left_join(
     b_add_names %>% 
-      distinct(covar_name) %>% 
-      filter(!is.na(covar_name)) %>% 
-      mutate(draw = seq(21))
+      distinct(tidy_name) %>% 
+      filter(!is.na(tidy_name)) %>% 
+      mutate(draw = seq(30))
   ) %>% 
   mutate(
     parameter = case_match(
@@ -203,11 +183,11 @@ d_mdl_shrink <- d_mdl_sum %>%
   ) %>% 
   arrange(parameter) %>% 
   select(
-    parameter, covar_name, everything(),
+    parameter, tidy_name, everything(),
     -draw
   ) %>% 
   rename(
-    covariate = covar_name
+    covariate = tidy_name
   ) %>% 
   mutate(across(mean:`97.5%`, ~ round(., 2)))
 
@@ -231,11 +211,11 @@ d_mdl_loglik <- d_mdl_nest %>%
   mutate(across(mean:`97.5%`, ~ round(., 2)))
 
 # Save
-write_csv(d_mdl_attr, "outputs/summaries/design_model/posterior_attr_recovery.csv")
-write_csv(d_mdl_gompertz, "outputs/summaries/design_model/posterior_gompertz.csv")
-write_csv(d_mdl_int, "outputs/summaries/design_model/posterior_intercept.csv")
-write_csv(d_mdl_shrink, "outputs/summaries/design_model/posterior_shrinkage.csv")
-write_csv(d_mdl_loglik, "outputs/summaries/design_model/posterior_fit_diags.csv")
+write_csv(d_mdl_attr, "outputs/manuscript_summaries/design_model/posterior_attr_recovery.csv")
+write_csv(d_mdl_gompertz, "outputs/manuscript_summaries/design_model/posterior_gompertz.csv")
+write_csv(d_mdl_int, "outputs/manuscript_summaries/design_model/posterior_intercept.csv")
+write_csv(d_mdl_shrink, "outputs/manuscript_summaries/design_model/posterior_shrinkage.csv")
+write_csv(d_mdl_loglik, "outputs/manuscript_summaries/design_model/posterior_fit_diags.csv")
 
 # Posterior summaries: Predicted attrition risk --------------------------------
 
@@ -262,12 +242,12 @@ e_dur <- median(a_imp_agd$duration * 52, na.rm = TRUE)
 e_base <- colMeans(a_imp_stan$X)
 
 # Identify binary variables
-e_binary <- c(
-  "age_lower", "age_upper",
-  "blindingdouble", "blindingtriple", "blindingquadruple",
-  "reg_am", "reg_eur", "reg_wpac", "reg_afr", "reg_sea", "reg_em",
-  "one_pom"
-)
+# e_binary <- c(
+#   "age_lower", "age_upper",
+#   "blindingdouble", "blindingtriple", "blindingquadruple",
+#   "reg_am", "reg_eur", "reg_wpac", "reg_afr", "reg_sea", "reg_em",
+#   "one_pom"
+# )
 
 # Function to predict attrition risk
 predict_risk <- function(x) {
@@ -294,19 +274,10 @@ e_risk <- map_dfr(seq_along(e_covars), function(i){
   x_new <- e_base
   var <- e_covars[i]
   
-  if(var %in% e_binary){
-    
-    # binary contrast
-    x_new[i] <- 1
-    x_base_i <- e_base
-    x_base_i[i] <- 0
-    
-  } else {
-    
-    # continuous contrast
-    x_base_i <- e_base
-    x_new[i] <- e_base[i] + 1
-  }
+  # binary contrast
+  x_new[i] <- 1
+  x_base_i <- e_base
+  x_base_i[i] <- 0
   
   risk_new  <- predict_risk(x_new)
   risk_base <- predict_risk(x_base_i)
@@ -314,7 +285,7 @@ e_risk <- map_dfr(seq_along(e_covars), function(i){
   diff <- risk_new - risk_base
   
   tibble(
-    covar = var,
+    raw_name = var,
     mean = mean(diff),
     median = median(diff),
     sd = sd(diff),
@@ -326,11 +297,11 @@ e_risk <- map_dfr(seq_along(e_covars), function(i){
 
 # Add tidy covariate names and plot
 e_risk_tidy <- b_var_names %>% 
-  distinct(covar, covar_name) %>% 
+  distinct(raw_name, tidy_name) %>% 
   left_join(e_risk)
 
 e_risk_plot <- e_risk_tidy %>% 
-  ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(covar_name))) +
+  ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(tidy_name))) +
   geom_point() +
   geom_linerange() +
   geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
@@ -344,40 +315,14 @@ e_risk_plot <- e_risk_tidy %>%
 # Save
 write_csv(
   e_risk_tidy %>% mutate(across(mean:`97.5%`, ~ round(., 3))), 
-  "outputs/summaries/design_model/trial_chars_risk.csv"
+  "outputs/manuscript_summaries/design_model/trial_chars_risk.csv"
 )
 
 ggsave(
-  "outputs/plots/design_trial_chars_risk.png",
+  "outputs/design/design_trial_chars_risk_diff.png",
   e_risk_plot,
   height = 6,
-  width = 7,
-  units = "in"
-)
-
-# Posterior predictive check: Attrition recovery -------------------------------
-
-ppc_dens <- ppc_dens_overlay(
-  a_imp_stan$r, 
-  as.matrix(a_imp_fit, pars = "r_new")[1:1000, ]
-)
-
-ppc_int <- ppc_intervals(
-  a_imp_stan$r, 
-  as.matrix(a_imp_fit, pars = "r_new")[1:1000, ]
-)
-
-ggsave(
-  "outputs/plots/design_attr_recovery_density.jpg", 
-  ppc_dens, 
-  width = 4, height = 4, 
-  units = "in"
-)
-
-ggsave(
-  "outputs/plots/design_attr_recovery_trial_level.jpg", 
-  ppc_int,
-  width = 6, height = 6, 
+  width = 8,
   units = "in"
 )
 
@@ -385,87 +330,16 @@ ggsave(
 
 # Import posterior draws for each fold
 a_imp_stan
-f_folds <- list.files("mars/design_valid/outputs/", full.names = TRUE)
-f_folds <- f_folds[grepl("fit_fold", f_folds)]
-f_fold_imp <- lapply(f_folds, readRDS)
-f_cv_df   <- readRDS("mars/design_valid/outputs/cv_results.rds")
-f_fold_id <- readRDS("mars/design_valid/outputs/fold_id.rds")
+f_cv_imp <- readRDS("outputs/design/internal_validation/out/cv_predictions.rds")
 
-# Helper: Gompgert CDF
-gompertz_prob <- function(b, a, dt) {
-  ifelse(
-    abs(a) < 1e-4,
-    1 - exp(-b * dt),
-    1 - exp(-b / a * (exp(a * dt) - 1))
+# Function to summarise mean and credible intervals
+summ_mean_q <- function(x, name, na.rm = TRUE) {
+  tibble::tibble(
+    "{name}"       := mean(x, na.rm = na.rm),
+    "{name}_q025"  := quantile(x, 0.025, na.rm = na.rm, names = FALSE),
+    "{name}_q975"  := quantile(x, 0.975, na.rm = na.rm, names = FALSE)
   )
 }
-
-# Compute posterior summaries for each fold
-f_diag_draws <- list()
-
-for(k in seq_along(f_fold_imp)) {
-  
-  message("Processing fold ", k)
-  
-  draws <- as_draws_df(f_fold_imp[[k]])
-  
-  mu_mu1   <- draws$mu_mu1
-  tau_mu1  <- draws$tau_mu1
-  beta_mat <- as.matrix(draws %>% select(starts_with("beta[")))
-  
-  S <- length(mu_mu1)
-  
-  test_idx <- which(f_fold_id == k)
-  
-  X_test  <- a_imp_stan$X[test_idx, , drop = FALSE]
-  dt_test <- a_imp_stan$dt[test_idx]
-  lp_test <- a_imp_stan$lp[test_idx]
-  N_test  <- a_imp_stan$N[test_idx]
-  r_test  <- a_imp_stan$r[test_idx]
-  
-  n_test <- length(test_idx)
-  
-  risk_pred <- matrix(NA_real_, S, n_test)
-  
-  for(s in seq_len(S)) {
-    
-    mu1_new <- rnorm(n_test, mu_mu1[s], tau_mu1[s])
-    
-    log_b <- mu1_new + X_test %*% beta_mat[s, ]
-    b <- exp(log_b)
-    
-    a <- b * a_imp_stan$beta_rate + lp_test
-    
-    risk_pred[s, ] <- gompertz_prob(b, a, dt_test)
-  }
-  
-  risk_obs <- r_test / N_test
-  
-  # metrics per draw
-  err <- sweep(risk_pred, 2, risk_obs, "-")
-  
-  mae  <- rowMeans(abs(err))
-  rmse <- sqrt(rowMeans(err^2))
-  calib <- rowMeans(err)
-  
-  # correlation per draw
-  cor_draw <- apply(risk_pred, 1, function(x)
-    cor(x, risk_obs)
-  )
-  
-  f_diag_draws[[k]] <- tibble(
-    fold = k,
-    draw = seq_len(S),
-    mae  = mae,
-    rmse = rmse,
-    calib = calib,
-    cor  = cor_draw
-  )
-  
-}
-
-# Combine draws across folds
-f_diag_all <- bind_rows(f_diag_draws)
 
 # Posterior summaries
 f_diag_summary <- f_diag_all %>%
