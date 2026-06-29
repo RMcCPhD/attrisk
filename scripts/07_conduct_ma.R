@@ -185,7 +185,7 @@ stopifnot(
 )
 
 # Construct block-diagonal VCOV
-ma_vcov_bdiag <- as.matrix(bdiag(vcov_construct$vcov_matrix))
+ma_vcov_bdiag <- as.matrix(bdiag(ma_vcov$vcov_matrix))
 
 # Fit meta-analysis model
 # Pass trial-specific, participant-level effect estimates on log-HR scale
@@ -196,16 +196,39 @@ ma_vcov_bdiag <- as.matrix(bdiag(vcov_construct$vcov_matrix))
 # As prepared above, missing terms retained with estimate = 0 and very large
 # SEs, contributes negligible information while preserving a common beta and
 # VCOV structure across trials
-ma_fit <- rma.mv(
-  yi = estimate,
-  V = ma_vcov_bdiag,
-  mods = ~ ma_param - 1,
-  random = ~ ma_param | ma_id,
-  struct = "DIAG",
-  data = ma_dat,
-  method = "REML",
-  verbose = TRUE
-)
+# ma_fit <- rma.mv(
+#   yi = estimate,
+#   V = ma_vcov_bdiag,
+#   mods = ~ ma_param - 1,
+#   random = ~ ma_param | ma_id,
+#   struct = "DIAG",
+#   data = ma_dat,
+#   method = "REML",
+#   verbose = TRUE
+# )
+
+# Save to skip refitting unstructured model
+ma_fit <- readRDS("outputs/conduct/ma/out/fit.rds")
+# saveRDS(ma_fit, "outputs/conduct/ma/out/fit.rds")
+
+# Extract term-specific heterogeneity
+ma_het <- tibble(
+  ma_param = levels(ma_dat$ma_param),
+  tau2 = ma_fit$tau2,
+  tau = sqrt(ma_fit$tau2),
+  hr_lower_approx = exp(-sqrt(ma_fit$tau2)),
+  hr_upper_approx = exp(sqrt(ma_fit$tau2))
+) %>%
+  reframe(
+    mean_tau = mean(tau, na.rm = TRUE),
+    sd_tau = sd(tau, na.rm = TRUE),
+    median_tau = median(tau, na.rm = TRUE),
+    min_tau = min(tau, na.rm = TRUE),
+    max_tau = max(tau, na.rm = TRUE),
+    mean_hr_upper_approx = exp(mean_tau),
+    median_hr_upper_approx = exp(median_tau)
+  ) %>%
+  pivot_longer(everything())
 
 # Generate outputs -------------------------------------------------------------
 
@@ -259,7 +282,7 @@ out_tidy <- tidy(ma_fit) %>%
     )
   ) %>% 
   filter(!term == "trttype") %>% 
-  select(term_tidy, hr, std.error, lo_hr, hi_hr, p.value)
+  select(term_tidy, hr, std.error, lo_hr, hi_hr, p.value, everything())
 
 saveRDS(out_tidy, "outputs/conduct/ma/out/ma_tidy.rds")
 write_csv(out_tidy, "outputs/conduct/ma/out/ma_tidy.csv")

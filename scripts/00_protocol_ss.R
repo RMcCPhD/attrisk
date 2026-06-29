@@ -55,24 +55,24 @@ pms_surv <- function(csrsquared, parameters, rate, timepoint, meanfup) {
 # AgD model --------------------------------------------------------------------
 
 # Data
-a_imp_stan <- readRDS("processed_data/design_stan_data.rds")
-a_imp_agd <- readRDS("processed_data/latest_dataset.rds")
+a_imp_stan <- readRDS("processed_data/stan_data.rds")
+a_imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
 
-# Define observed sample (344)
+# Define observed sample (342)
 a_agd_n <- nrow(a_imp_agd)
 
-# Attrition prevalence (median: 0.127, overall 0.169)
+# Attrition prevalence (median: 0.129, overall: 0.166)
 a_agd_attr_fu <- a_imp_agd %>% 
-  select(trial_id, arm_n, attr, duration) %>% 
-  mutate(rate = attr / arm_n) %>% 
+  select(trial_id, arm_n, arm_attr, duration) %>% 
+  mutate(rate = arm_attr / arm_n) %>% 
   reframe(
     med_rate = median(rate),
     med_fu = mean(duration)
   )
 
-a_agd_attr_overall <- sum(a_imp_agd$attr) / sum(a_imp_agd$arm_n)
+a_agd_attr_overall <- sum(a_imp_agd$arm_attr) / sum(a_imp_agd$arm_n)
 
-# 25 covariates (max number of covariates including dummy coded factors)
+# 30 covariates (max number of covariates including dummy coded factors)
 glimpse(a_imp_stan)
 
 # Create expansion grid to explore scenarios
@@ -135,9 +135,9 @@ b_imp_ipd <- read_csv("../attrition_rates_modelling/usable_data/total_attrition/
   filter(condition == "Type 2 diabetes")
 
 # Sample size (28335)
-# Test it with the actual IPD sample size (17937)
+# Test it with the actual IPD sample size (19023)
 b_ipd_n <- sum(b_imp_ipd$n)
-b_ipd_n <- 17937
+b_ipd_n <- 19023
 
 # Median event rate and follow-up (0.107, 1.10)
 b_ipd_rate_fu <- b_imp_ipd %>% 

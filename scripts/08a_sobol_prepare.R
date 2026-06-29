@@ -876,6 +876,63 @@ map_lgl(
   ~ all(eigen(.x, symmetric = TRUE, only.values = TRUE)$values > 0)
 )
 
+# Correlation matrix diagnostics for supplementary reporting ------------------
+
+dir.create("outputs/conduct/sobol", recursive = TRUE, showWarnings = FALSE)
+
+cor_copula_raw <- map(cor_add$out_raw, ~ {
+  x <- as.matrix(.x)
+  x[!is.finite(x)] <- 0
+  x <- (x + t(x)) / 2
+  diag(x) <- 1
+  x <- spearman_to_copula_cor(x)
+  x <- (x + t(x)) / 2
+  diag(x) <- 1
+  dimnames(x) <- dimnames(.x)
+  x
+})
+
+cor_matrix_diagnostics <- cor_add %>%
+  mutate(
+    out_copula_raw = cor_copula_raw,
+    min_eigen_raw_copula = map_dbl(
+      out_copula_raw,
+      ~ min(eigen(.x, symmetric = TRUE, only.values = TRUE)$values)
+    ),
+    min_eigen_pd = map_dbl(
+      out,
+      ~ min(eigen(.x, symmetric = TRUE, only.values = TRUE)$values)
+    ),
+    max_abs_pd_adjustment = map2_dbl(
+      out_copula_raw,
+      out,
+      ~ max(abs(.y - .x), na.rm = TRUE)
+    ),
+    mean_abs_pd_adjustment = map2_dbl(
+      out_copula_raw,
+      out,
+      ~ mean(abs(.y - .x), na.rm = TRUE)
+    ),
+    n_negative_raw_eigenvalues = map_int(
+      out_copula_raw,
+      ~ sum(eigen(.x, symmetric = TRUE, only.values = TRUE)$values <= 0)
+    )
+  ) %>%
+  transmute(
+    matrix = row_number(),
+    n_variables = map_int(out, ncol),
+    min_eigen_raw_copula,
+    min_eigen_pd,
+    max_abs_pd_adjustment,
+    mean_abs_pd_adjustment,
+    n_negative_raw_eigenvalues
+  )
+
+write_csv(
+  cor_matrix_diagnostics,
+  "outputs/conduct/sobol/sobol_correlation_matrix_diagnostics.csv"
+)
+
 # Save outputs -----------------------------------------------------------------
 
 # Covariate names order
