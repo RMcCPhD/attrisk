@@ -66,6 +66,7 @@ imp_n <- readRDS("data/ipd_covariates/agg_ipd_hba1c.Rds") %>%
 imp_bl %>% 
   unnest(imp) %>% 
   ungroup() %>% 
+  distinct(dist, nct_id, var) %>% 
   count(dist, var) %>% 
   group_by(var) %>% 
   arrange(desc(n), .by_group = TRUE) %>% 

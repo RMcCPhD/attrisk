@@ -201,7 +201,7 @@ agd_predict_na <- agd_found_chars %>%
 
 # Compare distribution before and after imputation
 # Highly similar
-agd_found_chars %>% 
+agd_plot_imp <- agd_found_chars %>% 
   filter(!is.na(n_facilities)) %>% 
   select(n_facilities) %>% 
   mutate(type = "before") %>% 
@@ -211,9 +211,25 @@ agd_found_chars %>%
       full_join(agd_predict_na) %>% 
       mutate(type = "after")
   ) %>% 
+  mutate(
+    type = factor(
+      type,
+      levels = c("before", "after"),
+      labels = c("Before", "After")
+    )
+  ) %>% 
   ggplot(aes(x = n_facilities, colour = type)) +
   geom_density() +
-  theme_classic()
+  theme_classic() +
+  labs(x = "Number of sites", y = "Density", colour = "Imputation stage")
+
+ggsave(
+  "outputs/design/dist_before_after_sites_imputation.png",
+  agd_plot_imp,
+  width = 6,
+  height = 4,
+  units = "in"
+)
 
 # Incorporate imputed n_facilities
 # Same reduction applied as when joining tidying characteristics as this was
