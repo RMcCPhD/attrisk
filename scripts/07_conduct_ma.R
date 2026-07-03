@@ -23,6 +23,20 @@ res_grid_terms <- expand.grid(
   term = res_unique_terms
 ) %>% as_tibble()
 
+# Generate a summary of missing trial-level terms for supplementary
+imp_vivli_res %>%
+  full_join(res_grid_terms) %>% 
+  group_by(term) %>% 
+  reframe(
+    n_trials = n_distinct(nct_id),
+    na = paste0(
+      sum(is.na(estimate)), " (", 
+      round(sum(is.na(estimate)) / n_trials * 100, 2),
+      "%)"
+    )
+  ) %>% 
+  write_csv("outputs/manuscript_summaries/sum_terms_ipd_models.csv")
+
 # Fill in missing terms (i.e. covariate or covariate level not fitted in
 # trial-level IPD models due to convergence issues)
 # Add zero estimates and large standard errors

@@ -73,6 +73,7 @@ make_draw_df <- function(
     r_test,
     risk_mat,
     count_exp_mat,
+    count_new_mat,
     log_lik_mat
 ) {
   
@@ -89,6 +90,7 @@ make_draw_df <- function(
     risk_obs = rep(r_test / N_test, each = S),
     risk_pred = as.vector(risk_mat),
     count_pred = as.vector(count_exp_mat),
+    count_new = as.vector(count_new_mat),
     log_lik = as.vector(log_lik_mat)
   )
 }
@@ -270,6 +272,7 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
       r_test = r_test,
       risk_mat = pred_risk_marginal,
       count_exp_mat = pred_count_exp_marginal,
+      count_new_mat = pred_count_new_marginal,
       log_lik_mat = log_lik_marginal
     ),
     make_draw_df(
@@ -280,6 +283,7 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
       r_test = r_test,
       risk_mat = pred_risk_typical,
       count_exp_mat = pred_count_exp_typical,
+      count_new_mat = pred_count_new_typical,
       log_lik_mat = log_lik_typical
     )
   )
@@ -397,12 +401,19 @@ make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
   draws %>%
     filter(.data$prediction == prediction) %>%
     mutate(
-      count_error = count_pred - r_obs,
+      # Count-scale posterior predictive error.
+      # These metrics compare simulated held-out attrition counts (r_new)
+      # against observed held-out attrition counts, matching the posterior
+      # predictive checks used for the development-data performance table.
+      count_error = count_new - r_obs,
       abs_count_error = abs(count_error),
       sq_count_error = count_error^2,
       rel_count_error = count_error / pmax(r_obs, 1),
       abs_rel_count_error = abs(rel_count_error),
       
+      # Risk-scale expected prediction error.
+      # These metrics compare latent predicted attrition probabilities against
+      # observed attrition risks and are retained for the existing CV summaries.
       risk_error = risk_pred - risk_obs,
       abs_risk_error = abs(risk_error),
       sq_risk_error = risk_error^2,
@@ -421,6 +432,7 @@ make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
       aggregate_pred_risk = sum(count_pred) / sum(N),
       aggregate_calibration = sum(count_pred) / sum(N) - sum(r_obs) / sum(N),
       
+      # Risk-scale predictive accuracy and association
       mae_risk = mean(abs_risk_error),
       rmse_risk = sqrt(mean(sq_risk_error)),
       mean_rel_error_risk = mean(rel_risk_error),
@@ -428,12 +440,14 @@ make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
       median_abs_rel_error_risk = median(abs_rel_risk_error),
       cor_risk = safe_cor(risk_obs, risk_pred),
       
+      # Count-scale posterior predictive recovery
+      mpe_count = mean(count_error),
       mae_count = mean(abs_count_error),
       rmse_count = sqrt(mean(sq_count_error)),
       mean_rel_error_count = mean(rel_count_error),
       mean_abs_rel_error_count = mean(abs_rel_count_error),
       median_abs_rel_error_count = median(abs_rel_count_error),
-      cor_count = safe_cor(r_obs, count_pred)
+      cor_count = safe_cor(r_obs, count_new)
     ) %>%
     select(-draw) %>%
     pivot_longer(everything(), names_to = "sum", values_to = "value") %>%
@@ -488,7 +502,9 @@ make_fold_draw_summary <- function(draws, prediction = c("marginal", "typical"))
       abs_risk_error = abs(risk_error),
       sq_risk_error = risk_error^2,
       
-      count_error = count_pred - r_obs,
+      # Use simulated held-out attrition counts for count-scale posterior
+      # predictive performance summaries, matching development-data checks.
+      count_error = count_new - r_obs,
       abs_count_error = abs(count_error),
       sq_count_error = count_error^2
     ) %>%
@@ -502,8 +518,10 @@ make_fold_draw_summary <- function(draws, prediction = c("marginal", "typical"))
       aggregate_calibration = sum(count_pred) / sum(N) - sum(r_obs) / sum(N),
       mae_risk = mean(abs_risk_error),
       rmse_risk = sqrt(mean(sq_risk_error)),
+      mpe_count = mean(count_error),
       mae_count = mean(abs_count_error),
-      rmse_count = sqrt(mean(sq_count_error))
+      rmse_count = sqrt(mean(sq_count_error)),
+      cor_count = safe_cor(r_obs, count_new)
     ) %>%
     select(-draw) %>%
     pivot_longer(
@@ -737,4 +755,558 @@ ggsave(
   width = 6,
   height = 5,
   units = "in"
+)
+
+# Supplementary numerical validation summaries ---------------------------------
+
+z_cv_draws <- "outputs/design/internal_validation/out/cv_prediction_draws.rds"
+z_out_dir <- "outputs/design/internal_validation/out"
+
+dir.create(z_out_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Use cv_draws from the current run when available. This fallback allows this
+# section to be rerun interactively after cv_prediction_draws.rds has been saved.
+if (!exists("cv_draws")) {
+  if (!file.exists(z_cv_draws)) {
+    stop(
+      "Could not find held-out posterior prediction draws: ",
+      z_cv_draws,
+      "\nRun scripts/06b_design_validate_output.R first."
+    )
+  }
+  cv_draws <- readRDS(z_cv_draws)
+}
+# Helper functions -------------------------------------------------------------
+
+q025 <- function(x) {
+  quantile(x, 0.025, na.rm = TRUE, names = FALSE)
+}
+
+q975 <- function(x) {
+  quantile(x, 0.975, na.rm = TRUE, names = FALSE)
+}
+
+summ_vec <- function(x) {
+  
+  x <- x[is.finite(x)]
+  
+  if (length(x) == 0) {
+    return(
+      data.frame(
+        mean = NA_real_,
+        median = NA_real_,
+        sd = NA_real_,
+        q025 = NA_real_,
+        q975 = NA_real_,
+        n_posterior_draws_used = 0L
+      )
+    )
+  }
+  
+  data.frame(
+    mean = mean(x),
+    median = median(x),
+    sd = sd(x),
+    q025 = q025(x),
+    q975 = q975(x),
+    n_posterior_draws_used = length(x)
+  )
+}
+
+# Grouped-data C-statistic.
+# This is an arm-level, participant-weighted risk-ranking metric:
+# it estimates the probability that an observed attrition event is assigned
+# a higher predicted trial-arm risk than an observed non-event.
+grouped_c_stat <- function(pred, events, non_events) {
+  
+  keep <- is.finite(pred) &
+    is.finite(events) &
+    is.finite(non_events) &
+    events >= 0 &
+    non_events >= 0
+  
+  pred <- pred[keep]
+  events <- events[keep]
+  non_events <- non_events[keep]
+  
+  n_events <- sum(events)
+  n_non_events <- sum(non_events)
+  
+  if (n_events <= 0 || n_non_events <= 0) {
+    return(NA_real_)
+  }
+  
+  ord <- order(pred)
+  pred <- pred[ord]
+  events <- events[ord]
+  non_events <- non_events[ord]
+  
+  ties <- rle(pred)
+  tie_end <- cumsum(ties$lengths)
+  tie_start <- tie_end - ties$lengths + 1L
+  
+  numerator <- 0
+  non_events_below <- 0
+  
+  for (g in seq_along(tie_start)) {
+    idx <- tie_start[g]:tie_end[g]
+    events_tie <- sum(events[idx])
+    non_events_tie <- sum(non_events[idx])
+    
+    numerator <- numerator +
+      events_tie * (non_events_below + 0.5 * non_events_tie)
+    
+    non_events_below <- non_events_below + non_events_tie
+  }
+  
+  numerator / (n_events * n_non_events)
+}
+
+make_grouped_roc <- function(pred, events, non_events) {
+  
+  keep <- is.finite(pred) &
+    is.finite(events) &
+    is.finite(non_events) &
+    events >= 0 &
+    non_events >= 0
+  
+  dat <- data.frame(
+    pred = pred[keep],
+    events = events[keep],
+    non_events = non_events[keep]
+  )
+  
+  dat <- dat[order(dat$pred, decreasing = TRUE), ]
+  
+  tie <- split(seq_len(nrow(dat)), dat$pred)
+  
+  roc <- do.call(
+    rbind,
+    lapply(
+      tie,
+      function(idx) {
+        data.frame(
+          pred = dat$pred[idx[1]],
+          events = sum(dat$events[idx]),
+          non_events = sum(dat$non_events[idx])
+        )
+      }
+    )
+  )
+  
+  roc <- roc[order(roc$pred, decreasing = TRUE), ]
+  
+  n_events <- sum(roc$events)
+  n_non_events <- sum(roc$non_events)
+  
+  roc$sensitivity <- cumsum(roc$events) / n_events
+  roc$one_minus_specificity <- cumsum(roc$non_events) / n_non_events
+  
+  rbind(
+    data.frame(
+      pred = Inf,
+      events = 0,
+      non_events = 0,
+      sensitivity = 0,
+      one_minus_specificity = 0
+    ),
+    roc,
+    data.frame(
+      pred = -Inf,
+      events = 0,
+      non_events = 0,
+      sensitivity = 1,
+      one_minus_specificity = 1
+    )
+  )
+}
+
+fit_calibration_draw <- function(pred, y_binom) {
+  
+  pred <- pmin(pmax(pred, 1e-6), 1 - 1e-6)
+  z <- qlogis(pred)
+  
+  out <- c(
+    citl_intercept = NA_real_,
+    calibration_intercept = NA_real_,
+    calibration_slope = NA_real_,
+    failed_citl = 1,
+    failed_calibration = 1
+  )
+  
+  fit_citl <- tryCatch(
+    suppressWarnings(
+      glm.fit(
+        x = matrix(1, nrow = length(z), ncol = 1),
+        y = y_binom,
+        family = binomial(),
+        offset = z
+      )
+    ),
+    error = function(e) NULL
+  )
+  
+  if (!is.null(fit_citl) &&
+      isTRUE(fit_citl$converged) &&
+      all(is.finite(fit_citl$coefficients))) {
+    out["citl_intercept"] <- fit_citl$coefficients[1]
+    out["failed_citl"] <- 0
+  }
+  
+  fit_cal <- tryCatch(
+    suppressWarnings(
+      glm.fit(
+        x = cbind(intercept = 1, z = z),
+        y = y_binom,
+        family = binomial()
+      )
+    ),
+    error = function(e) NULL
+  )
+  
+  if (!is.null(fit_cal) &&
+      isTRUE(fit_cal$converged) &&
+      all(is.finite(fit_cal$coefficients))) {
+    out["calibration_intercept"] <- fit_cal$coefficients[1]
+    out["calibration_slope"] <- fit_cal$coefficients[2]
+    out["failed_calibration"] <- 0
+  }
+  
+  out
+}
+
+reshape_prediction_draws <- function(dat) {
+  
+  dat <- dat[order(dat$row, dat$draw), ]
+  
+  draw_ids <- sort(unique(dat$draw))
+  n_draw <- length(draw_ids)
+  
+  if (nrow(dat) %% n_draw != 0) {
+    stop("Prediction draw object cannot be reshaped into draw x arm format.")
+  }
+  
+  n_arm <- nrow(dat) / n_draw
+  
+  draw_mat <- matrix(dat$draw, nrow = n_draw, ncol = n_arm)
+  
+  if (!all(draw_mat == draw_ids)) {
+    stop("Draw identifiers are not aligned within trial arms.")
+  }
+  
+  list(
+    draw_ids = draw_ids,
+    risk = matrix(dat$risk_pred, nrow = n_draw, ncol = n_arm),
+    fold = matrix(dat$fold, nrow = n_draw, ncol = n_arm)[1, ],
+    row = matrix(dat$row, nrow = n_draw, ncol = n_arm)[1, ],
+    N = matrix(dat$N, nrow = n_draw, ncol = n_arm)[1, ],
+    r_obs = matrix(dat$r_obs, nrow = n_draw, ncol = n_arm)[1, ]
+  )
+}
+
+make_auc_draws <- function(pred_obj, idx = seq_along(pred_obj$row)) {
+  
+  non_events <- pred_obj$N[idx] - pred_obj$r_obs[idx]
+  
+  vapply(
+    seq_len(nrow(pred_obj$risk)),
+    function(s) {
+      grouped_c_stat(
+        pred = pred_obj$risk[s, idx],
+        events = pred_obj$r_obs[idx],
+        non_events = non_events
+      )
+    },
+    numeric(1)
+  )
+}
+
+make_auc_summary <- function(prediction, pred_obj) {
+  
+  non_events <- pred_obj$N - pred_obj$r_obs
+  
+  auc_draws <- make_auc_draws(pred_obj)
+  
+  cbind(
+    data.frame(
+      prediction = prediction,
+      metric = "grouped_c_statistic_auc"
+    ),
+    summ_vec(auc_draws),
+    data.frame(
+      n_held_out_arms = length(unique(pred_obj$row)),
+      n_observed_attrition_events = sum(pred_obj$r_obs),
+      n_observed_non_events = sum(non_events)
+    )
+  )
+}
+
+make_auc_fold_summary <- function(prediction, pred_obj) {
+  
+  out <- lapply(
+    sort(unique(pred_obj$fold)),
+    function(fold) {
+      
+      idx <- which(pred_obj$fold == fold)
+      non_events <- pred_obj$N[idx] - pred_obj$r_obs[idx]
+      auc_draws <- make_auc_draws(pred_obj, idx = idx)
+      
+      cbind(
+        data.frame(
+          prediction = prediction,
+          fold = fold,
+          metric = "grouped_c_statistic_auc"
+        ),
+        summ_vec(auc_draws),
+        data.frame(
+          n_held_out_arms = length(unique(pred_obj$row[idx])),
+          n_observed_attrition_events = sum(pred_obj$r_obs[idx]),
+          n_observed_non_events = sum(non_events)
+        )
+      )
+    }
+  )
+  
+  do.call(rbind, out)
+}
+
+make_calibration_summary <- function(prediction, pred_obj) {
+  
+  y_binom <- cbind(pred_obj$r_obs, pred_obj$N - pred_obj$r_obs)
+  
+  cal_draws <- t(vapply(
+    seq_len(nrow(pred_obj$risk)),
+    function(s) fit_calibration_draw(pred_obj$risk[s, ], y_binom),
+    numeric(5)
+  ))
+  
+  citl_failed <- sum(cal_draws[, "failed_citl"] == 1, na.rm = TRUE)
+  cal_failed <- sum(cal_draws[, "failed_calibration"] == 1, na.rm = TRUE)
+  
+  rbind(
+    cbind(
+      data.frame(
+        prediction = prediction,
+        metric = "calibration_in_the_large_intercept"
+      ),
+      summ_vec(cal_draws[, "citl_intercept"]),
+      data.frame(n_failed_model_fits = citl_failed)
+    ),
+    cbind(
+      data.frame(
+        prediction = prediction,
+        metric = "calibration_intercept"
+      ),
+      summ_vec(cal_draws[, "calibration_intercept"]),
+      data.frame(n_failed_model_fits = cal_failed)
+    ),
+    cbind(
+      data.frame(
+        prediction = prediction,
+        metric = "calibration_slope"
+      ),
+      summ_vec(cal_draws[, "calibration_slope"]),
+      data.frame(n_failed_model_fits = cal_failed)
+    )
+  )
+}
+
+# Generate supplementary summaries --------------------------------------------
+
+# The existing CV performance summaries pair the same posterior draw index
+# across folds; the same convention is used here for draw-level summaries.
+prediction_types <- unique(cv_draws$prediction)
+
+cv_by_prediction <- lapply(
+  prediction_types,
+  function(prediction) {
+    reshape_prediction_draws(cv_draws[cv_draws$prediction == prediction, ])
+  }
+)
+names(cv_by_prediction) <- prediction_types
+
+auc_summary <- do.call(
+  rbind,
+  Map(make_auc_summary, names(cv_by_prediction), cv_by_prediction)
+)
+
+auc_fold_summary <- do.call(
+  rbind,
+  Map(make_auc_fold_summary, names(cv_by_prediction), cv_by_prediction)
+)
+
+calibration_summary <- do.call(
+  rbind,
+  Map(make_calibration_summary, names(cv_by_prediction), cv_by_prediction)
+)
+
+auc_summary <- auc_summary[order(auc_summary$prediction, auc_summary$metric), ]
+auc_fold_summary <- auc_fold_summary[
+  order(auc_fold_summary$prediction, auc_fold_summary$fold),
+]
+calibration_summary <- calibration_summary[
+  order(calibration_summary$prediction, calibration_summary$metric),
+]
+
+auc_curves <- do.call(
+  rbind,
+  lapply(
+    names(cv_by_prediction),
+    function(prediction) {
+      pred_obj <- cv_by_prediction[[prediction]]
+      non_events <- pred_obj$N - pred_obj$r_obs
+      
+      out <- make_grouped_roc(
+        pred = colMeans(pred_obj$risk, na.rm = TRUE),
+        events = pred_obj$r_obs,
+        non_events = non_events
+      )
+      
+      out$prediction <- prediction
+      out
+    }
+  )
+)
+
+auc_curves <- auc_curves[
+  c("prediction", "pred", "events", "non_events", "sensitivity", "one_minus_specificity")
+]
+
+# Save outputs -----------------------------------------------------------------
+
+write.csv(
+  auc_summary,
+  file.path(z_out_dir, "design_stage_cv_auc.csv"),
+  row.names = FALSE,
+  quote = FALSE,
+  na = ""
+)
+
+saveRDS(
+  auc_summary,
+  file.path(z_out_dir, "design_stage_cv_auc.rds")
+)
+
+write.csv(
+  auc_fold_summary,
+  file.path(z_out_dir, "design_stage_cv_auc_by_fold.csv"),
+  row.names = FALSE,
+  quote = FALSE,
+  na = ""
+)
+
+saveRDS(
+  auc_fold_summary,
+  file.path(z_out_dir, "design_stage_cv_auc_by_fold.rds")
+)
+
+write.csv(
+  auc_curves,
+  file.path(z_out_dir, "design_stage_cv_auc_curve.csv"),
+  row.names = FALSE,
+  quote = FALSE,
+  na = ""
+)
+
+png(
+  file.path(z_out_dir, "design_stage_cv_auc_plot.png"),
+  width = 5,
+  height = 5,
+  units = "in",
+  res = 300
+)
+plot(
+  c(0, 1),
+  c(0, 1),
+  type = "n",
+  xlab = "1 - specificity",
+  ylab = "Sensitivity",
+  asp = 1
+)
+abline(0, 1, lty = 2, col = "grey50")
+
+plot_cols <- c(marginal = "skyblue", typical = "black")
+
+for (prediction in names(cv_by_prediction)) {
+  dat <- auc_curves[auc_curves$prediction == prediction, ]
+  lines(
+    dat$one_minus_specificity,
+    dat$sensitivity,
+    type = "s",
+    lwd = 2,
+    col = plot_cols[[prediction]]
+  )
+}
+
+legend(
+  "bottomright",
+  legend = paste0(
+    auc_summary$prediction,
+    " C = ",
+    round(auc_summary$mean, 3)
+  ),
+  col = plot_cols[auc_summary$prediction],
+  lwd = 2,
+  bty = "n"
+)
+dev.off()
+
+write.csv(
+  calibration_summary,
+  file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.csv"),
+  row.names = FALSE,
+  quote = FALSE,
+  na = ""
+)
+
+saveRDS(
+  calibration_summary,
+  file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.rds")
+)
+
+# Log --------------------------------------------------------------------------
+
+log_lines <- c(
+  "Design-stage cross-validation supplementary validation outputs",
+  "",
+  paste0("Input posterior draw file: ", z_cv_draws),
+  paste0("Posterior-draw predictions used: yes"),
+  paste0("Prediction summaries included: ", paste(prediction_types, collapse = ", ")),
+  paste0(
+    "Held-out arms: ",
+    length(unique(cv_by_prediction[[1]]$row))
+  ),
+  paste0(
+    "Observed attrition events: ",
+    sum(cv_by_prediction[[1]]$r_obs)
+  ),
+  paste0(
+    "Observed non-events: ",
+    sum(cv_by_prediction[[1]]$N - cv_by_prediction[[1]]$r_obs)
+  ),
+  paste0(
+    "Calibration model failed fits: ",
+    sum(calibration_summary$n_failed_model_fits, na.rm = TRUE)
+  ),
+  "",
+  "Outputs produced:",
+  file.path(z_out_dir, "design_stage_cv_auc.csv"),
+  file.path(z_out_dir, "design_stage_cv_auc.rds"),
+  file.path(z_out_dir, "design_stage_cv_auc_by_fold.csv"),
+  file.path(z_out_dir, "design_stage_cv_auc_by_fold.rds"),
+  file.path(z_out_dir, "design_stage_cv_auc_curve.csv"),
+  file.path(z_out_dir, "design_stage_cv_auc_plot.png"),
+  file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.csv"),
+  file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.rds"),
+  "",
+  paste(
+    "Interpretation note: the grouped C-statistic is an arm-level,",
+    "participant-weighted risk-ranking metric and should not be described",
+    "as individual-level discrimination."
+  )
+)
+
+writeLines(
+  log_lines,
+  file.path(z_out_dir, "design_stage_cv_supplementary_README.txt")
 )

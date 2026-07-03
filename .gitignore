@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .positai
+r_libs/
 zold_version/
 outputs/
 protocol/

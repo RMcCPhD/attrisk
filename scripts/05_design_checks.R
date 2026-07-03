@@ -92,6 +92,96 @@ safe_cor <- function(x, y) {
   cor(x[ok], y[ok])
 }
 
+# Grouped-data C-statistic.
+# This is an arm-level, participant-weighted risk-ranking metric:
+# it estimates the probability that an observed attrition event is assigned
+# a higher predicted trial-arm risk than an observed non-event.
+grouped_c_stat <- function(pred, events, non_events) {
+  
+  keep <- is.finite(pred) &
+    is.finite(events) &
+    is.finite(non_events) &
+    events >= 0 &
+    non_events >= 0
+  
+  pred <- pred[keep]
+  events <- events[keep]
+  non_events <- non_events[keep]
+  
+  n_events <- sum(events)
+  n_non_events <- sum(non_events)
+  
+  if (n_events <= 0 || n_non_events <= 0) {
+    return(NA_real_)
+  }
+  
+  ord <- order(pred)
+  pred <- pred[ord]
+  events <- events[ord]
+  non_events <- non_events[ord]
+  
+  ties <- rle(pred)
+  tie_end <- cumsum(ties$lengths)
+  tie_start <- tie_end - ties$lengths + 1L
+  
+  numerator <- 0
+  non_events_below <- 0
+  
+  for (g in seq_along(tie_start)) {
+    idx <- tie_start[g]:tie_end[g]
+    events_tie <- sum(events[idx])
+    non_events_tie <- sum(non_events[idx])
+    
+    numerator <- numerator +
+      events_tie * (non_events_below + 0.5 * non_events_tie)
+    
+    non_events_below <- non_events_below + non_events_tie
+  }
+  
+  numerator / (n_events * n_non_events)
+}
+
+make_grouped_roc <- function(pred, events, non_events) {
+  
+  tibble(
+    pred = pred,
+    events = events,
+    non_events = non_events
+  ) %>%
+    filter(
+      is.finite(pred),
+      is.finite(events),
+      is.finite(non_events)
+    ) %>%
+    arrange(desc(pred)) %>%
+    group_by(pred) %>%
+    reframe(
+      events = sum(events),
+      non_events = sum(non_events)
+    ) %>%
+    mutate(
+      sensitivity = cumsum(events) / sum(events),
+      one_minus_specificity = cumsum(non_events) / sum(non_events)
+    ) %>%
+    bind_rows(
+      tibble(
+        pred = Inf,
+        events = 0,
+        non_events = 0,
+        sensitivity = 0,
+        one_minus_specificity = 0
+      ),
+      .,
+      tibble(
+        pred = -Inf,
+        events = 0,
+        non_events = 0,
+        sensitivity = 1,
+        one_minus_specificity = 1
+      )
+    )
+}
+
 # Draw-level posterior predictive performance
 # Rows = posterior draws
 # Columns = trial arms
@@ -118,6 +208,74 @@ performance_draws <- map_dfr(seq_len(nrow(r_pred_draws)), function(s) {
   )
 })
 
+# Arm-level discrimination from latent attrition probabilities -----------------
+
+auc_draws <- map_dbl(seq_len(nrow(ppc_out$p)), function(s) {
+  
+  grouped_c_stat(
+    pred = ppc_out$p[s, ],
+    events = imp_dat$r,
+    non_events = imp_dat$N - imp_dat$r
+  )
+  
+})
+
+auc_summary <- posterior_scalar_summary(auc_draws) %>%
+  mutate(
+    metric = "grouped_c_statistic_auc",
+    n_posterior_draws_used = sum(is.finite(auc_draws)),
+    n_arms = imp_dat$I,
+    n_observed_attrition_events = sum(imp_dat$r),
+    n_observed_non_events = sum(imp_dat$N - imp_dat$r),
+    .before = 1
+  )
+
+write_csv(
+  auc_summary,
+  "outputs/design/posterior_auc.csv"
+)
+
+saveRDS(
+  auc_summary,
+  "outputs/design/posterior_auc.rds"
+)
+
+auc_curve <- make_grouped_roc(
+  pred = ppc_tbl$p_mean,
+  events = imp_dat$r,
+  non_events = imp_dat$N - imp_dat$r
+)
+
+write_csv(
+  auc_curve,
+  "outputs/design/posterior_auc_curve.csv"
+)
+
+auc_plot <- auc_curve %>%
+  ggplot(aes(x = one_minus_specificity, y = sensitivity)) +
+  geom_abline(linetype = "dashed") +
+  geom_step(linewidth = 0.7, colour = "skyblue") +
+  coord_equal() +
+  theme_classic() +
+  annotate(
+    "text",
+    x = 0.65,
+    y = 0.15,
+    label = paste0("C-statistic = ", round(auc_summary$mean, 3))
+  ) +
+  labs(
+    x = "1 - specificity",
+    y = "Sensitivity"
+  )
+
+ggsave(
+  "outputs/design/posterior_auc_plot.png",
+  auc_plot,
+  width = 5,
+  height = 5,
+  units = "in"
+)
+
 # Point estimate coverage from posterior predictive intervals
 # This is not draw-specific because it is defined using the full posterior interval
 coverage_point <- ppc_tbl %>%
@@ -141,6 +299,10 @@ ppc_performance <- performance_draws %>%
       q025 = NA_real_,
       q975 = NA_real_
     )
+  ) %>%
+  bind_rows(
+    auc_summary %>%
+      select(metric, mean, median, sd, q025, q975)
   ) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
 
@@ -197,7 +359,6 @@ res_names <- read_csv(z_names) %>%
   )
 
 # Summarise covariate effect estimates
-# Subset of trials, don't expect findings to be telling
 res_sum <- res_covars %>% 
   pivot_longer(everything()) %>% 
   group_by(name) %>% 
