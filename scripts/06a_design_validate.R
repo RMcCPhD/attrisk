@@ -23,26 +23,34 @@ options(mc.cores = parallel::detectCores())
 # Define folds -----------------------------------------------------------------
 
 # Set number of folds and save directory
-K_folds <- 5
+K_folds <- 10
 out_dir <- "kfold_cv/"
 
 # Import Stan data
-imp_dat <- readRDS("stan_data.rds")
+imp_dat <- readRDS("Processed_data/stan_data.rds")
 
-# Create folds
-# Folds are trial-level since arms are collapsed where >1 non-experimental
-# Stratified by observed risk to balance low and high-risk trials, i.e.
-# minimise chance of all extremes getting bundled together
+# Create trial-level folds stratified by observed attrition risk.
+# Trials are divided into five risk strata and randomly ordered within each one.
+# Round-robin allocation spreads each risk stratum across the K folds, while the
+# random offset prevents surplus trials repeatedly being assigned to early folds.
+# Finally, restore the original trial-row order for use in model sub setting.
 fold_tbl <- tibble(
   row = seq_len(imp_dat$I),
   r = imp_dat$r,
   N = imp_dat$N,
-  risk_obs = imp_dat$r / imp_dat$N,
-  risk_bin = ntile(risk_obs, K_folds)
-  ) %>% 
-  group_by(risk_bin) %>% 
-  mutate(fold = sample(rep(seq_len(K_folds), length.out = n()))) %>% 
-  ungroup() %>% 
+  risk_obs = r / N
+) %>%
+  mutate(
+    risk_stratum = ntile(risk_obs, 5),
+    random_order = runif(n())
+  ) %>%
+  arrange(risk_stratum, random_order) %>%
+  group_by(risk_stratum) %>%
+  mutate(
+    offset = sample.int(K_folds, 1) - 1L,
+    fold = ((row_number() - 1L + offset) %% K_folds) + 1L
+  ) %>%
+  ungroup() %>%
   arrange(row)
 
 folds <- fold_tbl$fold

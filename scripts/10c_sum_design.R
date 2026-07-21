@@ -31,7 +31,7 @@ b_var_names <- read_csv("scratch_data/data_processing/tidy_covariate_names.csv")
     variable = paste0("beta[", row_number(), "]")
   )
 
-# Some general posterior summaries ---------------------------------------------
+# General posterior summaries --------------------------------------------------
 
 # Summarise draws
 b_draws_array <- as_draws_df(a_imp_fit)
@@ -217,7 +217,7 @@ write_csv(d_mdl_int, "outputs/manuscript_summaries/design_model/posterior_interc
 write_csv(d_mdl_shrink, "outputs/manuscript_summaries/design_model/posterior_shrinkage.csv")
 write_csv(d_mdl_loglik, "outputs/manuscript_summaries/design_model/posterior_fit_diags.csv")
 
-# Posterior summaries: Predicted attrition risk --------------------------------
+# Posterior summaries: Attrition odds ratios -----------------------------------
 
 # Create draws matrix
 e_draws_mat <- as_draws_matrix(as.array(a_imp_fit))
@@ -226,101 +226,121 @@ e_draws_mat <- as_draws_matrix(as.array(a_imp_fit))
 e_beta_cols <- grep("^beta\\[", colnames(e_draws_mat), value = TRUE)
 e_beta_draws <- e_draws_mat[, e_beta_cols, drop = FALSE]
 
-# Extract baseline log-rate parameter
+# Extract global log-rate parameter
 e_mu_mu1_draws <- e_draws_mat[, "mu_mu1"]
 
-# Extract mean Gompertz shape parameter
-e_shape_draws <- rowMeans(e_draws_mat[, grepl("^a\\[", colnames(e_draws_mat))])
-
-# Number of posterior draws
-S <- nrow(e_beta_draws)
-
-# Median follow-up duration across trials (weeks)
-e_dur <- median(a_imp_agd$duration * 52, na.rm = TRUE)
+# Median follow-up duration across trials (years)
+e_dur <- median(a_imp_stan$dt, na.rm = TRUE)
 
 # Baseline design vector (mean trial design)
 e_base <- colMeans(a_imp_stan$X)
+e_covars <- colnames(a_imp_stan$X)
 
-# Identify binary variables
-# e_binary <- c(
-#   "age_lower", "age_upper",
-#   "blindingdouble", "blindingtriple", "blindingquadruple",
-#   "reg_am", "reg_eur", "reg_wpac", "reg_afr", "reg_sea", "reg_em",
-#   "one_pom"
-# )
+# Identify groups of categorical variables
+e_covar_groups <- list(
+  e_covars[str_detect(e_covars, "^trttype")],
+  e_covars[str_detect(e_covars, "^n_cat")],
+  e_covars[str_detect(e_covars, "^arm_n_cat")],
+  e_covars[str_detect(e_covars, "^n_sites_cat")],
+  e_covars[str_detect(e_covars, "^masking")],
+  e_covars[str_detect(e_covars, "^upper_bmi")],
+  e_covars[str_detect(e_covars, "^lower_egfr")]
+)
+
+# Function to identify categorical contrast columns
+contrast_cols <- function(var) {
+  
+  cols <- keep(e_covar_groups, ~ var %in% .x)
+  
+  if (length(cols) == 0) {
+    var
+  } else {
+    cols[[1]]
+  }
+  
+}
 
 # Function to predict attrition risk
 predict_risk <- function(x) {
   
   # Linear predictor
-  rate_lp <- e_beta_draws %*% x
+  rate_lp <- as.numeric(e_beta_draws %*% x)
   
   # Rate
   log_rate <- e_mu_mu1_draws + rate_lp
   rate <- exp(log_rate)
   
-  # Shape parameter (using baseline relationship)
-  shape <- e_shape_draws
+  # Shape parameter for a typical trial
+  shape <- a_imp_stan$alpha_shape +
+    a_imp_stan$beta_lograte * log_rate
   
   # Gompertz cumulative distribution
   risk <- pgompertz(e_dur, shape = shape, rate = rate)
-  as.numeric(risk)
+  pmin(
+    pmax(as.numeric(risk), .Machine$double.eps),
+    1 - .Machine$double.eps
+  )
 }
 
-# Predict attrition risk for each trial characteristic
-e_covars <- colnames(a_imp_stan$X)
-e_risk <- map_dfr(seq_along(e_covars), function(i){
+# Estimate odds ratio for each trial characteristic
+e_or <- map_dfr(seq_along(e_covars), function(i){
   
   x_new <- e_base
+  x_base <- e_base
   var <- e_covars[i]
+  cols <- contrast_cols(var)
   
-  # binary contrast
-  x_new[i] <- 1
-  x_base_i <- e_base
-  x_base_i[i] <- 0
+  # Binary or categorical contrast
+  x_new[cols] <- 0
+  x_base[cols] <- 0
+  x_new[var] <- 1
   
-  risk_new  <- predict_risk(x_new)
-  risk_base <- predict_risk(x_base_i)
-  
-  diff <- risk_new - risk_base
+  risk_new <- predict_risk(x_new)
+  risk_base <- predict_risk(x_base)
+  odds_ratio <- exp(qlogis(risk_new) - qlogis(risk_base))
   
   tibble(
     raw_name = var,
-    mean = mean(diff),
-    median = median(diff),
-    sd = sd(diff),
-    `2.5%` = quantile(diff, .025),
-    `97.5%` = quantile(diff, .975)
+    mean = mean(odds_ratio),
+    median = median(odds_ratio),
+    sd = sd(odds_ratio),
+    `2.5%` = quantile(odds_ratio, .025),
+    `97.5%` = quantile(odds_ratio, .975)
   )
   
 })
 
 # Add tidy covariate names and plot
-e_risk_tidy <- b_var_names %>% 
+e_or_tidy <- b_var_names %>% 
   distinct(raw_name, tidy_name) %>% 
-  left_join(e_risk)
+  left_join(e_or)
 
-e_risk_plot <- e_risk_tidy %>% 
+e_or_plot <- e_or_tidy %>% 
   ggplot(aes(x = mean, xmin = `2.5%`, xmax = `97.5%`, y = fct_rev(tidy_name))) +
   geom_point() +
   geom_linerange() +
-  geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
-  scale_x_continuous(limits = c(-0.3, 0.3), n.breaks = 6) +
+  geom_vline(xintercept = 1, colour = "red", linetype = "dashed") +
+  scale_x_log10(
+    limits = c(0.5, 2.5),
+    breaks = c(0.5, 1, 2),
+    labels = c("0.5", "1.0", "2.0"),
+    minor_breaks = NULL
+  ) +
   theme_classic() +
   labs(
-    x = "Mean difference in predicted attrition risk (95% credible intervals)", 
+    x = "Mean odds ratio for attrition at median follow-up (95% credible intervals)", 
     y = NULL
   )
 
 # Save
 write_csv(
-  e_risk_tidy %>% mutate(across(mean:`97.5%`, ~ round(., 3))), 
-  "outputs/manuscript_summaries/design_model/trial_chars_risk.csv"
+  e_or_tidy %>% mutate(across(mean:`97.5%`, ~ round(., 3))), 
+  "outputs/manuscript_summaries/design_model/trial_chars_odds_ratio.csv"
 )
 
 ggsave(
-  "outputs/design/design_trial_chars_risk_diff.png",
-  e_risk_plot,
+  "outputs/design/design_trial_chars_odds_ratio.png",
+  e_or_plot,
   height = 6,
   width = 8,
   units = "in"

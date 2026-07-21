@@ -1,218 +1,218 @@
 
-# Perform calibration-in-the-large for the conduct-stage model
-# Aligns participant-marginalised conduct-stage risk to the design-stage
-# marginal attrition risk after applying pooled participant-level effects
-# Finds an intercept shift that aligns observed risk with average participant
-# level attrition risk
+# Perform calibration-in-the-large for conduct-stage model
+# Align participant-marginalised conduct-stage risk to design-stage marginal risk
 
 source("scripts/00_config.R")
 source("scripts/00_functions_packages_etc.R")
 
 # Import Sobol outputs
 imp_sobol <- readRDS("processed_data/sobol_lst.rds")
+imp_sobol_profiles <- readRDS("processed_data/sobol_unnest.rds")
 
 # Import design-stage model and Stan data
 imp_design <- readRDS("outputs/design/design_model.rds")
 imp_stan <- readRDS("processed_data/stan_data.rds")
 
-# Import AgD data
+# Import AgD
 imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
 
-# Trial arm quantities
+# Trial quantities
 I <- imp_stan$I
 r <- imp_stan$r
 N <- imp_stan$N
 dt <- imp_stan$dt
 
-# Prepare design-stage posterior draws -----------------------------------------
+# Number of points used to invert participant-averaged survival
+n_citl_grid <- 4096L
 
-# Extract posterior draws of Gompertz parameters
+# Check inputs -----------------------------------------------------------------
+
+stopifnot(
+  I == nrow(imp_agd),
+  I == imp_sobol$I,
+  I == nrow(imp_sobol_profiles),
+  identical(imp_agd$trial_id, imp_sobol_profiles$trial_id),
+  length(r) == I,
+  length(N) == I,
+  length(dt) == I,
+  all(is.finite(r)),
+  all(is.finite(N)),
+  all(is.finite(dt))
+)
+
+# Prepare design-stage posterior draws ----------------------------------------
+
+# Extract Gompertz parameters
 design_draws <- as_draws(imp_design)
 design_logb <- extract_variable_array(design_draws, variable = "log_b")
 design_a <- extract_variable_array(design_draws, variable = "a")
 
-# Convert posterior draw arrays to matrices (draws x trial arms)
+# Convert posterior arrays to matrices
 arr_to_mat <- function(arr) {
+  
   d <- dim(arr)
+  
   if (length(d) == 3) {
     matrix(arr, nrow = d[1] * d[2], ncol = d[3])
   } else if (length(d) == 2) {
     as.matrix(arr)
   } else {
-    stop("Unexpected posterior draw dimension.")
+    stop("Unexpected posterior draw dimension")
   }
 }
 
 logb_mat <- arr_to_mat(design_logb)
 a_mat <- arr_to_mat(design_a)
 
-# Prepare Sobol participant linear predictors ----------------------------------
+# Number of posterior draws
+S <- nrow(logb_mat)
+
+stopifnot(
+  ncol(logb_mat) == I,
+  all(dim(a_mat) == c(S, I)),
+  all(is.finite(logb_mat)),
+  all(is.finite(a_mat))
+)
+
+# Prepare Sobol participant linear predictors ---------------------------------
 
 J <- imp_sobol$J
 Z <- imp_sobol$Z
 loghr <- imp_sobol$loghr
 
-# Checks names match
-setdiff(names(loghr), colnames(Z))
-setdiff(colnames(Z), names(loghr))
+# Check predictor names and dimensions
+stopifnot(
+  setequal(names(loghr), colnames(Z)),
+  nrow(Z) == I * J,
+  ncol(Z) == length(loghr),
+  all(is.finite(Z)),
+  all(is.finite(loghr))
+)
 
-# Reorder Z block explicitly to names
+# Reorder predictors
 Z <- Z[, names(loghr), drop = FALSE]
 
-# One participant-level linear predictor per Sobol profile
+# Get trial-specific participant linear predictors
 sobol_lp <- as.vector(Z %*% loghr)
+lp_mat <- matrix(sobol_lp, nrow = J, ncol = I)
+hr_mat <- exp(lp_mat)
 
-# Split linear predictors into a vector of J participants per trial arm
-lp_lst <- split(sobol_lp, rep(seq_len(I), each = J))
+stopifnot(
+  all(is.finite(lp_mat)),
+  all(is.finite(hr_mat))
+)
 
-# Gompertz CDF -----------------------------------------------------------------
+# Helper functions -------------------------------------------------------------
 
-# If shape is close to zero, decays to exponential
-gompertz_prob <- function(b, a, dt, lp = 0) {
-  if (abs(a) < 1e-4) {
-    p <- 1 - exp(-b * exp(lp) * dt)
-  } else {
-    p <- 1 - exp(-(b / a) * (exp(a * dt) - 1) * exp(lp))
-  }
-  pmin(pmax(p, 0), 1)
+# Gompertz cumulative hazard
+gompertz_cumhaz <- function(b, a, dt) {
+  
+  out <- numeric(length(b))
+  is_exp <- abs(a) < 1e-4
+  
+  out[is_exp] <- b[is_exp] * dt
+  out[!is_exp] <- (
+    b[!is_exp] / a[!is_exp]
+  ) * expm1(a[!is_exp] * dt)
+  
+  out
 }
 
-# Root-finding helpers ---------------------------------------------------------
-
-uniroot_bracket <- function(f, lo = -30, hi = 30, step = 5, max_iter = 10) {
-  
-  flo <- f(lo)
-  fhi <- f(hi)
-  k <- 0L
-  
-  if (!is.finite(flo) || !is.finite(fhi)) return(NULL)
-  if (abs(flo) < 1e-12) return(lo)
-  if (abs(fhi) < 1e-12) return(hi)
-  
-  while (sign(flo) == sign(fhi) && k < max_iter) {
-    lo <- lo - step
-    hi <- hi + step
-    flo <- f(lo)
-    fhi <- f(hi)
-    k <- k + 1L
-    
-    if (!is.finite(flo) || !is.finite(fhi)) return(NULL)
-    if (abs(flo) < 1e-12) return(lo)
-    if (abs(fhi) < 1e-12) return(hi)
-  }
-  
-  if (sign(flo) == sign(fhi)) return(NULL)
-  
-  uniroot(f, c(lo, hi))$root
-  
+# Participant-averaged survival
+laplace_survival <- function(h, hr) {
+  rowMeans(exp(-outer(h, hr)))
 }
 
-# Find the intercept shift that aligns the participant-marginalised risk with
-# the design-stage marginal risk.
-find_delta <- function(log_b, a, dt, lp, target_risk) {
+# Create interpolation function for CITL shift
+make_delta_function <- function(H, hr, n_grid = n_citl_grid, buffer = 6) {
   
-  target_risk <- pmin(pmax(target_risk, 1e-10), 1 - 1e-10)
+  H <- H[is.finite(H) & H > 0]
   
-  f <- function(delta) {
-    p <- gompertz_prob(
-      b = exp(log_b + delta),
-      a = a,
-      dt = dt,
-      lp = lp
-    )
-    mean(p) - target_risk
+  log_h_grid <- seq(
+    log(min(H)) - buffer,
+    log(max(H)) + buffer,
+    length.out = n_grid
+  )
+  
+  survival_grid <- laplace_survival(exp(log_h_grid), hr)
+  marginal_h_grid <- -log(pmax(survival_grid, .Machine$double.xmin))
+  
+  # Remove duplicated values following numerical underflow
+  keep <- is.finite(marginal_h_grid) & !duplicated(marginal_h_grid)
+  
+  delta_interp <- approxfun(
+    marginal_h_grid[keep],
+    log_h_grid[keep],
+    rule = 2
+  )
+  
+  function(H) {
+    delta_interp(H) - log(H)
   }
-  
-  out <- uniroot_bracket(f, lo = -30, hi = 30, step = 5)
-  
-  if (is.null(out)) {
-    obj <- function(delta) (f(delta))^2
-    optimise(obj, interval = c(-40, 40))$minimum
-  } else {
-    out
-  }
-  
 }
 
-# Backsolve to find delta (CITL intercept shift) -------------------------------
-
-S <- nrow(logb_mat)
+# Backsolve CITL shift ---------------------------------------------------------
 
 target_risk <- matrix(NA_real_, nrow = S, ncol = I)
 delta_mat <- matrix(NA_real_, nrow = S, ncol = I)
 
-for (i in seq_len(I)) {
-  
-  lp_i <- lp_lst[[i]]
-  dt_i <- dt[i]
-  
-  if (i %% 10 == 1 || i == I) message(sprintf("Arm %d/%d", i, I))
-  
-  for (s in seq_len(S)) {
-    
-    # Design-stage marginal risk before applying participant-level effects
-    target_risk[s, i] <- gompertz_prob(
-      b = exp(logb_mat[s, i]),
-      a = a_mat[s, i],
-      dt = dt_i,
-      lp = 0
-    )
-    
-    # CITL shift recentres the participant-marginalised risk to this target
-    delta_mat[s, i] <- find_delta(
-      log_b = logb_mat[s, i],
-      a = a_mat[s, i],
-      dt = dt_i,
-      lp = lp_i,
-      target_risk = target_risk[s, i]
-    )
-    
-  }
-  
-}
-
-mean(is.na(delta_mat))
-
-# Compute pre- and post-CITL risks --------------------------------------------
-
 avg_risk_pre <- matrix(NA_real_, nrow = S, ncol = I)
-pred_count_pre <- matrix(NA_real_, nrow = S, ncol = I)
-
 avg_risk_citl <- matrix(NA_real_, nrow = S, ncol = I)
-pred_count_citl <- matrix(NA_real_, nrow = S, ncol = I)
 
 for (i in seq_len(I)) {
   
-  lp_i <- lp_lst[[i]]
-  dt_i <- dt[i]
-  
-  if (i %% 10 == 1 || i == I) message(sprintf("Arm %d/%d", i, I))
-  
-  for (s in seq_len(S)) {
-    
-    p_pre <- gompertz_prob(
-      b = exp(logb_mat[s, i]),
-      a = a_mat[s, i],
-      dt = dt_i,
-      lp = lp_i
-    )
-    
-    p_citl <- gompertz_prob(
-      b = exp(logb_mat[s, i] + delta_mat[s, i]),
-      a = a_mat[s, i],
-      dt = dt_i,
-      lp = lp_i
-    )
-    
-    avg_risk_pre[s, i] <- mean(p_pre)
-    avg_risk_citl[s, i] <- mean(p_citl)
-    
-    pred_count_pre[s, i] <- N[i] * avg_risk_pre[s, i]
-    pred_count_citl[s, i] <- N[i] * avg_risk_citl[s, i]
-    
+  if (i %% 10 == 1 || i == I) {
+    message(sprintf("Trial %d/%d", i, I))
   }
   
+  # Design-stage cumulative hazard and marginal risk
+  H_i <- gompertz_cumhaz(
+    b = exp(logb_mat[, i]),
+    a = a_mat[, i],
+    dt = dt[i]
+  )
+  
+  target_risk[, i] <- -expm1(-H_i)
+  
+  # Participant-marginalised risk before CITL
+  avg_risk_pre[, i] <- 1 - laplace_survival(
+    H_i,
+    hr_mat[, i]
+  )
+  
+  # Backsolve CITL shift for trial-specific participant population
+  delta_fun <- make_delta_function(
+    H = H_i,
+    hr = hr_mat[, i]
+  )
+  
+  delta_mat[, i] <- delta_fun(H_i)
+  
+  # Participant-marginalised risk after CITL
+  avg_risk_citl[, i] <- 1 - laplace_survival(
+    H_i * exp(delta_mat[, i]),
+    hr_mat[, i]
+  )
 }
+
+# Predicted counts
+pred_count_design <- sweep(target_risk, 2, N, "*")
+pred_count_pre <- sweep(avg_risk_pre, 2, N, "*")
+pred_count_citl <- sweep(avg_risk_citl, 2, N, "*")
+
+# Check outputs ----------------------------------------------------------------
+
+citl_resid <- avg_risk_citl - target_risk
+
+stopifnot(
+  !anyNA(target_risk),
+  !anyNA(delta_mat),
+  !anyNA(avg_risk_pre),
+  !anyNA(avg_risk_citl),
+  max(abs(citl_resid)) < 1e-4
+)
+
+summary(as.numeric(citl_resid))
 
 # Save full outputs ------------------------------------------------------------
 
@@ -222,10 +222,14 @@ citl_out <- list(
   I = I,
   J = J,
   S = S,
+  trial_id = imp_agd$trial_id,
+  sobol_lp = sobol_lp,
+  n_citl_grid = n_citl_grid,
   target_risk = target_risk,
   delta = delta_mat,
   avg_risk_pre = avg_risk_pre,
   avg_risk_citl = avg_risk_citl,
+  pred_count_design = pred_count_design,
   pred_count_pre = pred_count_pre,
   pred_count_citl = pred_count_citl
 )
@@ -235,33 +239,30 @@ saveRDS(citl_out, "outputs/conduct/citl/citl_draws.rds")
 
 # Summarise CITL outputs -------------------------------------------------------
 
+# Summarise vector
 summ_vec <- function(x, metric) {
+  
   tibble(
     metric = metric,
     mean = mean(x, na.rm = TRUE),
     median = median(x, na.rm = TRUE),
     sd = sd(x, na.rm = TRUE),
-    q025 = quantile(x, 0.025, na.rm = TRUE),
-    q975 = quantile(x, 0.975, na.rm = TRUE)
+    q025 = quantile(x, 0.025, na.rm = TRUE, names = FALSE),
+    q975 = quantile(x, 0.975, na.rm = TRUE, names = FALSE)
   )
 }
 
+# Summarise draw-level metric
 summ_draw_metric <- function(x, metric) {
   summ_vec(rowMeans(x, na.rm = TRUE), metric)
 }
 
+# Summarise all draws and trials
 summ_all_metric <- function(x, metric) {
   summ_vec(as.numeric(x), metric)
 }
 
-count_design <- sweep(target_risk, 2, N, "*")
-count_pre <- pred_count_pre
-count_citl <- pred_count_citl
-
-citl_out$pred_count_design <- count_design
-saveRDS(citl_out, "outputs/conduct/citl/citl_draws.rds")
-
-# Draw-level summaries: each posterior draw is first averaged across AgD arms.
+# Draw-level summaries
 citl_draw_summary <- bind_rows(
   summ_draw_metric(target_risk, "design_stage_risk"),
   summ_draw_metric(avg_risk_pre, "pre_citl_risk"),
@@ -269,14 +270,14 @@ citl_draw_summary <- bind_rows(
   summ_draw_metric(avg_risk_pre - target_risk, "pre_minus_design_risk"),
   summ_draw_metric(avg_risk_citl - target_risk, "post_minus_design_risk"),
   summ_draw_metric(delta_mat, "delta_log_rate"),
-  summ_draw_metric(count_design, "design_stage_count"),
-  summ_draw_metric(count_pre, "pre_citl_count"),
-  summ_draw_metric(count_citl, "post_citl_count"),
-  summ_draw_metric(count_pre - count_design, "pre_minus_design_count"),
-  summ_draw_metric(count_citl - count_design, "post_minus_design_count")
+  summ_draw_metric(pred_count_design, "design_stage_count"),
+  summ_draw_metric(pred_count_pre, "pre_citl_count"),
+  summ_draw_metric(pred_count_citl, "post_citl_count"),
+  summ_draw_metric(pred_count_pre - pred_count_design, "pre_minus_design_count"),
+  summ_draw_metric(pred_count_citl - pred_count_design, "post_minus_design_count")
 )
 
-# Global summaries: all posterior draws and arms are pooled before summarising.
+# Global summaries
 citl_global_summary <- bind_rows(
   summ_all_metric(target_risk, "design_stage_risk"),
   summ_all_metric(avg_risk_pre, "pre_citl_risk"),
@@ -284,34 +285,47 @@ citl_global_summary <- bind_rows(
   summ_all_metric(avg_risk_pre - target_risk, "pre_minus_design_risk"),
   summ_all_metric(avg_risk_citl - target_risk, "post_minus_design_risk"),
   summ_all_metric(delta_mat, "delta_log_rate"),
-  summ_all_metric(count_design, "design_stage_count"),
-  summ_all_metric(count_pre, "pre_citl_count"),
-  summ_all_metric(count_citl, "post_citl_count"),
-  summ_all_metric(count_pre - count_design, "pre_minus_design_count"),
-  summ_all_metric(count_citl - count_design, "post_minus_design_count")
+  summ_all_metric(pred_count_design, "design_stage_count"),
+  summ_all_metric(pred_count_pre, "pre_citl_count"),
+  summ_all_metric(pred_count_citl, "post_citl_count"),
+  summ_all_metric(pred_count_pre - pred_count_design, "pre_minus_design_count"),
+  summ_all_metric(pred_count_citl - pred_count_design, "post_minus_design_count")
 )
 
+# Save overall summaries
 write_csv(citl_draw_summary, "outputs/conduct/citl/citl_draw_summary.csv")
 write_csv(citl_global_summary, "outputs/conduct/citl/citl_global_summary.csv")
 
-# Summarise per trial arm ------------------------------------------------------
+# Summarise per trial ----------------------------------------------------------
 
+# Summarise posterior draws by trial
 arm_summ <- function(x, prefix) {
+  
   tibble(
     "{prefix}_mean" := apply(x, 2, mean, na.rm = TRUE),
     "{prefix}_median" := apply(x, 2, median, na.rm = TRUE),
     "{prefix}_sd" := apply(x, 2, sd, na.rm = TRUE),
-    "{prefix}_q025" := apply(x, 2, \(z) quantile(z, 0.025, na.rm = TRUE)),
-    "{prefix}_q975" := apply(x, 2, \(z) quantile(z, 0.975, na.rm = TRUE))
+    "{prefix}_q025" := apply(
+      x,
+      2,
+      \(z) quantile(z, 0.025, na.rm = TRUE, names = FALSE)
+    ),
+    "{prefix}_q975" := apply(
+      x,
+      2,
+      \(z) quantile(z, 0.975, na.rm = TRUE, names = FALSE)
+    )
   )
 }
 
+# Combine trial summaries
 citl_sum <- tibble(
   arm = seq_len(I),
+  trial_id = imp_agd$trial_id,
   N = N,
   r_obs = r,
   risk_obs = r / N
-) %>%
+) %>% 
   bind_cols(
     arm_summ(target_risk, "risk_design"),
     arm_summ(avg_risk_pre, "risk_pre"),
@@ -319,17 +333,17 @@ citl_sum <- tibble(
     arm_summ(avg_risk_pre - target_risk, "risk_pre_minus_design"),
     arm_summ(avg_risk_citl - target_risk, "risk_citl_minus_design"),
     arm_summ(delta_mat, "delta"),
-    arm_summ(count_design, "count_design"),
-    arm_summ(count_pre, "count_pre"),
-    arm_summ(count_citl, "count_citl"),
-    arm_summ(count_pre - count_design, "count_pre_minus_design"),
-    arm_summ(count_citl - count_design, "count_citl_minus_design")
+    arm_summ(pred_count_design, "count_design"),
+    arm_summ(pred_count_pre, "count_pre"),
+    arm_summ(pred_count_citl, "count_citl"),
+    arm_summ(pred_count_pre - pred_count_design, "count_pre_minus_design"),
+    arm_summ(pred_count_citl - pred_count_design, "count_citl_minus_design")
   )
 
 write_csv(citl_sum, "outputs/conduct/citl/citl_risk_sum.csv")
 write_csv(citl_sum, "outputs/conduct/citl/citl_arm_summary.csv")
 
-# Empirical summaries across arm-level posterior medians, useful for text.
+# Summarise across trial-level posterior medians
 summ_arm_medians <- function(data, column, metric) {
   summ_vec(data[[column]], metric)
 }
@@ -348,6 +362,7 @@ citl_arm_median_summary <- bind_rows(
   summ_arm_medians(citl_sum, "count_citl_minus_design_median", "arm_median_post_minus_design_count")
 )
 
+# Summarise direction of CITL shifts
 citl_delta_direction <- tibble(
   metric = c(
     "n_arms",
@@ -365,6 +380,7 @@ write_csv(
   citl_arm_median_summary,
   "outputs/conduct/citl/citl_arm_median_summary.csv"
 )
+
 write_csv(
   citl_delta_direction,
   "outputs/conduct/citl/citl_delta_direction_summary.csv"
@@ -372,17 +388,13 @@ write_csv(
 
 # Calibration checks -----------------------------------------------------------
 
-# Should be very close to zero
-citl_resid <- avg_risk_citl - target_risk
-
-summary(as.numeric(citl_resid))
-
+# Summarise residuals
 citl_resid_sum <- tibble(
   min = min(citl_resid, na.rm = TRUE),
-  q25 = quantile(citl_resid, 0.25, na.rm = TRUE),
+  q25 = quantile(citl_resid, 0.25, na.rm = TRUE, names = FALSE),
   median = median(citl_resid, na.rm = TRUE),
   mean = mean(citl_resid, na.rm = TRUE),
-  q75 = quantile(citl_resid, 0.75, na.rm = TRUE),
+  q75 = quantile(citl_resid, 0.75, na.rm = TRUE, names = FALSE),
   max = max(citl_resid, na.rm = TRUE),
   n_na = sum(is.na(citl_resid))
 )
@@ -391,22 +403,25 @@ write_csv(citl_resid_sum, "outputs/conduct/citl/citl_residual_summary.csv")
 
 # Observed-risk diagnostics ----------------------------------------------------
 
-observed_diag_dat <- citl_sum %>%
+# Compare observed and predicted trial risks
+observed_diag_dat <- citl_sum %>% 
   transmute(
     arm,
+    trial_id,
     risk_obs,
     `Design stage` = risk_design_median,
     `Pre-CITL` = risk_pre_median,
     `Post-CITL` = risk_citl_median
-  ) %>%
+  ) %>% 
   pivot_longer(
     cols = c(`Design stage`, `Pre-CITL`, `Post-CITL`),
     names_to = "stage",
     values_to = "risk_pred"
   )
 
-observed_diag_summary <- observed_diag_dat %>%
-  group_by(stage) %>%
+# Summarise observed-risk diagnostics
+observed_diag_summary <- observed_diag_dat %>% 
+  group_by(stage) %>% 
   summarise(
     mean_observed_risk = mean(risk_obs, na.rm = TRUE),
     mean_predicted_risk = mean(risk_pred, na.rm = TRUE),
@@ -422,10 +437,11 @@ write_csv(
   "outputs/conduct/citl/citl_observed_diagnostic_summary.csv"
 )
 
-# Plot: conduct-stage risk against design-stage target -------------------------
+# Plot conduct-stage risk against design-stage target -------------------------
 
 plot_dat <- tibble(
   arm = rep(seq_len(I), 2),
+  trial_id = rep(imp_agd$trial_id, 2),
   design = rep(apply(target_risk, 2, median, na.rm = TRUE), 2),
   fit = c(
     apply(avg_risk_pre, 2, median, na.rm = TRUE),
@@ -466,10 +482,17 @@ ggsave(
   units = "in"
 )
 
-# Diagnostic plot against observed risk ----------------------------------------
+# Plot predicted against observed risk ----------------------------------------
 
 plot_obs <- citl_sum %>% 
-  select(arm, risk_obs, risk_design_median, risk_pre_median, risk_citl_median) %>% 
+  select(
+    arm,
+    trial_id,
+    risk_obs,
+    risk_design_median,
+    risk_pre_median,
+    risk_citl_median
+  ) %>% 
   pivot_longer(
     cols = c(risk_design_median, risk_pre_median, risk_citl_median),
     names_to = "stage",

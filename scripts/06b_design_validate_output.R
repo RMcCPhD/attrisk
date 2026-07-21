@@ -5,17 +5,30 @@
 source("scripts/00_config.R")
 source("scripts/00_functions_packages_etc.R")
 
+set.seed(123)
+
 # Define file directory for folds
 cv_dir <- "outputs/design/internal_validation/models/"
-
-# Define folds
-K_folds <- 5
 
 # Import Stan data
 imp_stan <- readRDS("processed_data/stan_data.rds")
 
 # Import fold metadata
 imp_fold_ids <- readRDS("outputs/design/internal_validation/meta/fold_id.rds")
+
+# Infer K from the saved allocation so all fitted folds are processed
+fold_values <- sort(unique(imp_fold_ids))
+
+if (length(imp_fold_ids) != imp_stan$I) {
+  stop("Fold IDs do not match the number of trials in the Stan data.")
+}
+
+if (anyNA(fold_values) ||
+    !setequal(fold_values, seq_len(length(fold_values)))) {
+  stop("Fold IDs must be contiguous integers starting at 1.")
+}
+
+K_folds <- length(fold_values)
 
 # Import cv diagnostics
 imp_cv_diag <- read_csv("outputs/design/internal_validation/sum/cv_diagnostics.csv")
@@ -103,9 +116,18 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
   
   # Identify held-out trials
   test_idx <- which(folds == k)
+
+  if (length(test_idx) == 0) {
+    stop(sprintf("Fold %d does not contain any held-out trials.", k))
+  }
   
   # Load fold model
   fit_path <- file.path(cv_dir, sprintf("fit_fold_%d.rds", k))
+
+  if (!file.exists(fit_path)) {
+    stop("Could not find fitted fold model: ", fit_path)
+  }
+
   fit_k <- readRDS(fit_path)
   
   # Extract prediction parameters
@@ -124,13 +146,6 @@ get_fold_pred <- function(k, imp_dat, folds, cv_dir, max_draws = Inf) {
   tau_mu1 <- ext$tau_mu1[draw_idx]
   beta_arr <- ext$beta[draw_idx, , drop = FALSE]
   
-  S <- length(draw_idx)
-  n_test <- length(test_idx)
-  
-  # Define parameters
-  mu_mu1 <- ext$mu_mu1[draw_idx]
-  tau_mu1 <- ext$tau_mu1[draw_idx]
-  beta_arr <- ext$beta[draw_idx, , drop = FALSE]
   S <- length(draw_idx)
   n_test <- length(test_idx)
   
@@ -399,13 +414,12 @@ make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
   prediction <- match.arg(prediction)
   
   draws %>%
-    filter(.data$prediction == prediction) %>%
+    filter(.data$prediction == .env$prediction) %>%
     mutate(
-      # Count-scale posterior predictive error.
-      # These metrics compare simulated held-out attrition counts (r_new)
-      # against observed held-out attrition counts, matching the posterior
-      # predictive checks used for the development-data performance table.
-      count_error = count_new - r_obs,
+      # Count-scale expected prediction error
+      # Use E(r | training data) rather than a random posterior predictive
+      # replicate, which adds binomial sampling error to the comparison
+      count_error = count_pred - r_obs,
       abs_count_error = abs(count_error),
       sq_count_error = count_error^2,
       rel_count_error = count_error / pmax(r_obs, 1),
@@ -447,7 +461,7 @@ make_draw_summary <- function(draws, prediction = c("marginal", "typical")) {
       mean_rel_error_count = mean(rel_count_error),
       mean_abs_rel_error_count = mean(abs_rel_count_error),
       median_abs_rel_error_count = median(abs_rel_count_error),
-      cor_count = safe_cor(r_obs, count_new)
+      cor_count = safe_cor(r_obs, count_pred)
     ) %>%
     select(-draw) %>%
     pivot_longer(everything(), names_to = "sum", values_to = "value") %>%
@@ -496,15 +510,14 @@ make_fold_draw_summary <- function(draws, prediction = c("marginal", "typical"))
   prediction <- match.arg(prediction)
   
   draws %>%
-    filter(.data$prediction == prediction) %>%
+    filter(.data$prediction == .env$prediction) %>%
     mutate(
       risk_error = risk_pred - risk_obs,
       abs_risk_error = abs(risk_error),
       sq_risk_error = risk_error^2,
       
-      # Use simulated held-out attrition counts for count-scale posterior
-      # predictive performance summaries, matching development-data checks.
-      count_error = count_new - r_obs,
+      # Count-scale expected prediction error
+      count_error = count_pred - r_obs,
       abs_count_error = abs(count_error),
       sq_count_error = count_error^2
     ) %>%
@@ -521,7 +534,7 @@ make_fold_draw_summary <- function(draws, prediction = c("marginal", "typical"))
       mpe_count = mean(count_error),
       mae_count = mean(abs_count_error),
       rmse_count = sqrt(mean(sq_count_error)),
-      cor_count = safe_cor(r_obs, count_new)
+      cor_count = safe_cor(r_obs, count_pred)
     ) %>%
     select(-draw) %>%
     pivot_longer(
@@ -757,7 +770,7 @@ ggsave(
   units = "in"
 )
 
-# Supplementary numerical validation summaries ---------------------------------
+# Count concordance and calibration summaries ----------------------------------
 
 z_cv_draws <- "outputs/design/internal_validation/out/cv_prediction_draws.rds"
 z_out_dir <- "outputs/design/internal_validation/out"
@@ -778,21 +791,13 @@ if (!exists("cv_draws")) {
 }
 # Helper functions -------------------------------------------------------------
 
-q025 <- function(x) {
-  quantile(x, 0.025, na.rm = TRUE, names = FALSE)
-}
-
-q975 <- function(x) {
-  quantile(x, 0.975, na.rm = TRUE, names = FALSE)
-}
-
 summ_vec <- function(x) {
   
   x <- x[is.finite(x)]
   
   if (length(x) == 0) {
     return(
-      data.frame(
+      tibble(
         mean = NA_real_,
         median = NA_real_,
         sd = NA_real_,
@@ -810,114 +815,6 @@ summ_vec <- function(x) {
     q025 = q025(x),
     q975 = q975(x),
     n_posterior_draws_used = length(x)
-  )
-}
-
-# Grouped-data C-statistic.
-# This is an arm-level, participant-weighted risk-ranking metric:
-# it estimates the probability that an observed attrition event is assigned
-# a higher predicted trial-arm risk than an observed non-event.
-grouped_c_stat <- function(pred, events, non_events) {
-  
-  keep <- is.finite(pred) &
-    is.finite(events) &
-    is.finite(non_events) &
-    events >= 0 &
-    non_events >= 0
-  
-  pred <- pred[keep]
-  events <- events[keep]
-  non_events <- non_events[keep]
-  
-  n_events <- sum(events)
-  n_non_events <- sum(non_events)
-  
-  if (n_events <= 0 || n_non_events <= 0) {
-    return(NA_real_)
-  }
-  
-  ord <- order(pred)
-  pred <- pred[ord]
-  events <- events[ord]
-  non_events <- non_events[ord]
-  
-  ties <- rle(pred)
-  tie_end <- cumsum(ties$lengths)
-  tie_start <- tie_end - ties$lengths + 1L
-  
-  numerator <- 0
-  non_events_below <- 0
-  
-  for (g in seq_along(tie_start)) {
-    idx <- tie_start[g]:tie_end[g]
-    events_tie <- sum(events[idx])
-    non_events_tie <- sum(non_events[idx])
-    
-    numerator <- numerator +
-      events_tie * (non_events_below + 0.5 * non_events_tie)
-    
-    non_events_below <- non_events_below + non_events_tie
-  }
-  
-  numerator / (n_events * n_non_events)
-}
-
-make_grouped_roc <- function(pred, events, non_events) {
-  
-  keep <- is.finite(pred) &
-    is.finite(events) &
-    is.finite(non_events) &
-    events >= 0 &
-    non_events >= 0
-  
-  dat <- data.frame(
-    pred = pred[keep],
-    events = events[keep],
-    non_events = non_events[keep]
-  )
-  
-  dat <- dat[order(dat$pred, decreasing = TRUE), ]
-  
-  tie <- split(seq_len(nrow(dat)), dat$pred)
-  
-  roc <- do.call(
-    rbind,
-    lapply(
-      tie,
-      function(idx) {
-        data.frame(
-          pred = dat$pred[idx[1]],
-          events = sum(dat$events[idx]),
-          non_events = sum(dat$non_events[idx])
-        )
-      }
-    )
-  )
-  
-  roc <- roc[order(roc$pred, decreasing = TRUE), ]
-  
-  n_events <- sum(roc$events)
-  n_non_events <- sum(roc$non_events)
-  
-  roc$sensitivity <- cumsum(roc$events) / n_events
-  roc$one_minus_specificity <- cumsum(roc$non_events) / n_non_events
-  
-  rbind(
-    data.frame(
-      pred = Inf,
-      events = 0,
-      non_events = 0,
-      sensitivity = 0,
-      one_minus_specificity = 0
-    ),
-    roc,
-    data.frame(
-      pred = -Inf,
-      events = 0,
-      non_events = 0,
-      sensitivity = 1,
-      one_minus_specificity = 1
-    )
   )
 }
 
@@ -983,91 +880,169 @@ reshape_prediction_draws <- function(dat) {
   n_draw <- length(draw_ids)
   
   if (nrow(dat) %% n_draw != 0) {
-    stop("Prediction draw object cannot be reshaped into draw x arm format.")
+    stop("Prediction draw object cannot be reshaped into draw x trial format.")
   }
   
-  n_arm <- nrow(dat) / n_draw
+  n_trial <- nrow(dat) / n_draw
   
-  draw_mat <- matrix(dat$draw, nrow = n_draw, ncol = n_arm)
+  draw_mat <- matrix(dat$draw, nrow = n_draw, ncol = n_trial)
   
   if (!all(draw_mat == draw_ids)) {
-    stop("Draw identifiers are not aligned within trial arms.")
+    stop("Draw identifiers are not aligned within trials.")
   }
   
   list(
     draw_ids = draw_ids,
-    risk = matrix(dat$risk_pred, nrow = n_draw, ncol = n_arm),
-    fold = matrix(dat$fold, nrow = n_draw, ncol = n_arm)[1, ],
-    row = matrix(dat$row, nrow = n_draw, ncol = n_arm)[1, ],
-    N = matrix(dat$N, nrow = n_draw, ncol = n_arm)[1, ],
-    r_obs = matrix(dat$r_obs, nrow = n_draw, ncol = n_arm)[1, ]
+    risk = matrix(dat$risk_pred, nrow = n_draw, ncol = n_trial),
+    count = matrix(dat$count_pred, nrow = n_draw, ncol = n_trial),
+    fold = matrix(dat$fold, nrow = n_draw, ncol = n_trial)[1, ],
+    row = matrix(dat$row, nrow = n_draw, ncol = n_trial)[1, ],
+    N = matrix(dat$N, nrow = n_draw, ncol = n_trial)[1, ],
+    r_obs = matrix(dat$r_obs, nrow = n_draw, ncol = n_trial)[1, ]
   )
 }
 
-make_auc_draws <- function(pred_obj, idx = seq_along(pred_obj$row)) {
-  
-  non_events <- pred_obj$N[idx] - pred_obj$r_obs[idx]
-  
-  vapply(
-    seq_len(nrow(pred_obj$risk)),
-    function(s) {
-      grouped_c_stat(
-        pred = pred_obj$risk[s, idx],
-        events = pred_obj$r_obs[idx],
-        non_events = non_events
-      )
-    },
-    numeric(1)
+# Trial-level count concordance statistic
+# This estimates the probability that, for two trials with different observed
+# attrition counts, the trial with more attrition has the higher expected count
+count_c_stat <- function(pred, observed) {
+
+  keep <- is.finite(pred) & is.finite(observed)
+  pred <- pred[keep]
+  observed <- observed[keep]
+
+  observed_values <- sort(unique(observed))
+  pred_below <- numeric()
+  numerator <- 0
+  denominator <- 0
+
+  for (value in observed_values) {
+    pred_value <- pred[observed == value]
+
+    if (length(pred_below) > 0) {
+      pred_diff <- outer(pred_value, pred_below, "-")
+
+      numerator <- numerator +
+        sum(pred_diff > 0) +
+        0.5 * sum(pred_diff == 0)
+
+      denominator <- denominator + length(pred_diff)
+    }
+
+    pred_below <- c(pred_below, pred_value)
+  }
+
+  if (denominator == 0) {
+    return(NA_real_)
+  }
+
+  numerator / denominator
+}
+
+# Trial-level bootstrap for uncertainty around count concordance
+bootstrap_count_c <- function(
+    pred,
+    observed,
+    n_boot = 2000L,
+    seed = 123L
+) {
+
+  set.seed(seed)
+  n_trials <- length(pred)
+
+  map_dbl(seq_len(n_boot), function(b) {
+    idx <- sample.int(n_trials, size = n_trials, replace = TRUE)
+
+    count_c_stat(
+      pred = pred[idx],
+      observed = observed[idx]
+    )
+  })
+}
+
+summarise_c_bootstrap <- function(x) {
+
+  x <- x[is.finite(x)]
+
+  tibble(
+    bootstrap_mean = mean(x),
+    bootstrap_median = median(x),
+    bootstrap_sd = sd(x),
+    bootstrap_q025 = q025(x),
+    bootstrap_q975 = q975(x),
+    n_bootstrap_samples = length(x)
   )
 }
 
-make_auc_summary <- function(prediction, pred_obj) {
-  
-  non_events <- pred_obj$N - pred_obj$r_obs
-  
-  auc_draws <- make_auc_draws(pred_obj)
-  
-  cbind(
-    data.frame(
+# Estimate concordance in recovering trial-level attrition counts
+make_count_c_summary <- function(
+    prediction,
+    pred,
+    observed,
+    n_boot = 2000L,
+    seed = 123L
+) {
+
+  count_c_boot <- bootstrap_count_c(
+    pred = pred,
+    observed = observed,
+    n_boot = n_boot,
+    seed = seed
+  )
+
+  bind_cols(
+    tibble(
       prediction = prediction,
-      metric = "grouped_c_statistic_auc"
+      metric = "trial_count_concordance",
+      estimate = count_c_stat(
+        pred = pred,
+        observed = observed
+      )
     ),
-    summ_vec(auc_draws),
-    data.frame(
-      n_held_out_arms = length(unique(pred_obj$row)),
-      n_observed_attrition_events = sum(pred_obj$r_obs),
-      n_observed_non_events = sum(non_events)
+    summarise_c_bootstrap(count_c_boot),
+    tibble(
+      n_held_out_trials = length(observed),
+      n_distinct_observed_counts = length(unique(observed))
     )
   )
 }
 
-make_auc_fold_summary <- function(prediction, pred_obj) {
-  
-  out <- lapply(
-    sort(unique(pred_obj$fold)),
-    function(fold) {
-      
-      idx <- which(pred_obj$fold == fold)
-      non_events <- pred_obj$N[idx] - pred_obj$r_obs[idx]
-      auc_draws <- make_auc_draws(pred_obj, idx = idx)
-      
-      cbind(
-        data.frame(
-          prediction = prediction,
-          fold = fold,
-          metric = "grouped_c_statistic_auc"
-        ),
-        summ_vec(auc_draws),
-        data.frame(
-          n_held_out_arms = length(unique(pred_obj$row[idx])),
-          n_observed_attrition_events = sum(pred_obj$r_obs[idx]),
-          n_observed_non_events = sum(non_events)
+make_count_c_fold_summary <- function(
+    prediction,
+    pred,
+    observed,
+    fold,
+    n_boot = 2000L,
+    seed = 123L
+) {
+
+  map_dfr(sort(unique(fold)), function(k) {
+
+    idx <- which(fold == k)
+    count_c_boot <- bootstrap_count_c(
+      pred = pred[idx],
+      observed = observed[idx],
+      n_boot = n_boot,
+      seed = seed + k
+    )
+
+    bind_cols(
+      tibble(
+        prediction = prediction,
+        fold = k,
+        metric = "trial_count_concordance",
+        estimate = count_c_stat(
+          pred = pred[idx],
+          observed = observed[idx]
         )
+      ),
+      summarise_c_bootstrap(count_c_boot),
+      tibble(
+        n_held_out_trials = length(idx),
+        n_distinct_observed_counts = length(unique(observed[idx]))
       )
-    }
-  )
-  
-  do.call(rbind, out)
+    )
+  })
 }
 
 make_calibration_summary <- function(prediction, pred_obj) {
@@ -1113,149 +1088,127 @@ make_calibration_summary <- function(prediction, pred_obj) {
 
 # Generate supplementary summaries --------------------------------------------
 
-# The existing CV performance summaries pair the same posterior draw index
-# across folds; the same convention is used here for draw-level summaries.
+# Posterior draws are retained for calibration summaries. Count concordance is
+# calculated from posterior mean predictions, integrating over unknown trial
+# effects for the marginal predictions.
 prediction_types <- unique(cv_draws$prediction)
+n_count_c_boot <- 2000L
 
-cv_by_prediction <- lapply(
+cv_by_prediction <- map(
   prediction_types,
   function(prediction) {
     reshape_prediction_draws(cv_draws[cv_draws$prediction == prediction, ])
   }
-)
-names(cv_by_prediction) <- prediction_types
+) %>%
+  set_names(prediction_types)
 
-auc_summary <- do.call(
-  rbind,
-  Map(make_auc_summary, names(cv_by_prediction), cv_by_prediction)
-)
+# Confirm predictions are aligned before comparing marginal and typical results
+prediction_ref <- cv_by_prediction[[1]]
 
-auc_fold_summary <- do.call(
-  rbind,
-  Map(make_auc_fold_summary, names(cv_by_prediction), cv_by_prediction)
-)
-
-calibration_summary <- do.call(
-  rbind,
-  Map(make_calibration_summary, names(cv_by_prediction), cv_by_prediction)
+prediction_aligned <- map_lgl(
+  cv_by_prediction,
+  function(x) {
+    identical(x$row, prediction_ref$row) &&
+      identical(x$fold, prediction_ref$fold) &&
+      identical(x$N, prediction_ref$N) &&
+      identical(x$r_obs, prediction_ref$r_obs)
+  }
 )
 
-auc_summary <- auc_summary[order(auc_summary$prediction, auc_summary$metric), ]
-auc_fold_summary <- auc_fold_summary[
-  order(auc_fold_summary$prediction, auc_fold_summary$fold),
+if (!all(prediction_aligned)) {
+  stop("Marginal and typical held-out predictions are not aligned.")
+}
+
+# Posterior mean expected attrition count for each held-out trial
+count_predictions <- map(
+  cv_by_prediction,
+  function(x) colMeans(x$count, na.rm = TRUE)
+)
+
+# Fold-specific reference prediction using trial size and the aggregate
+# attrition risk from the corresponding training set
+count_predictions$size_only <- vapply(
+  seq_along(prediction_ref$row),
+  function(i) {
+    train_idx <- prediction_ref$fold != prediction_ref$fold[i]
+    train_risk <- sum(prediction_ref$r_obs[train_idx]) /
+      sum(prediction_ref$N[train_idx])
+
+    prediction_ref$N[i] * train_risk
+  },
+  numeric(1)
+)
+
+count_c_summary <- imap_dfr(
+  count_predictions,
+  ~ make_count_c_summary(
+    prediction = .y,
+    pred = .x,
+    observed = prediction_ref$r_obs,
+    n_boot = n_count_c_boot,
+    seed = 2000L + which(names(count_predictions) == .y)
+  )
+)
+
+count_c_fold_summary <- imap_dfr(
+  count_predictions,
+  ~ make_count_c_fold_summary(
+    prediction = .y,
+    pred = .x,
+    observed = prediction_ref$r_obs,
+    fold = prediction_ref$fold,
+    n_boot = n_count_c_boot,
+    seed = 3000L + 100L * which(names(count_predictions) == .y)
+  )
+)
+
+calibration_summary <- map2_dfr(
+  names(cv_by_prediction),
+  cv_by_prediction,
+  make_calibration_summary
+)
+
+count_c_summary <- count_c_summary[
+  order(match(count_c_summary$prediction, names(count_predictions))),
+]
+count_c_fold_summary <- count_c_fold_summary[
+  order(
+    match(count_c_fold_summary$prediction, names(count_predictions)),
+    count_c_fold_summary$fold
+  ),
 ]
 calibration_summary <- calibration_summary[
   order(calibration_summary$prediction, calibration_summary$metric),
 ]
 
-auc_curves <- do.call(
-  rbind,
-  lapply(
-    names(cv_by_prediction),
-    function(prediction) {
-      pred_obj <- cv_by_prediction[[prediction]]
-      non_events <- pred_obj$N - pred_obj$r_obs
-      
-      out <- make_grouped_roc(
-        pred = colMeans(pred_obj$risk, na.rm = TRUE),
-        events = pred_obj$r_obs,
-        non_events = non_events
-      )
-      
-      out$prediction <- prediction
-      out
-    }
-  )
-)
-
-auc_curves <- auc_curves[
-  c("prediction", "pred", "events", "non_events", "sensitivity", "one_minus_specificity")
-]
-
 # Save outputs -----------------------------------------------------------------
 
-write.csv(
-  auc_summary,
-  file.path(z_out_dir, "design_stage_cv_auc.csv"),
-  row.names = FALSE,
-  quote = FALSE,
+# Count concordance summaries
+write_csv(
+  count_c_summary,
+  file.path(z_out_dir, "design_stage_cv_count_concordance.csv"),
   na = ""
 )
 
 saveRDS(
-  auc_summary,
-  file.path(z_out_dir, "design_stage_cv_auc.rds")
+  count_c_summary,
+  file.path(z_out_dir, "design_stage_cv_count_concordance.rds")
 )
 
-write.csv(
-  auc_fold_summary,
-  file.path(z_out_dir, "design_stage_cv_auc_by_fold.csv"),
-  row.names = FALSE,
-  quote = FALSE,
+write_csv(
+  count_c_fold_summary,
+  file.path(z_out_dir, "design_stage_cv_count_concordance_by_fold.csv"),
   na = ""
 )
 
 saveRDS(
-  auc_fold_summary,
-  file.path(z_out_dir, "design_stage_cv_auc_by_fold.rds")
+  count_c_fold_summary,
+  file.path(z_out_dir, "design_stage_cv_count_concordance_by_fold.rds")
 )
 
-write.csv(
-  auc_curves,
-  file.path(z_out_dir, "design_stage_cv_auc_curve.csv"),
-  row.names = FALSE,
-  quote = FALSE,
-  na = ""
-)
-
-png(
-  file.path(z_out_dir, "design_stage_cv_auc_plot.png"),
-  width = 5,
-  height = 5,
-  units = "in",
-  res = 300
-)
-plot(
-  c(0, 1),
-  c(0, 1),
-  type = "n",
-  xlab = "1 - specificity",
-  ylab = "Sensitivity",
-  asp = 1
-)
-abline(0, 1, lty = 2, col = "grey50")
-
-plot_cols <- c(marginal = "skyblue", typical = "black")
-
-for (prediction in names(cv_by_prediction)) {
-  dat <- auc_curves[auc_curves$prediction == prediction, ]
-  lines(
-    dat$one_minus_specificity,
-    dat$sensitivity,
-    type = "s",
-    lwd = 2,
-    col = plot_cols[[prediction]]
-  )
-}
-
-legend(
-  "bottomright",
-  legend = paste0(
-    auc_summary$prediction,
-    " C = ",
-    round(auc_summary$mean, 3)
-  ),
-  col = plot_cols[auc_summary$prediction],
-  lwd = 2,
-  bty = "n"
-)
-dev.off()
-
-write.csv(
+write_csv(
   calibration_summary,
   file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.csv"),
-  row.names = FALSE,
-  quote = FALSE,
   na = ""
 )
 
@@ -1270,19 +1223,36 @@ log_lines <- c(
   "Design-stage cross-validation supplementary validation outputs",
   "",
   paste0("Input posterior draw file: ", z_cv_draws),
-  paste0("Posterior-draw predictions used: yes"),
+  paste0(
+    "Primary count prediction: marginal posterior mean expected count ",
+    "integrated over parameter uncertainty and unknown trial effects"
+  ),
+  paste0(
+    "Count sensitivity prediction: typical posterior mean expected count ",
+    "with unknown trial effects set to their central values"
+  ),
+  paste0(
+    "Count ranking metric: trial-level count concordance with ",
+    "a fold-specific size-only reference"
+  ),
+  paste0(
+    "Count concordance uncertainty: trial-level bootstrap with ",
+    n_count_c_boot,
+    " samples"
+  ),
+  paste0("Posterior-draw predictions used for calibration: yes"),
   paste0("Prediction summaries included: ", paste(prediction_types, collapse = ", ")),
   paste0(
-    "Held-out arms: ",
+    "Held-out trials: ",
     length(unique(cv_by_prediction[[1]]$row))
   ),
   paste0(
-    "Observed attrition events: ",
+    "Observed attrition count: ",
     sum(cv_by_prediction[[1]]$r_obs)
   ),
   paste0(
-    "Observed non-events: ",
-    sum(cv_by_prediction[[1]]$N - cv_by_prediction[[1]]$r_obs)
+    "Total randomised: ",
+    sum(cv_by_prediction[[1]]$N)
   ),
   paste0(
     "Calibration model failed fits: ",
@@ -1290,19 +1260,17 @@ log_lines <- c(
   ),
   "",
   "Outputs produced:",
-  file.path(z_out_dir, "design_stage_cv_auc.csv"),
-  file.path(z_out_dir, "design_stage_cv_auc.rds"),
-  file.path(z_out_dir, "design_stage_cv_auc_by_fold.csv"),
-  file.path(z_out_dir, "design_stage_cv_auc_by_fold.rds"),
-  file.path(z_out_dir, "design_stage_cv_auc_curve.csv"),
-  file.path(z_out_dir, "design_stage_cv_auc_plot.png"),
+  file.path(z_out_dir, "design_stage_cv_count_concordance.csv"),
+  file.path(z_out_dir, "design_stage_cv_count_concordance.rds"),
+  file.path(z_out_dir, "design_stage_cv_count_concordance_by_fold.csv"),
+  file.path(z_out_dir, "design_stage_cv_count_concordance_by_fold.rds"),
   file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.csv"),
   file.path(z_out_dir, "design_stage_cv_calibration_intercept_slope.rds"),
   "",
   paste(
-    "Interpretation note: the grouped C-statistic is an arm-level,",
-    "participant-weighted risk-ranking metric and should not be described",
-    "as individual-level discrimination."
+    "Interpretation note: count concordance is the probability that the",
+    "trial with the higher observed attrition count also has the higher",
+    "posterior mean expected count, excluding pairs tied on observed count."
   )
 )
 

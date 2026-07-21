@@ -3,7 +3,7 @@
 # Trace plots not generated because Rhat = 1 achieved for all parameters
 # Assessing:
 # - Recovery of attrition counts
-# - Predictive performance
+# - Apparent count performance
 # - Covariate effect estimates (not PPC but here for initial check)
 
 rm(list = ls())
@@ -26,6 +26,9 @@ ppc_out <- extract(
   imp_mdl, 
   pars = c("r_new", "p", "log_lik", "beta")
 )
+
+# Posterior expected attrition counts
+count_pred_draws <- sweep(ppc_out$p, 2, imp_dat$N, "*")
 
 # Helper for row-level posterior summaries
 # For r_new these are posterior predictive summaries
@@ -59,9 +62,10 @@ ppc_tbl <- tibble(
   r_obs = imp_dat$r,
   N = imp_dat$N,
   obs_risk = r_obs / N
-) %>% 
+) %>%
   bind_cols(
     posterior_col_summary(ppc_out$r_new, "r_pred"),
+    posterior_col_summary(count_pred_draws, "count_pred"),
     posterior_col_summary(ppc_out$p, "p")
   )
 
@@ -92,106 +96,117 @@ safe_cor <- function(x, y) {
   cor(x[ok], y[ok])
 }
 
-# Grouped-data C-statistic.
-# This is an arm-level, participant-weighted risk-ranking metric:
-# it estimates the probability that an observed attrition event is assigned
-# a higher predicted trial-arm risk than an observed non-event.
-grouped_c_stat <- function(pred, events, non_events) {
+# Trial-level count concordance statistic
+# This estimates the probability that, for two trials with different observed
+# attrition counts, the trial with more attrition has the higher expected count
+count_c_stat <- function(pred, observed) {
   
-  keep <- is.finite(pred) &
-    is.finite(events) &
-    is.finite(non_events) &
-    events >= 0 &
-    non_events >= 0
+  keep <- is.finite(pred) & is.finite(observed)
   
   pred <- pred[keep]
-  events <- events[keep]
-  non_events <- non_events[keep]
+  observed <- observed[keep]
   
-  n_events <- sum(events)
-  n_non_events <- sum(non_events)
+  observed_values <- sort(unique(observed))
+  pred_below <- numeric()
+  numerator <- 0
+  denominator <- 0
   
-  if (n_events <= 0 || n_non_events <= 0) {
+  for (value in observed_values) {
+    pred_value <- pred[observed == value]
+
+    if (length(pred_below) > 0) {
+      pred_diff <- outer(pred_value, pred_below, "-")
+
+      numerator <- numerator +
+        sum(pred_diff > 0) +
+        0.5 * sum(pred_diff == 0)
+
+      denominator <- denominator + length(pred_diff)
+    }
+
+    pred_below <- c(pred_below, pred_value)
+  }
+  
+  if (denominator == 0) {
     return(NA_real_)
   }
   
-  ord <- order(pred)
-  pred <- pred[ord]
-  events <- events[ord]
-  non_events <- non_events[ord]
-  
-  ties <- rle(pred)
-  tie_end <- cumsum(ties$lengths)
-  tie_start <- tie_end - ties$lengths + 1L
-  
-  numerator <- 0
-  non_events_below <- 0
-  
-  for (g in seq_along(tie_start)) {
-    idx <- tie_start[g]:tie_end[g]
-    events_tie <- sum(events[idx])
-    non_events_tie <- sum(non_events[idx])
-    
-    numerator <- numerator +
-      events_tie * (non_events_below + 0.5 * non_events_tie)
-    
-    non_events_below <- non_events_below + non_events_tie
-  }
-  
-  numerator / (n_events * n_non_events)
+  numerator / denominator
 }
 
-make_grouped_roc <- function(pred, events, non_events) {
+# Trial-level bootstrap for uncertainty around count concordance
+bootstrap_count_c <- function(
+    pred,
+    observed,
+    n_boot = 2000L,
+    seed = 123L
+) {
   
-  tibble(
-    pred = pred,
-    events = events,
-    non_events = non_events
-  ) %>%
-    filter(
-      is.finite(pred),
-      is.finite(events),
-      is.finite(non_events)
-    ) %>%
-    arrange(desc(pred)) %>%
-    group_by(pred) %>%
-    reframe(
-      events = sum(events),
-      non_events = sum(non_events)
-    ) %>%
-    mutate(
-      sensitivity = cumsum(events) / sum(events),
-      one_minus_specificity = cumsum(non_events) / sum(non_events)
-    ) %>%
-    bind_rows(
-      tibble(
-        pred = Inf,
-        events = 0,
-        non_events = 0,
-        sensitivity = 0,
-        one_minus_specificity = 0
-      ),
-      .,
-      tibble(
-        pred = -Inf,
-        events = 0,
-        non_events = 0,
-        sensitivity = 1,
-        one_minus_specificity = 1
-      )
+  set.seed(seed)
+  n_trials <- length(pred)
+  
+  map_dbl(seq_len(n_boot), function(b) {
+    idx <- sample.int(n_trials, size = n_trials, replace = TRUE)
+    
+    count_c_stat(
+      pred = pred[idx],
+      observed = observed[idx]
     )
+  })
 }
 
-# Draw-level posterior predictive performance
-# Rows = posterior draws
-# Columns = trial arms
-r_pred_draws <- ppc_out$r_new
+make_count_c_summary <- function(
+    prediction,
+    pred,
+    observed,
+    n_boot = 2000L,
+    seed = 123L
+) {
+  
+  count_c_boot <- bootstrap_count_c(
+    pred = pred,
+    observed = observed,
+    n_boot = n_boot,
+    seed = seed
+  )
 
-performance_draws <- map_dfr(seq_len(nrow(r_pred_draws)), function(s) {
+  tibble(
+    prediction = prediction,
+    metric = "trial_count_concordance",
+    estimate = count_c_stat(
+      pred = pred,
+      observed = observed
+    ),
+    bootstrap_mean = mean(count_c_boot, na.rm = TRUE),
+    bootstrap_median = median(count_c_boot, na.rm = TRUE),
+    bootstrap_sd = sd(count_c_boot, na.rm = TRUE),
+    bootstrap_q025 = quantile(
+      count_c_boot,
+      0.025,
+      na.rm = TRUE,
+      names = FALSE
+    ),
+    bootstrap_q975 = quantile(
+      count_c_boot,
+      0.975,
+      na.rm = TRUE,
+      names = FALSE
+    ),
+    n_bootstrap_samples = sum(is.finite(count_c_boot)),
+    n_trials = length(observed),
+    n_distinct_observed_counts = n_distinct(observed)
+  )
+}
+
+# Draw-level posterior expected count performance
+# Rows = posterior draws
+# Columns = trials
+
+performance_draws <- map_dfr(seq_len(nrow(count_pred_draws)), function(s) {
   
-  r_pred_s <- r_pred_draws[s, ]
+  count_pred_s <- count_pred_draws[s, ]
   
-  error <- r_pred_s - imp_dat$r
+  error <- count_pred_s - imp_dat$r
   abs_error <- abs(error)
   sq_error <- error^2
   rel_error <- error / pmax(imp_dat$r, 1)
@@ -204,76 +219,40 @@ performance_draws <- map_dfr(seq_len(nrow(r_pred_draws)), function(s) {
     rel_error = mean(rel_error),
     mae = mean(abs_error),
     rmse = sqrt(mean(sq_error)),
-    cor_obs_pred = safe_cor(imp_dat$r, r_pred_s)
+    cor_obs_pred = safe_cor(imp_dat$r, count_pred_s)
   )
 })
 
-# Arm-level discrimination from latent attrition probabilities -----------------
+# Trial-level count concordance ------------------------------------------------
 
-auc_draws <- map_dbl(seq_len(nrow(ppc_out$p)), function(s) {
-  
-  grouped_c_stat(
-    pred = ppc_out$p[s, ],
-    events = imp_dat$r,
-    non_events = imp_dat$N - imp_dat$r
-  )
-  
-})
+# Fitted prediction includes trial effects informed by the observed count
+# This is an apparent development-data check rather than new-trial performance
+count_predictions <- list(
+  fitted_apparent = colMeans(count_pred_draws, na.rm = TRUE),
+  size_only = imp_dat$N * sum(imp_dat$r) / sum(imp_dat$N)
+)
 
-auc_summary <- posterior_scalar_summary(auc_draws) %>%
-  mutate(
-    metric = "grouped_c_statistic_auc",
-    n_posterior_draws_used = sum(is.finite(auc_draws)),
-    n_arms = imp_dat$I,
-    n_observed_attrition_events = sum(imp_dat$r),
-    n_observed_non_events = sum(imp_dat$N - imp_dat$r),
-    .before = 1
+n_count_c_boot <- 2000L
+
+count_c_summary <- imap_dfr(
+  count_predictions,
+  ~ make_count_c_summary(
+    prediction = .y,
+    pred = .x,
+    observed = imp_dat$r,
+    n_boot = n_count_c_boot,
+    seed = 123L + which(names(count_predictions) == .y)
   )
+)
 
 write_csv(
-  auc_summary,
-  "outputs/design/posterior_auc.csv"
+  count_c_summary,
+  "outputs/design/posterior_count_concordance.csv"
 )
 
 saveRDS(
-  auc_summary,
-  "outputs/design/posterior_auc.rds"
-)
-
-auc_curve <- make_grouped_roc(
-  pred = ppc_tbl$p_mean,
-  events = imp_dat$r,
-  non_events = imp_dat$N - imp_dat$r
-)
-
-write_csv(
-  auc_curve,
-  "outputs/design/posterior_auc_curve.csv"
-)
-
-auc_plot <- auc_curve %>%
-  ggplot(aes(x = one_minus_specificity, y = sensitivity)) +
-  geom_abline(linetype = "dashed") +
-  geom_step(linewidth = 0.7, colour = "skyblue") +
-  coord_equal() +
-  theme_classic() +
-  annotate(
-    "text",
-    x = 0.65,
-    y = 0.15,
-    label = paste0("C-statistic = ", round(auc_summary$mean, 3))
-  ) +
-  labs(
-    x = "1 - specificity",
-    y = "Sensitivity"
-  )
-
-ggsave(
-  "outputs/design/posterior_auc_plot.png",
-  auc_plot,
-  width = 5,
-  height = 5,
-  units = "in"
+  count_c_summary,
+  "outputs/design/posterior_count_concordance.rds"
 )
 
 # Point estimate coverage from posterior predictive intervals
@@ -285,6 +264,7 @@ coverage_point <- ppc_tbl %>%
   pull(covered_95)
 
 # Summarise posterior distribution of performance metrics
+# Concordance uncertainty is from the trial-level bootstrap
 ppc_performance <- performance_draws %>%
   select(-draw) %>%
   pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
@@ -301,8 +281,16 @@ ppc_performance <- performance_draws %>%
     )
   ) %>%
   bind_rows(
-    auc_summary %>%
-      select(metric, mean, median, sd, q025, q975)
+    count_c_summary %>%
+      filter(prediction == "fitted_apparent") %>%
+      transmute(
+        metric = "trial_count_concordance_apparent",
+        mean = estimate,
+        median = bootstrap_median,
+        sd = bootstrap_sd,
+        q025 = bootstrap_q025,
+        q975 = bootstrap_q975
+      )
   ) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3)))
 
@@ -316,7 +304,7 @@ ppc_plot <- ppc_tbl %>%
   ggplot(aes(x = row, y = r_obs)) +
   geom_point(size = 0.5) +
   geom_point(
-    aes(x = row, y = r_pred_mean), 
+    aes(x = row, y = count_pred_mean),
     colour = "skyblue",
     size = 0.5,
     alpha = 0.7
@@ -328,7 +316,7 @@ ppc_plot <- ppc_tbl %>%
   ) +
   theme_classic() +
   labs(
-    x = "Trial arm", 
+    x = "Trial",
     y = "Attrition count",
     # title = "Observed versus posterior predicted attrition counts"
   )
