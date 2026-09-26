@@ -2,14 +2,3 @@
 .Rhistory
 .RData
 .Ruserdata
-.positai
-r_libs/
-zold_version/
-outputs/
-protocol/
-
-# Large/generated outputs
-zold_version/outputs_old/
-**/design_draws.rds
-*.7z
-Thumbs.db

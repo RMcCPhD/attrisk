@@ -1,0 +1,2 @@
+available_sample,csrsquared,rate,timepoint,meanfup,shrinkage,max_parameters,required_sample_at_max,expected_events_at_max,epp_at_max,expected_events_in_available_sample,expected_epp_in_available_sample,first_infeasible_parameters,required_sample_first_infeasible,observed_events
+19023,0.1,0.107,1,1,0.9,224,19019,2035.033,9.08,2035.461,9.086879464285714,225,19103,4022

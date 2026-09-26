@@ -1,0 +1,1014 @@
+nct_id,reference,term,res,p
+NCT00286429,Placebo,Age (in decades),"-0.313 [-0.697, 0.071 ]",0.111
+NCT00286429,Placebo,Male,"-0.335 [-0.921, 0.251 ]",0.263
+NCT00286429,Placebo,Asian,"-0.639 [-1.58, 0.302 ]",0.184
+NCT00286429,Placebo,Black/African American,"0.545 [-0.278, 1.368 ]",0.194
+NCT00286429,Placebo,Other race/ethnicity,"0.222 [-0.664, 1.108 ]",0.623
+NCT00286429,Placebo,BMI (kg/m2),"-0.026 [-0.322, 0.27 ]",0.865
+NCT00286429,Placebo,T2DM duration (years),"0.272 [0.051, 0.493 ]",0.016
+NCT00286429,Placebo,Current smoker,"-0.376 [-1.133, 0.381 ]",0.331
+NCT00286429,Placebo,HbA1c (%/DCCT units),"0.468 [0.288, 0.648 ]",<0.01
+NCT00286429,Placebo,eGFR (ml/min/1.73m2),"-0.06 [-0.454, 0.334 ]",0.765
+NCT00286429,Placebo,Systolic blood pressure (mmHg),"0.145 [-0.137, 0.427 ]",0.313
+NCT00286429,Placebo,HDL cholesterol (mmol/L),"-0.309 [-0.638, 0.02 ]",0.067
+NCT00286429,Placebo,Total cholesterol (mmol/L),"0.122 [-0.105, 0.349 ]",0.291
+NCT00286429,Placebo,Comorbidities,"0.096 [-0.184, 0.376 ]",0.501
+NCT00286429,Placebo,Concomitant medications,"0.017 [-0.101, 0.135 ]",0.779
+NCT00286442,Placebo,Age (in decades),"0.31 [-0.219, 0.839 ]",0.252
+NCT00286442,Placebo,Male,"-1.292 [-2.284, -0.3 ]",0.011
+NCT00286442,Placebo,Other race/ethnicity,"-1.024 [-2.09, 0.042 ]",0.06
+NCT00286442,Placebo,BMI (kg/m2),"0.097 [-0.322, 0.516 ]",0.65
+NCT00286442,Placebo,T2DM duration (years),"0.485 [-0.007, 0.977 ]",0.053
+NCT00286442,Placebo,Current smoker,"-0.369 [-1.578, 0.84 ]",0.549
+NCT00286442,Placebo,HbA1c (%/DCCT units),"1.639 [1.069, 2.209 ]",<0.01
+NCT00286442,Placebo,eGFR (ml/min/1.73m2),"0.179 [-0.356, 0.714 ]",0.512
+NCT00286442,Placebo,Systolic blood pressure (mmHg),"0.117 [-0.304, 0.538 ]",0.585
+NCT00286442,Placebo,HDL cholesterol (mmol/L),"-1.214 [-1.871, -0.557 ]",<0.01
+NCT00286442,Placebo,Total cholesterol (mmol/L),"-0.327 [-0.762, 0.108 ]",0.141
+NCT00286442,Placebo,Comorbidities,"0.335 [-0.128, 0.798 ]",0.155
+NCT00286442,Placebo,Concomitant medications,"-0.197 [-0.377, -0.017 ]",0.032
+NCT00286455,Placebo,Age (in decades),"-0.981 [-1.781, -0.181 ]",0.016
+NCT00286455,Placebo,Male,"2.583 [0.686, 4.48 ]",<0.01
+NCT00286455,Placebo,Asian,"-0.513 [-2.771, 1.745 ]",0.656
+NCT00286455,Placebo,Black/African American,"-2.871 [-5.874, 0.132 ]",0.061
+NCT00286455,Placebo,Other race/ethnicity,"1.934 [0.182, 3.686 ]",0.03
+NCT00286455,Placebo,BMI (kg/m2),"0.871 [0.146, 1.596 ]",0.019
+NCT00286455,Placebo,T2DM duration (years),"-0.035 [-0.733, 0.663 ]",0.921
+NCT00286455,Placebo,Current smoker,"1.129 [-0.155, 2.413 ]",0.085
+NCT00286455,Placebo,HbA1c (%/DCCT units),"1.663 [0.75, 2.576 ]",<0.01
+NCT00286455,Placebo,eGFR (ml/min/1.73m2),"-0.417 [-1.569, 0.735 ]",0.478
+NCT00286455,Placebo,Systolic blood pressure (mmHg),"0.635 [-0.096, 1.366 ]",0.089
+NCT00286455,Placebo,HDL cholesterol (mmol/L),"0.405 [-0.561, 1.371 ]",0.412
+NCT00286455,Placebo,Total cholesterol (mmol/L),"-0.523 [-1.107, 0.061 ]",0.079
+NCT00286455,Placebo,Comorbidities,"0.537 [0.129, 0.945 ]",0.01
+NCT00286455,Placebo,Concomitant medications,"0.084 [-0.149, 0.317 ]",0.479
+NCT00286468,Placebo,Age (in decades),"0.019 [-0.508, 0.546 ]",0.943
+NCT00286468,Placebo,Male,"0.312 [-0.556, 1.18 ]",0.48
+NCT00286468,Placebo,Asian,"-0.325 [-1.436, 0.786 ]",0.567
+NCT00286468,Placebo,Other race/ethnicity,"-0.457 [-1.637, 0.723 ]",0.448
+NCT00286468,Placebo,BMI (kg/m2),"-0.088 [-0.502, 0.326 ]",0.676
+NCT00286468,Placebo,T2DM duration (years),"0.124 [-0.372, 0.62 ]",0.624
+NCT00286468,Placebo,Current smoker,"-0.146 [-1.2, 0.908 ]",0.786
+NCT00286468,Placebo,HbA1c (%/DCCT units),"0.965 [0.534, 1.396 ]",<0.01
+NCT00286468,Placebo,eGFR (ml/min/1.73m2),"-0.056 [-0.573, 0.461 ]",0.832
+NCT00286468,Placebo,Systolic blood pressure (mmHg),"-0.117 [-0.527, 0.293 ]",0.576
+NCT00286468,Placebo,HDL cholesterol (mmol/L),"-0.347 [-0.964, 0.27 ]",0.271
+NCT00286468,Placebo,Total cholesterol (mmol/L),"-0.565 [-1.139, 0.009 ]",0.054
+NCT00286468,Placebo,Comorbidities,"-0.141 [-0.513, 0.231 ]",0.458
+NCT00286468,Placebo,Concomitant medications,"0.249 [0.098, 0.4 ]",<0.01
+NCT00286494,Placebo,Age (in decades),"0.167 [-0.403, 0.737 ]",0.565
+NCT00286494,Placebo,Male,"0.371 [-0.83, 1.572 ]",0.545
+NCT00286494,Placebo,BMI (kg/m2),"-0.182 [-0.619, 0.255 ]",0.413
+NCT00286494,Placebo,T2DM duration (years),"-0.041 [-0.439, 0.357 ]",0.841
+NCT00286494,Placebo,Current smoker,"0.749 [-0.284, 1.782 ]",0.155
+NCT00286494,Placebo,HbA1c (%/DCCT units),"1.173 [0.652, 1.694 ]",<0.01
+NCT00286494,Placebo,eGFR (ml/min/1.73m2),"-0.089 [-0.763, 0.585 ]",0.796
+NCT00286494,Placebo,Systolic blood pressure (mmHg),"0.38 [-0.122, 0.882 ]",0.139
+NCT00286494,Placebo,HDL cholesterol (mmol/L),"-0.117 [-0.64, 0.406 ]",0.66
+NCT00286494,Placebo,Total cholesterol (mmol/L),"-0.207 [-0.754, 0.34 ]",0.458
+NCT00601250,Placebo,Age (in decades),"0.118 [-0.697, 0.933 ]",0.776
+NCT00601250,Placebo,Male,"-0.398 [-1.696, 0.9 ]",0.548
+NCT00601250,Placebo,Asian,"-0.984 [-2.883, 0.915 ]",0.31
+NCT00601250,Placebo,BMI (kg/m2),"-0.773 [-1.635, 0.089 ]",0.079
+NCT00601250,Placebo,T2DM duration (years),"0.617 [-0.506, 1.74 ]",0.282
+NCT00601250,Placebo,Current smoker,"-0.991 [-3.235, 1.253 ]",0.387
+NCT00601250,Placebo,HbA1c (%/DCCT units),"-0.408 [-1.125, 0.309 ]",0.266
+NCT00601250,Placebo,eGFR (ml/min/1.73m2),"-0.542 [-1.477, 0.393 ]",0.256
+NCT00601250,Placebo,Systolic blood pressure (mmHg),"-0.318 [-1.039, 0.403 ]",0.388
+NCT00601250,Placebo,HDL cholesterol (mmol/L),"-0.649 [-1.464, 0.166 ]",0.118
+NCT00601250,Placebo,Total cholesterol (mmol/L),"0.243 [-0.435, 0.921 ]",0.482
+NCT00601250,Placebo,Comorbidities,"0.197 [-0.383, 0.777 ]",0.505
+NCT00601250,Placebo,Concomitant medications,"-0.152 [-0.47, 0.166 ]",0.346
+NCT00602472,Placebo,Age (in decades),"-1.023 [-1.885, -0.161 ]",0.02
+NCT00602472,Placebo,Male,"-0.09 [-1.068, 0.888 ]",0.857
+NCT00602472,Placebo,Asian,"-2.548 [-3.926, -1.17 ]",<0.01
+NCT00602472,Placebo,Other race/ethnicity,"-0.009 [-2.234, 2.216 ]",0.994
+NCT00602472,Placebo,BMI (kg/m2),"-0.769 [-1.547, 0.009 ]",0.053
+NCT00602472,Placebo,T2DM duration (years),"-0.398 [-1.211, 0.415 ]",0.338
+NCT00602472,Placebo,Current smoker,"0.296 [-1.035, 1.627 ]",0.663
+NCT00602472,Placebo,HbA1c (%/DCCT units),"0.484 [-0.022, 0.99 ]",0.061
+NCT00602472,Placebo,eGFR (ml/min/1.73m2),"-0.316 [-1.004, 0.372 ]",0.368
+NCT00602472,Placebo,Systolic blood pressure (mmHg),"0.398 [0.043, 0.753 ]",0.028
+NCT00602472,Placebo,HDL cholesterol (mmol/L),"0.61 [0.185, 1.035 ]",<0.01
+NCT00602472,Placebo,Total cholesterol (mmol/L),"-0.425 [-0.986, 0.136 ]",0.138
+NCT00602472,Placebo,Comorbidities,"0.083 [-0.299, 0.465 ]",0.669
+NCT00602472,Placebo,Concomitant medications,"0.245 [0.057, 0.433 ]",0.011
+NCT00621140,Placebo,Age (in decades),"-0.478 [-1.34, 0.384 ]",0.278
+NCT00621140,Placebo,Male,"0.506 [-0.701, 1.713 ]",0.411
+NCT00621140,Placebo,Asian,"1.564 [0.004, 3.124 ]",0.049
+NCT00621140,Placebo,BMI (kg/m2),"-0.44 [-1.216, 0.336 ]",0.267
+NCT00621140,Placebo,T2DM duration (years),"1.576 [0.502, 2.65 ]",<0.01
+NCT00621140,Placebo,Current smoker,"-0.739 [-2.969, 1.491 ]",0.516
+NCT00621140,Placebo,HbA1c (%/DCCT units),"0.265 [-0.276, 0.806 ]",0.336
+NCT00621140,Placebo,eGFR (ml/min/1.73m2),"0.258 [-0.687, 1.203 ]",0.592
+NCT00621140,Placebo,Systolic blood pressure (mmHg),"0.463 [-0.156, 1.082 ]",0.143
+NCT00621140,Placebo,HDL cholesterol (mmol/L),"-0.434 [-1.222, 0.354 ]",0.28
+NCT00621140,Placebo,Total cholesterol (mmol/L),"-0.367 [-1.106, 0.372 ]",0.329
+NCT00621140,Placebo,Comorbidities,"0.156 [-0.334, 0.646 ]",0.532
+NCT00621140,Placebo,Concomitant medications,"0.069 [-0.227, 0.365 ]",0.647
+NCT00622284,Active,Age (in decades),"0.004 [-0.241, 0.249 ]",0.977
+NCT00622284,Active,Male,"-0.289 [-0.62, 0.042 ]",0.088
+NCT00622284,Active,Asian,"-0.559 [-1.151, 0.033 ]",0.065
+NCT00622284,Active,Black/African American,"0.465 [-0.368, 1.298 ]",0.273
+NCT00622284,Active,Other race/ethnicity,"2.346 [0.87, 3.822 ]",<0.01
+NCT00622284,Active,BMI (kg/m2),"-0.317 [-0.54, -0.094 ]",<0.01
+NCT00622284,Active,T2DM duration (years),"-0.19 [-0.502, 0.122 ]",0.231
+NCT00622284,Active,Current smoker,"0.283 [-0.133, 0.699 ]",0.183
+NCT00622284,Active,HbA1c (%/DCCT units),"0.104 [-0.059, 0.267 ]",0.211
+NCT00622284,Active,eGFR (ml/min/1.73m2),"-0.076 [-0.307, 0.155 ]",0.519
+NCT00622284,Active,Systolic blood pressure (mmHg),"-0.046 [-0.215, 0.123 ]",0.596
+NCT00622284,Active,HDL cholesterol (mmol/L),"-0.028 [-0.21, 0.154 ]",0.766
+NCT00622284,Active,Total cholesterol (mmol/L),"-0.023 [-0.199, 0.153 ]",0.796
+NCT00622284,Active,Comorbidities,"0.054 [-0.066, 0.174 ]",0.378
+NCT00622284,Active,Concomitant medications,"-0.003 [-0.056, 0.05 ]",0.92
+NCT00641043,Placebo,Age (in decades),"0.583 [-0.174, 1.34 ]",0.131
+NCT00641043,Placebo,Male,"0.037 [-1.145, 1.219 ]",0.952
+NCT00641043,Placebo,Asian,"-0.381 [-1.961, 1.199 ]",0.637
+NCT00641043,Placebo,BMI (kg/m2),"-0.232 [-0.987, 0.523 ]",0.546
+NCT00641043,Placebo,T2DM duration (years),"-0.011 [-0.771, 0.749 ]",0.977
+NCT00641043,Placebo,Current smoker,"-1.816 [-3.941, 0.309 ]",0.094
+NCT00641043,Placebo,HbA1c (%/DCCT units),"0.678 [0.163, 1.193 ]",0.01
+NCT00641043,Placebo,eGFR (ml/min/1.73m2),"0.075 [-0.682, 0.832 ]",0.847
+NCT00641043,Placebo,Systolic blood pressure (mmHg),"-0.53 [-1.13, 0.07 ]",0.084
+NCT00641043,Placebo,HDL cholesterol (mmol/L),"0.091 [-0.552, 0.734 ]",0.781
+NCT00641043,Placebo,Total cholesterol (mmol/L),"0.202 [-0.415, 0.819 ]",0.521
+NCT00641043,Placebo,Comorbidities,"0.085 [-0.436, 0.606 ]",0.749
+NCT00641043,Placebo,Concomitant medications,"0.013 [-0.344, 0.37 ]",0.942
+NCT00707993,Active,Age (in decades),"-0.646 [-1.312, 0.02 ]",0.057
+NCT00707993,Active,Male,"0 [-0.468, 0.468 ]",0.999
+NCT00707993,Active,Asian,"0.524 [-0.062, 1.11 ]",0.08
+NCT00707993,Active,Black/African American,"-0.176 [-0.942, 0.59 ]",0.653
+NCT00707993,Active,Other race/ethnicity,"-0.257 [-1.084, 0.57 ]",0.543
+NCT00707993,Active,BMI (kg/m2),"0.049 [-0.237, 0.335 ]",0.735
+NCT00707993,Active,T2DM duration (years),"0.084 [-0.106, 0.274 ]",0.385
+NCT00707993,Active,HbA1c (%/DCCT units),"0.636 [0.315, 0.957 ]",<0.01
+NCT00707993,Active,eGFR (ml/min/1.73m2),"0.009 [-0.305, 0.323 ]",0.957
+NCT00707993,Active,Systolic blood pressure (mmHg),"0.254 [0.009, 0.499 ]",0.042
+NCT00707993,Active,HDL cholesterol (mmol/L),"-0.171 [-0.453, 0.111 ]",0.234
+NCT00707993,Active,Total cholesterol (mmol/L),"0.171 [-0.074, 0.416 ]",0.171
+NCT00707993,Active,Comorbidities,"0.041 [-0.179, 0.261 ]",0.712
+NCT00707993,Active,Concomitant medications,"0.052 [-0.042, 0.146 ]",0.278
+NCT00712673,Placebo,Age (in decades),"0.148 [-0.35, 0.646 ]",0.559
+NCT00712673,Placebo,Male,"-0.235 [-0.921, 0.451 ]",0.503
+NCT00712673,Placebo,Other race/ethnicity,"-1.679 [-3.71, 0.352 ]",0.105
+NCT00712673,Placebo,BMI (kg/m2),"-0.085 [-0.399, 0.229 ]",0.594
+NCT00712673,Placebo,T2DM duration (years),"-0.49 [-1.217, 0.237 ]",0.187
+NCT00712673,Placebo,Current smoker,"-0.136 [-1.134, 0.862 ]",0.789
+NCT00712673,Placebo,HbA1c (%/DCCT units),"0.049 [-0.272, 0.37 ]",0.765
+NCT00712673,Placebo,eGFR (ml/min/1.73m2),"-0.149 [-0.729, 0.431 ]",0.615
+NCT00712673,Placebo,Systolic blood pressure (mmHg),"-0.674 [-1.131, -0.217 ]",<0.01
+NCT00712673,Placebo,HDL cholesterol (mmol/L),"-0.566 [-1.091, -0.041 ]",0.035
+NCT00712673,Placebo,Total cholesterol (mmol/L),"0.417 [0.158, 0.676 ]",<0.01
+NCT00712673,Placebo,Comorbidities,"-0.173 [-0.514, 0.168 ]",0.318
+NCT00712673,Placebo,Concomitant medications,"0.266 [0.123, 0.409 ]",<0.01
+NCT00713830,Placebo,Age (in decades),"0.014 [-0.317, 0.345 ]",0.935
+NCT00713830,Placebo,Male,"-0.371 [-0.845, 0.103 ]",0.126
+NCT00713830,Placebo,Asian,"-0.322 [-0.914, 0.27 ]",0.286
+NCT00713830,Placebo,Black/African American,"0.897 [-0.214, 2.008 ]",0.114
+NCT00713830,Placebo,BMI (kg/m2),"-0.115 [-0.389, 0.159 ]",0.413
+NCT00713830,Placebo,T2DM duration (years),"-0.029 [-0.298, 0.24 ]",0.833
+NCT00713830,Placebo,Current smoker,"-0.974 [-1.768, -0.18 ]",0.016
+NCT00713830,Placebo,HbA1c (%/DCCT units),"0.212 [-0.035, 0.459 ]",0.093
+NCT00713830,Placebo,eGFR (ml/min/1.73m2),"0.355 [-0.008, 0.718 ]",0.056
+NCT00713830,Placebo,Systolic blood pressure (mmHg),"0.01 [-0.264, 0.284 ]",0.941
+NCT00713830,Placebo,HDL cholesterol (mmol/L),"-0.225 [-0.517, 0.067 ]",0.132
+NCT00713830,Placebo,Total cholesterol (mmol/L),"-0.011 [-0.268, 0.246 ]",0.931
+NCT00713830,Placebo,Comorbidities,"0.004 [-0.172, 0.18 ]",0.96
+NCT00713830,Placebo,Concomitant medications,"0.05 [-0.034, 0.134 ]",0.249
+NCT00715624,Placebo,Age (in decades),"-0.353 [-0.774, 0.068 ]",0.101
+NCT00715624,Placebo,Male,"0.028 [-0.652, 0.708 ]",0.937
+NCT00715624,Placebo,Asian,"0.386 [-0.482, 1.254 ]",0.384
+NCT00715624,Placebo,Other race/ethnicity,"-1.389 [-3.539, 0.761 ]",0.205
+NCT00715624,Placebo,BMI (kg/m2),"0.455 [0.134, 0.776 ]",<0.01
+NCT00715624,Placebo,T2DM duration (years),"-0.015 [-0.334, 0.304 ]",0.926
+NCT00715624,Placebo,Current smoker,"0.857 [0.042, 1.672 ]",0.039
+NCT00715624,Placebo,HbA1c (%/DCCT units),"0.072 [-0.289, 0.433 ]",0.697
+NCT00715624,Placebo,eGFR (ml/min/1.73m2),"-0.419 [-0.727, -0.111 ]",<0.01
+NCT00715624,Placebo,Systolic blood pressure (mmHg),"0.526 [0.173, 0.879 ]",<0.01
+NCT00715624,Placebo,HDL cholesterol (mmol/L),"-0.5 [-1.059, 0.059 ]",0.079
+NCT00715624,Placebo,Total cholesterol (mmol/L),"-0.002 [-0.508, 0.504 ]",0.995
+NCT00715624,Placebo,Comorbidities,"-0.248 [-0.542, 0.046 ]",0.098
+NCT00715624,Placebo,Concomitant medications,"0.074 [-0.042, 0.19 ]",0.21
+NCT00740051,Placebo,Age (in decades),"0.597 [-0.171, 1.365 ]",0.128
+NCT00740051,Placebo,Male,"0.262 [-0.998, 1.522 ]",0.684
+NCT00740051,Placebo,Asian,"-0.167 [-1.833, 1.499 ]",0.844
+NCT00740051,Placebo,Black/African American,"1.333 [-1.527, 4.193 ]",0.361
+NCT00740051,Placebo,BMI (kg/m2),"0.23 [-0.525, 0.985 ]",0.551
+NCT00740051,Placebo,T2DM duration (years),"-0.245 [-1.539, 1.049 ]",0.71
+NCT00740051,Placebo,Current smoker,"0.833 [-0.704, 2.37 ]",0.288
+NCT00740051,Placebo,HbA1c (%/DCCT units),"-0.2 [-0.931, 0.531 ]",0.591
+NCT00740051,Placebo,eGFR (ml/min/1.73m2),"-0.092 [-0.766, 0.582 ]",0.79
+NCT00740051,Placebo,Systolic blood pressure (mmHg),"0.002 [-0.666, 0.67 ]",0.995
+NCT00740051,Placebo,HDL cholesterol (mmol/L),"-0.575 [-1.477, 0.327 ]",0.211
+NCT00740051,Placebo,Total cholesterol (mmol/L),"0.279 [-0.336, 0.894 ]",0.374
+NCT00740051,Placebo,Comorbidities,"-0.371 [-0.881, 0.139 ]",0.153
+NCT00740051,Placebo,Concomitant medications,"0.082 [-0.132, 0.296 ]",0.453
+NCT00763451,Placebo,Age (in decades),"0.471 [-0.168, 1.11 ]",0.149
+NCT00763451,Placebo,Male,"0.452 [-0.338, 1.242 ]",0.262
+NCT00763451,Placebo,Asian,"0.725 [-0.868, 2.318 ]",0.372
+NCT00763451,Placebo,BMI (kg/m2),"0.511 [0.039, 0.983 ]",0.034
+NCT00763451,Placebo,T2DM duration (years),"0.271 [-0.284, 0.826 ]",0.339
+NCT00763451,Placebo,Current smoker,"0.576 [-0.451, 1.603 ]",0.271
+NCT00763451,Placebo,HbA1c (%/DCCT units),"-0.383 [-0.826, 0.06 ]",0.09
+NCT00763451,Placebo,eGFR (ml/min/1.73m2),"0.456 [-0.222, 1.134 ]",0.187
+NCT00763451,Placebo,Systolic blood pressure (mmHg),"0.034 [-0.36, 0.428 ]",0.864
+NCT00763451,Placebo,HDL cholesterol (mmol/L),"-0.141 [-0.735, 0.453 ]",0.642
+NCT00763451,Placebo,Total cholesterol (mmol/L),"0.246 [-0.338, 0.83 ]",0.409
+NCT00763451,Placebo,Comorbidities,"0.005 [-0.297, 0.307 ]",0.974
+NCT00763451,Placebo,Concomitant medications,"0.056 [-0.132, 0.244 ]",0.563
+NCT00763815,Placebo,Age (in decades),"-0.091 [-0.512, 0.33 ]",0.672
+NCT00763815,Placebo,Male,"0.064 [-0.563, 0.691 ]",0.842
+NCT00763815,Placebo,Other race/ethnicity,"-0.597 [-1.491, 0.297 ]",0.19
+NCT00763815,Placebo,BMI (kg/m2),"0.216 [-0.054, 0.486 ]",0.117
+NCT00763815,Placebo,T2DM duration (years),"0.241 [-0.2, 0.682 ]",0.283
+NCT00763815,Placebo,Current smoker,"-1.031 [-2.47, 0.408 ]",0.16
+NCT00763815,Placebo,HbA1c (%/DCCT units),"0.043 [-0.308, 0.394 ]",0.811
+NCT00763815,Placebo,eGFR (ml/min/1.73m2),"0.1 [-0.286, 0.486 ]",0.612
+NCT00763815,Placebo,Systolic blood pressure (mmHg),"-0.414 [-0.8, -0.028 ]",0.035
+NCT00763815,Placebo,HDL cholesterol (mmol/L),"0.27 [-0.048, 0.588 ]",0.094
+NCT00763815,Placebo,Total cholesterol (mmol/L),"-0.004 [-0.343, 0.335 ]",0.983
+NCT00763815,Placebo,Comorbidities,"0.136 [-0.054, 0.326 ]",0.162
+NCT00763815,Placebo,Concomitant medications,"0.023 [-0.046, 0.092 ]",0.506
+NCT00798161,Placebo,Age (in decades),"-0.388 [-0.796, 0.02 ]",0.062
+NCT00798161,Placebo,Male,"0.133 [-0.475, 0.741 ]",0.667
+NCT00798161,Placebo,Asian,"-0.142 [-0.895, 0.611 ]",0.712
+NCT00798161,Placebo,Black/African American,"1.344 [-0.759, 3.447 ]",0.21
+NCT00798161,Placebo,BMI (kg/m2),"-0.06 [-0.46, 0.34 ]",0.769
+NCT00798161,Placebo,T2DM duration (years),"0.7 [0.155, 1.245 ]",0.012
+NCT00798161,Placebo,Current smoker,"-0.693 [-1.673, 0.287 ]",0.166
+NCT00798161,Placebo,HbA1c (%/DCCT units),"0.523 [0.229, 0.817 ]",<0.01
+NCT00798161,Placebo,eGFR (ml/min/1.73m2),"-0.461 [-0.912, -0.01 ]",0.044
+NCT00798161,Placebo,Systolic blood pressure (mmHg),"0.268 [-0.071, 0.607 ]",0.12
+NCT00798161,Placebo,HDL cholesterol (mmol/L),"-0.113 [-0.466, 0.24 ]",0.531
+NCT00798161,Placebo,Total cholesterol (mmol/L),"0.121 [-0.181, 0.423 ]",0.431
+NCT00798161,Placebo,Comorbidities,"-0.002 [-0.271, 0.267 ]",0.988
+NCT00798161,Placebo,Concomitant medications,"-0.012 [-0.173, 0.149 ]",0.885
+NCT00800683,Placebo,Age (in decades),"-1.045 [-1.774, -0.316 ]",<0.01
+NCT00800683,Placebo,Male,"-0.435 [-1.985, 1.115 ]",0.582
+NCT00800683,Placebo,Asian,"-0.839 [-3.048, 1.37 ]",0.457
+NCT00800683,Placebo,Black/African American,"-0.145 [-2.189, 1.899 ]",0.889
+NCT00800683,Placebo,Other race/ethnicity,"1.675 [-0.957, 4.307 ]",0.212
+NCT00800683,Placebo,BMI (kg/m2),"-0.303 [-0.944, 0.338 ]",0.353
+NCT00800683,Placebo,Current smoker,"-0.643 [-2.427, 1.141 ]",0.479
+NCT00800683,Placebo,HbA1c (%/DCCT units),"0.415 [0.027, 0.803 ]",0.036
+NCT00800683,Placebo,eGFR (ml/min/1.73m2),"0.827 [-0.921, 2.575 ]",0.354
+NCT00800683,Placebo,Systolic blood pressure (mmHg),"0.135 [-0.496, 0.766 ]",0.674
+NCT00800683,Placebo,HDL cholesterol (mmol/L),"-0.526 [-1.281, 0.229 ]",0.172
+NCT00800683,Placebo,Total cholesterol (mmol/L),"-0.106 [-0.718, 0.506 ]",0.734
+NCT00800683,Placebo,Comorbidities,"0.11 [-0.151, 0.371 ]",0.405
+NCT00800683,Placebo,Concomitant medications,"0.033 [-0.092, 0.158 ]",0.608
+NCT00838903,Placebo,Age (in decades),"-0.113 [-0.342, 0.116 ]",0.335
+NCT00838903,Placebo,Male,"-0.083 [-0.432, 0.266 ]",0.64
+NCT00838903,Placebo,Asian,"-0.357 [-1.123, 0.409 ]",0.362
+NCT00838903,Placebo,Black/African American,"-0.005 [-0.462, 0.452 ]",0.982
+NCT00838903,Placebo,Other race/ethnicity,"-2.365 [-3.772, -0.958 ]",<0.01
+NCT00838903,Placebo,BMI (kg/m2),"-0.052 [-0.232, 0.128 ]",0.575
+NCT00838903,Placebo,T2DM duration (years),"-0.066 [-0.262, 0.13 ]",0.512
+NCT00838903,Placebo,Current smoker,"0.197 [-0.256, 0.65 ]",0.393
+NCT00838903,Placebo,HbA1c (%/DCCT units),"0.012 [-0.159, 0.183 ]",0.887
+NCT00838903,Placebo,eGFR (ml/min/1.73m2),"-0.053 [-0.31, 0.204 ]",0.685
+NCT00838903,Placebo,Systolic blood pressure (mmHg),"0.054 [-0.134, 0.242 ]",0.575
+NCT00838903,Placebo,HDL cholesterol (mmol/L),"0.083 [-0.127, 0.293 ]",0.442
+NCT00838903,Placebo,Total cholesterol (mmol/L),"0.035 [-0.167, 0.237 ]",0.736
+NCT00838903,Placebo,Comorbidities,"0.116 [-0.088, 0.32 ]",0.264
+NCT00838903,Placebo,Concomitant medications,"-0.036 [-0.087, 0.015 ]",0.161
+NCT00838916,Active,Age (in decades),"-0.16 [-0.47, 0.15 ]",0.308
+NCT00838916,Active,Male,"0.068 [-0.449, 0.585 ]",0.798
+NCT00838916,Active,Asian,"-0.615 [-1.834, 0.604 ]",0.323
+NCT00838916,Active,Black/African American,"0.333 [-0.196, 0.862 ]",0.219
+NCT00838916,Active,BMI (kg/m2),"0.115 [-0.159, 0.389 ]",0.414
+NCT00838916,Active,T2DM duration (years),"-0.043 [-0.327, 0.241 ]",0.765
+NCT00838916,Active,Current smoker,"0.35 [-0.287, 0.987 ]",0.282
+NCT00838916,Active,HbA1c (%/DCCT units),"0.103 [-0.124, 0.33 ]",0.375
+NCT00838916,Active,eGFR (ml/min/1.73m2),"-0.044 [-0.348, 0.26 ]",0.776
+NCT00838916,Active,Systolic blood pressure (mmHg),"0.05 [-0.215, 0.315 ]",0.712
+NCT00838916,Active,HDL cholesterol (mmol/L),"0.074 [-0.224, 0.372 ]",0.623
+NCT00838916,Active,Total cholesterol (mmol/L),"0.361 [0.098, 0.624 ]",<0.01
+NCT00838916,Active,Comorbidities,"0.121 [-0.181, 0.423 ]",0.43
+NCT00838916,Active,Concomitant medications,"-0.066 [-0.154, 0.022 ]",0.144
+NCT00839527,Placebo,Age (in decades),"-0.098 [-0.312, 0.116 ]",0.368
+NCT00839527,Placebo,Male,"-0.496 [-0.829, -0.163 ]",<0.01
+NCT00839527,Placebo,Asian,"-1.442 [-2.148, -0.736 ]",<0.01
+NCT00839527,Placebo,Black/African American,"-0.073 [-0.624, 0.478 ]",0.796
+NCT00839527,Placebo,Other race/ethnicity,"-1.492 [-2.521, -0.463 ]",<0.01
+NCT00839527,Placebo,BMI (kg/m2),"-0.152 [-0.328, 0.024 ]",0.091
+NCT00839527,Placebo,T2DM duration (years),"0.027 [-0.14, 0.194 ]",0.752
+NCT00839527,Placebo,Current smoker,"-0.014 [-0.457, 0.429 ]",0.952
+NCT00839527,Placebo,HbA1c (%/DCCT units),"0.098 [-0.061, 0.257 ]",0.224
+NCT00839527,Placebo,eGFR (ml/min/1.73m2),"-0.177 [-0.393, 0.039 ]",0.109
+NCT00839527,Placebo,Systolic blood pressure (mmHg),"0.137 [-0.022, 0.296 ]",0.09
+NCT00839527,Placebo,HDL cholesterol (mmol/L),"-0.291 [-0.497, -0.085 ]",<0.01
+NCT00839527,Placebo,Total cholesterol (mmol/L),"-0.084 [-0.262, 0.094 ]",0.356
+NCT00839527,Placebo,Comorbidities,"0.152 [-0.022, 0.326 ]",0.088
+NCT00839527,Placebo,Concomitant medications,"-0.042 [-0.095, 0.011 ]",0.125
+NCT00849017,Placebo,Age (in decades),"-0.417 [-0.819, -0.015 ]",0.042
+NCT00849017,Placebo,Male,"0.504 [-0.262, 1.27 ]",0.197
+NCT00849017,Placebo,Asian,"-0.586 [-2.728, 1.556 ]",0.592
+NCT00849017,Placebo,Black/African American,"-1.645 [-3.021, -0.269 ]",0.019
+NCT00849017,Placebo,Other race/ethnicity,"-0.09 [-1.366, 1.186 ]",0.89
+NCT00849017,Placebo,BMI (kg/m2),"0.058 [-0.295, 0.411 ]",0.748
+NCT00849017,Placebo,T2DM duration (years),"0.501 [0.127, 0.875 ]",<0.01
+NCT00849017,Placebo,Current smoker,"0.864 [0.096, 1.632 ]",0.028
+NCT00849017,Placebo,HbA1c (%/DCCT units),"-0.4 [-0.812, 0.012 ]",0.057
+NCT00849017,Placebo,eGFR (ml/min/1.73m2),"-0.05 [-0.552, 0.452 ]",0.846
+NCT00849017,Placebo,Systolic blood pressure (mmHg),"0.151 [-0.217, 0.519 ]",0.424
+NCT00849017,Placebo,HDL cholesterol (mmol/L),"0.198 [-0.288, 0.684 ]",0.425
+NCT00849017,Placebo,Total cholesterol (mmol/L),"-0.37 [-0.807, 0.067 ]",0.097
+NCT00849017,Placebo,Comorbidities,"0.087 [-0.293, 0.467 ]",0.654
+NCT00849017,Placebo,Concomitant medications,"-0.07 [-0.188, 0.048 ]",0.239
+NCT00849056,Placebo,Age (in decades),"-0.188 [-0.617, 0.241 ]",0.39
+NCT00849056,Placebo,Male,"-0.634 [-1.206, -0.062 ]",0.03
+NCT00849056,Placebo,Asian,"-0.773 [-2.837, 1.291 ]",0.463
+NCT00849056,Placebo,Black/African American,"0.055 [-0.682, 0.792 ]",0.883
+NCT00849056,Placebo,Other race/ethnicity,"-0.69 [-1.895, 0.515 ]",0.262
+NCT00849056,Placebo,BMI (kg/m2),"0.391 [0.099, 0.683 ]",<0.01
+NCT00849056,Placebo,T2DM duration (years),"0.064 [-0.206, 0.334 ]",0.641
+NCT00849056,Placebo,Current smoker,"0.202 [-0.576, 0.98 ]",0.612
+NCT00849056,Placebo,HbA1c (%/DCCT units),"0.037 [-0.253, 0.327 ]",0.803
+NCT00849056,Placebo,eGFR (ml/min/1.73m2),"-0.287 [-0.652, 0.078 ]",0.122
+NCT00849056,Placebo,Systolic blood pressure (mmHg),"0.078 [-0.24, 0.396 ]",0.63
+NCT00849056,Placebo,HDL cholesterol (mmol/L),"-0.063 [-0.445, 0.319 ]",0.748
+NCT00849056,Placebo,Total cholesterol (mmol/L),"-0.038 [-0.336, 0.26 ]",0.805
+NCT00849056,Placebo,Comorbidities,"-0.385 [-0.734, -0.036 ]",0.03
+NCT00849056,Placebo,Concomitant medications,"0.001 [-0.068, 0.07 ]",0.985
+NCT00856284,Active,Age (in decades),"-0.141 [-0.274, -0.008 ]",0.038
+NCT00856284,Active,Male,"-0.1 [-0.298, 0.098 ]",0.323
+NCT00856284,Active,Asian,"-0.021 [-0.288, 0.246 ]",0.88
+NCT00856284,Active,Black/African American,"0.292 [-0.016, 0.6 ]",0.063
+NCT00856284,Active,Other race/ethnicity,"-0.215 [-0.652, 0.222 ]",0.334
+NCT00856284,Active,BMI (kg/m2),"0.054 [-0.062, 0.17 ]",0.365
+NCT00856284,Active,T2DM duration (years),"0.201 [0.029, 0.373 ]",0.022
+NCT00856284,Active,HbA1c (%/DCCT units),"0.368 [0.225, 0.511 ]",<0.01
+NCT00856284,Active,eGFR (ml/min/1.73m2),"-0.128 [-0.273, 0.017 ]",0.081
+NCT00856284,Active,Systolic blood pressure (mmHg),"0.021 [-0.118, 0.16 ]",0.765
+NCT00856284,Active,HDL cholesterol (mmol/L),"-0.078 [-0.198, 0.042 ]",0.201
+NCT00856284,Active,Total cholesterol (mmol/L),"0.066 [-0.034, 0.166 ]",0.198
+NCT00856284,Active,Comorbidities,"0.07 [-0.01, 0.15 ]",0.092
+NCT00856284,Active,Concomitant medications,"-0.035 [-0.068, -0.002 ]",0.039
+NCT00866658,Placebo,Age (in decades),"1.106 [0.2, 2.012 ]",0.017
+NCT00866658,Placebo,Male,"0.942 [-0.573, 2.457 ]",0.223
+NCT00866658,Placebo,BMI (kg/m2),"0.584 [-0.325, 1.493 ]",0.209
+NCT00866658,Placebo,T2DM duration (years),"-2.334 [-4.519, -0.149 ]",0.036
+NCT00866658,Placebo,Current smoker,"-0.129 [-1.583, 1.325 ]",0.862
+NCT00866658,Placebo,HbA1c (%/DCCT units),"-0.364 [-1.05, 0.322 ]",0.298
+NCT00866658,Placebo,eGFR (ml/min/1.73m2),"0.193 [-0.573, 0.959 ]",0.622
+NCT00866658,Placebo,Systolic blood pressure (mmHg),"-0.245 [-0.86, 0.37 ]",0.435
+NCT00866658,Placebo,HDL cholesterol (mmol/L),"-0.009 [-0.519, 0.501 ]",0.974
+NCT00866658,Placebo,Total cholesterol (mmol/L),"0.018 [-0.766, 0.802 ]",0.964
+NCT00866658,Placebo,Comorbidities,"-0.094 [-0.684, 0.496 ]",0.754
+NCT00866658,Placebo,Concomitant medications,"-0.071 [-0.345, 0.203 ]",0.614
+NCT00915772,Active,Age (in decades),"-0.187 [-0.683, 0.309 ]",0.459
+NCT00915772,Active,Male,"-0.345 [-1.096, 0.406 ]",0.368
+NCT00915772,Active,Asian,"0.818 [-0.217, 1.853 ]",0.122
+NCT00915772,Active,BMI (kg/m2),"0.057 [-0.378, 0.492 ]",0.798
+NCT00915772,Active,T2DM duration (years),"0.34 [-0.362, 1.042 ]",0.342
+NCT00915772,Active,Current smoker,"0.759 [-0.158, 1.676 ]",0.105
+NCT00915772,Active,HbA1c (%/DCCT units),"0.538 [0.23, 0.846 ]",<0.01
+NCT00915772,Active,eGFR (ml/min/1.73m2),"-0.839 [-1.478, -0.2 ]",0.01
+NCT00915772,Active,Systolic blood pressure (mmHg),"-0.02 [-0.296, 0.256 ]",0.887
+NCT00915772,Active,HDL cholesterol (mmol/L),"0.601 [0.172, 1.03 ]",<0.01
+NCT00915772,Active,Total cholesterol (mmol/L),"-0.092 [-0.537, 0.353 ]",0.687
+NCT00915772,Active,Concomitant medications,"-0.026 [-0.126, 0.074 ]",0.614
+NCT00954447,Placebo,Age (in decades),"-0.039 [-0.308, 0.23 ]",0.777
+NCT00954447,Placebo,Male,"0.235 [-0.192, 0.662 ]",0.282
+NCT00954447,Placebo,Asian,"-0.117 [-0.791, 0.557 ]",0.734
+NCT00954447,Placebo,Black/African American,"0.099 [-0.748, 0.946 ]",0.819
+NCT00954447,Placebo,Other race/ethnicity,"-0.194 [-2.187, 1.799 ]",0.849
+NCT00954447,Placebo,BMI (kg/m2),"-0.013 [-0.262, 0.236 ]",0.921
+NCT00954447,Placebo,T2DM duration (years),"0.249 [-0.135, 0.633 ]",0.204
+NCT00954447,Placebo,Current smoker,"0.37 [-0.163, 0.903 ]",0.174
+NCT00954447,Placebo,HbA1c (%/DCCT units),"0.084 [-0.126, 0.294 ]",0.433
+NCT00954447,Placebo,eGFR (ml/min/1.73m2),"-0.114 [-0.341, 0.113 ]",0.325
+NCT00954447,Placebo,Systolic blood pressure (mmHg),"-0.031 [-0.235, 0.173 ]",0.766
+NCT00954447,Placebo,HDL cholesterol (mmol/L),"0.094 [-0.129, 0.317 ]",0.411
+NCT00954447,Placebo,Total cholesterol (mmol/L),"-0.029 [-0.25, 0.192 ]",0.798
+NCT00954447,Placebo,Comorbidities,"0.141 [0.016, 0.266 ]",0.029
+NCT00954447,Placebo,Concomitant medications,"-0.004 [-0.071, 0.063 ]",0.912
+NCT00968812,Active,Age (in decades),"-0.224 [-0.473, 0.025 ]",0.078
+NCT00968812,Active,Male,"-0.247 [-0.584, 0.09 ]",0.153
+NCT00968812,Active,BMI (kg/m2),"0.056 [-0.12, 0.232 ]",0.535
+NCT00968812,Active,T2DM duration (years),"0.163 [-0.035, 0.361 ]",0.107
+NCT00968812,Active,Current smoker,"-0.068 [-0.593, 0.457 ]",0.798
+NCT00968812,Active,HbA1c (%/DCCT units),"0.119 [-0.059, 0.297 ]",0.189
+NCT00968812,Active,eGFR (ml/min/1.73m2),"-0.037 [-0.306, 0.232 ]",0.79
+NCT00968812,Active,Systolic blood pressure (mmHg),"0.1 [-0.082, 0.282 ]",0.281
+NCT00968812,Active,HDL cholesterol (mmol/L),"0.106 [-0.092, 0.304 ]",0.297
+NCT00968812,Active,Total cholesterol (mmol/L),"-0.169 [-0.367, 0.029 ]",0.093
+NCT00968812,Active,Comorbidities,"0.151 [0.028, 0.274 ]",0.017
+NCT00968812,Active,Concomitant medications,"-0.03 [-0.055, -0.005 ]",0.019
+NCT00975286,Placebo,Age (in decades),"0.231 [-0.565, 1.027 ]",0.569
+NCT00975286,Placebo,Male,"0.859 [-0.527, 2.245 ]",0.225
+NCT00975286,Placebo,BMI (kg/m2),"-0.136 [-0.781, 0.509 ]",0.68
+NCT00975286,Placebo,T2DM duration (years),"-0.487 [-1.461, 0.487 ]",0.327
+NCT00975286,Placebo,Current smoker,"0.656 [-0.571, 1.883 ]",0.295
+NCT00975286,Placebo,HbA1c (%/DCCT units),"-0.079 [-1.096, 0.938 ]",0.88
+NCT00975286,Placebo,eGFR (ml/min/1.73m2),"0.096 [-0.909, 1.101 ]",0.852
+NCT00975286,Placebo,Systolic blood pressure (mmHg),"-0.281 [-1.047, 0.485 ]",0.473
+NCT00975286,Placebo,HDL cholesterol (mmol/L),"-3.008 [-6.903, 0.887 ]",0.13
+NCT00975286,Placebo,Total cholesterol (mmol/L),"-0.768 [-1.572, 0.036 ]",0.061
+NCT00975286,Placebo,Comorbidities,"-0.08 [-0.595, 0.435 ]",0.762
+NCT00975286,Placebo,Concomitant medications,"0.005 [-0.267, 0.277 ]",0.972
+NCT00976937,Active,Age (in decades),"-0.123 [-2.287, 2.041 ]",0.911
+NCT00976937,Active,Male,"1.538 [-1.055, 4.131 ]",0.245
+NCT00976937,Active,Black/African American,"1.948 [-0.218, 4.114 ]",0.078
+NCT00976937,Active,BMI (kg/m2),"4.346 [-4.494, 13.186 ]",0.335
+NCT00976937,Active,T2DM duration (years),"0.823 [-0.498, 2.144 ]",0.222
+NCT00976937,Active,Current smoker,"-0.313 [-2.559, 1.933 ]",0.785
+NCT00976937,Active,HbA1c (%/DCCT units),"-0.161 [-0.867, 0.545 ]",0.654
+NCT00976937,Active,eGFR (ml/min/1.73m2),"0.174 [-1.067, 1.415 ]",0.784
+NCT00976937,Active,Systolic blood pressure (mmHg),"-0.273 [-1.557, 1.011 ]",0.677
+NCT00976937,Active,HDL cholesterol (mmol/L),"0.158 [-1.285, 1.601 ]",0.831
+NCT00976937,Active,Total cholesterol (mmol/L),"-0.368 [-1.446, 0.71 ]",0.504
+NCT00976937,Active,Comorbidities,"-0.695 [-1.728, 0.338 ]",0.188
+NCT00976937,Active,Concomitant medications,"0.02 [-0.298, 0.338 ]",0.904
+NCT00996658,Placebo,Age (in decades),"0.639 [-0.602, 1.88 ]",0.313
+NCT00996658,Placebo,Male,"0.994 [-0.68, 2.668 ]",0.244
+NCT00996658,Placebo,Asian,"-1.124 [-3.092, 0.844 ]",0.263
+NCT00996658,Placebo,Other race/ethnicity,"1.175 [-1.777, 4.127 ]",0.435
+NCT00996658,Placebo,BMI (kg/m2),"-0.288 [-1.388, 0.812 ]",0.607
+NCT00996658,Placebo,T2DM duration (years),"-0.486 [-1.96, 0.988 ]",0.518
+NCT00996658,Placebo,HbA1c (%/DCCT units),"-0.082 [-0.862, 0.698 ]",0.837
+NCT00996658,Placebo,eGFR (ml/min/1.73m2),"0.738 [-0.299, 1.775 ]",0.163
+NCT00996658,Placebo,Systolic blood pressure (mmHg),"1.183 [-0.046, 2.412 ]",0.059
+NCT00996658,Placebo,HDL cholesterol (mmol/L),"0.081 [-1.083, 1.245 ]",0.892
+NCT00996658,Placebo,Total cholesterol (mmol/L),"0.33 [-0.519, 1.179 ]",0.446
+NCT00996658,Placebo,Comorbidities,"-0.564 [-1.703, 0.575 ]",0.331
+NCT00996658,Placebo,Concomitant medications,"0.283 [-0.08, 0.646 ]",0.126
+NCT01023581,Placebo,Age (in decades),"0.019 [-0.33, 0.368 ]",0.916
+NCT01023581,Placebo,Male,"-0.232 [-0.789, 0.325 ]",0.415
+NCT01023581,Placebo,Asian,"0.734 [0.044, 1.424 ]",0.037
+NCT01023581,Placebo,Black/African American,"0.754 [-0.095, 1.603 ]",0.082
+NCT01023581,Placebo,Other race/ethnicity,"-1.016 [-3.015, 0.983 ]",0.319
+NCT01023581,Placebo,BMI (kg/m2),"0.145 [-0.155, 0.445 ]",0.346
+NCT01023581,Placebo,T2DM duration (years),"0.175 [-0.172, 0.522 ]",0.322
+NCT01023581,Placebo,HbA1c (%/DCCT units),"0.18 [-0.143, 0.503 ]",0.276
+NCT01023581,Placebo,eGFR (ml/min/1.73m2),"0.087 [-0.34, 0.514 ]",0.691
+NCT01023581,Placebo,Systolic blood pressure (mmHg),"0.109 [-0.242, 0.46 ]",0.542
+NCT01023581,Placebo,HDL cholesterol (mmol/L),"0.006 [-0.357, 0.369 ]",0.975
+NCT01023581,Placebo,Total cholesterol (mmol/L),"-0.107 [-0.389, 0.175 ]",0.457
+NCT01023581,Placebo,Comorbidities,"-0.13 [-0.4, 0.14 ]",0.347
+NCT01023581,Placebo,Concomitant medications,"-0.014 [-0.136, 0.108 ]",0.821
+NCT01064687,Placebo,Age (in decades),"0.144 [-0.597, 0.885 ]",0.704
+NCT01064687,Placebo,Male,"0.43 [-0.677, 1.537 ]",0.447
+NCT01064687,Placebo,Other race/ethnicity,"-1.091 [-2.724, 0.542 ]",0.191
+NCT01064687,Placebo,BMI (kg/m2),"-0.25 [-0.816, 0.316 ]",0.387
+NCT01064687,Placebo,T2DM duration (years),"0.047 [-0.502, 0.596 ]",0.865
+NCT01064687,Placebo,Current smoker,"-0.635 [-2.717, 1.447 ]",0.55
+NCT01064687,Placebo,HbA1c (%/DCCT units),"0.103 [-0.232, 0.438 ]",0.547
+NCT01064687,Placebo,eGFR (ml/min/1.73m2),"-0.513 [-1.144, 0.118 ]",0.111
+NCT01064687,Placebo,Systolic blood pressure (mmHg),"0.001 [-0.526, 0.528 ]",0.998
+NCT01064687,Placebo,HDL cholesterol (mmol/L),"-0.065 [-0.663, 0.533 ]",0.83
+NCT01064687,Placebo,Total cholesterol (mmol/L),"0.127 [-0.445, 0.699 ]",0.665
+NCT01064687,Placebo,Comorbidities,"-0.174 [-0.58, 0.232 ]",0.4
+NCT01064687,Placebo,Concomitant medications,"-0.023 [-0.223, 0.177 ]",0.821
+NCT01075282,Active,Age (in decades),"-0.322 [-0.965, 0.321 ]",0.327
+NCT01075282,Active,Male,"0.011 [-0.936, 0.958 ]",0.982
+NCT01075282,Active,Asian,"0.206 [-1.205, 1.617 ]",0.775
+NCT01075282,Active,Other race/ethnicity,"0.561 [-0.64, 1.762 ]",0.36
+NCT01075282,Active,BMI (kg/m2),"0.47 [0.002, 0.938 ]",0.05
+NCT01075282,Active,T2DM duration (years),"0.272 [-0.218, 0.762 ]",0.276
+NCT01075282,Active,Current smoker,"0.132 [-1.032, 1.296 ]",0.824
+NCT01075282,Active,HbA1c (%/DCCT units),"0.024 [-0.38, 0.428 ]",0.906
+NCT01075282,Active,eGFR (ml/min/1.73m2),"0.275 [-0.544, 1.094 ]",0.511
+NCT01075282,Active,Systolic blood pressure (mmHg),"0.294 [-0.161, 0.749 ]",0.205
+NCT01075282,Active,HDL cholesterol (mmol/L),"0.343 [-0.176, 0.862 ]",0.196
+NCT01075282,Active,Total cholesterol (mmol/L),"-0.043 [-0.566, 0.48 ]",0.871
+NCT01075282,Active,Comorbidities,"0.246 [0.011, 0.481 ]",0.04
+NCT01075282,Active,Concomitant medications,"-0.249 [-0.486, -0.012 ]",0.04
+NCT01081834,Placebo,Age (in decades),"-0.171 [-0.577, 0.235 ]",0.408
+NCT01081834,Placebo,Male,"0.051 [-0.562, 0.664 ]",0.87
+NCT01081834,Placebo,Asian,"-0.364 [-1.238, 0.51 ]",0.415
+NCT01081834,Placebo,Black/African American,"-0.107 [-1.308, 1.094 ]",0.862
+NCT01081834,Placebo,Other race/ethnicity,"-0.442 [-1.414, 0.53 ]",0.373
+NCT01081834,Placebo,BMI (kg/m2),"0.01 [-0.276, 0.296 ]",0.944
+NCT01081834,Placebo,T2DM duration (years),"-0.111 [-0.54, 0.318 ]",0.613
+NCT01081834,Placebo,Current smoker,"-0.443 [-1.341, 0.455 ]",0.333
+NCT01081834,Placebo,HbA1c (%/DCCT units),"0.448 [0.227, 0.669 ]",<0.01
+NCT01081834,Placebo,eGFR (ml/min/1.73m2),"0.06 [-0.438, 0.558 ]",0.814
+NCT01081834,Placebo,Systolic blood pressure (mmHg),"0.063 [-0.276, 0.402 ]",0.715
+NCT01081834,Placebo,HDL cholesterol (mmol/L),"0.143 [-0.257, 0.543 ]",0.484
+NCT01081834,Placebo,Total cholesterol (mmol/L),"0.279 [-0.017, 0.575 ]",0.064
+NCT01081834,Placebo,Comorbidities,"-0.257 [-0.582, 0.068 ]",0.122
+NCT01081834,Placebo,Concomitant medications,"0.155 [0.039, 0.271 ]",<0.01
+NCT01087502,Placebo,Age (in decades),"0.001 [-0.477, 0.479 ]",0.995
+NCT01087502,Placebo,Male,"-0.351 [-1.231, 0.529 ]",0.434
+NCT01087502,Placebo,Asian,"-0.908 [-2.302, 0.486 ]",0.201
+NCT01087502,Placebo,Black/African American,"1.028 [-0.126, 2.182 ]",0.081
+NCT01087502,Placebo,BMI (kg/m2),"-0.272 [-0.703, 0.159 ]",0.216
+NCT01087502,Placebo,T2DM duration (years),"-0.399 [-1.048, 0.25 ]",0.227
+NCT01087502,Placebo,Current smoker,"0.107 [-1.094, 1.308 ]",0.862
+NCT01087502,Placebo,HbA1c (%/DCCT units),"0.04 [-0.36, 0.44 ]",0.846
+NCT01087502,Placebo,eGFR (ml/min/1.73m2),"-0.517 [-1.127, 0.093 ]",0.096
+NCT01087502,Placebo,Systolic blood pressure (mmHg),"-0.046 [-0.34, 0.248 ]",0.761
+NCT01087502,Placebo,HDL cholesterol (mmol/L),"-0.149 [-0.668, 0.37 ]",0.575
+NCT01087502,Placebo,Total cholesterol (mmol/L),"-0.241 [-0.805, 0.323 ]",0.402
+NCT01087502,Placebo,Comorbidities,"-0.157 [-0.361, 0.047 ]",0.132
+NCT01087502,Placebo,Concomitant medications,"0.076 [-0.028, 0.18 ]",0.153
+NCT01098539,Active,Age (in decades),"-0.339 [-0.668, -0.01 ]",0.043
+NCT01098539,Active,Male,"-0.573 [-1.136, -0.01 ]",0.046
+NCT01098539,Active,Asian,"0.017 [-0.781, 0.815 ]",0.967
+NCT01098539,Active,Black/African American,"-0.09 [-0.852, 0.672 ]",0.818
+NCT01098539,Active,Other race/ethnicity,"0.27 [-0.712, 1.252 ]",0.59
+NCT01098539,Active,BMI (kg/m2),"-0.007 [-0.348, 0.334 ]",0.966
+NCT01098539,Active,T2DM duration (years),"0.092 [-0.11, 0.294 ]",0.371
+NCT01098539,Active,Current smoker,"0.626 [-0.168, 1.42 ]",0.122
+NCT01098539,Active,HbA1c (%/DCCT units),"-0.082 [-0.321, 0.157 ]",0.504
+NCT01098539,Active,eGFR (ml/min/1.73m2),"-0.336 [-0.589, -0.083 ]",<0.01
+NCT01098539,Active,Systolic blood pressure (mmHg),"0.215 [-0.054, 0.484 ]",0.117
+NCT01098539,Active,HDL cholesterol (mmol/L),"-0.028 [-0.344, 0.288 ]",0.863
+NCT01098539,Active,Total cholesterol (mmol/L),"-0.109 [-0.417, 0.199 ]",0.487
+NCT01098539,Active,Comorbidities,"-0.094 [-0.41, 0.222 ]",0.56
+NCT01098539,Active,Concomitant medications,"0.034 [-0.029, 0.097 ]",0.281
+NCT01106625,Placebo,Age (in decades),"0.084 [-0.341, 0.509 ]",0.699
+NCT01106625,Placebo,Male,"0.114 [-0.484, 0.712 ]",0.709
+NCT01106625,Placebo,Black/African American,"0.1 [-0.86, 1.06 ]",0.838
+NCT01106625,Placebo,Other race/ethnicity,"0.478 [-0.377, 1.333 ]",0.273
+NCT01106625,Placebo,BMI (kg/m2),"0.125 [-0.142, 0.392 ]",0.357
+NCT01106625,Placebo,T2DM duration (years),"-0.033 [-0.358, 0.292 ]",0.844
+NCT01106625,Placebo,Current smoker,"1.196 [0.504, 1.888 ]",<0.01
+NCT01106625,Placebo,HbA1c (%/DCCT units),"0.241 [-0.024, 0.506 ]",0.075
+NCT01106625,Placebo,eGFR (ml/min/1.73m2),"0.192 [-0.276, 0.66 ]",0.421
+NCT01106625,Placebo,Systolic blood pressure (mmHg),"0.187 [-0.097, 0.471 ]",0.197
+NCT01106625,Placebo,HDL cholesterol (mmol/L),"-0.103 [-0.426, 0.22 ]",0.533
+NCT01106625,Placebo,Total cholesterol (mmol/L),"0.102 [-0.174, 0.378 ]",0.471
+NCT01106625,Placebo,Comorbidities,"-0.116 [-0.31, 0.078 ]",0.241
+NCT01106625,Placebo,Concomitant medications,"0.138 [0.04, 0.236 ]",<0.01
+NCT01106651,Placebo,Age (in decades),"0.441 [-0.043, 0.925 ]",0.074
+NCT01106651,Placebo,Male,"-0.023 [-0.529, 0.483 ]",0.93
+NCT01106651,Placebo,Asian,"0.512 [-0.303, 1.327 ]",0.218
+NCT01106651,Placebo,Black/African American,"0.789 [0.099, 1.479 ]",0.025
+NCT01106651,Placebo,Other race/ethnicity,"0.086 [-0.984, 1.156 ]",0.875
+NCT01106651,Placebo,BMI (kg/m2),"-0.13 [-0.44, 0.18 ]",0.408
+NCT01106651,Placebo,T2DM duration (years),"-0.041 [-0.292, 0.21 ]",0.75
+NCT01106651,Placebo,Current smoker,"-0.137 [-0.966, 0.692 ]",0.746
+NCT01106651,Placebo,HbA1c (%/DCCT units),"0.388 [0.129, 0.647 ]",<0.01
+NCT01106651,Placebo,eGFR (ml/min/1.73m2),"0.011 [-0.365, 0.387 ]",0.954
+NCT01106651,Placebo,Systolic blood pressure (mmHg),"0.027 [-0.259, 0.313 ]",0.853
+NCT01106651,Placebo,HDL cholesterol (mmol/L),"-0.043 [-0.347, 0.261 ]",0.781
+NCT01106651,Placebo,Total cholesterol (mmol/L),"0.158 [-0.138, 0.454 ]",0.296
+NCT01106651,Placebo,Comorbidities,"0.027 [-0.173, 0.227 ]",0.795
+NCT01106651,Placebo,Concomitant medications,"0.005 [-0.066, 0.076 ]",0.896
+NCT01106677,Placebo,Age (in decades),"-0.328 [-0.604, -0.052 ]",0.02
+NCT01106677,Placebo,Male,"-0.154 [-0.538, 0.23 ]",0.432
+NCT01106677,Placebo,Asian,"0.551 [0.002, 1.1 ]",0.049
+NCT01106677,Placebo,Black/African American,"0.611 [-0.21, 1.432 ]",0.145
+NCT01106677,Placebo,Other race/ethnicity,"-0.549 [-1.353, 0.255 ]",0.181
+NCT01106677,Placebo,BMI (kg/m2),"0.144 [-0.046, 0.334 ]",0.138
+NCT01106677,Placebo,T2DM duration (years),"0.021 [-0.222, 0.264 ]",0.865
+NCT01106677,Placebo,Current smoker,"-0.643 [-1.278, -0.008 ]",0.047
+NCT01106677,Placebo,HbA1c (%/DCCT units),"0.269 [0.087, 0.451 ]",<0.01
+NCT01106677,Placebo,eGFR (ml/min/1.73m2),"-0.316 [-0.61, -0.022 ]",0.035
+NCT01106677,Placebo,Systolic blood pressure (mmHg),"0.116 [-0.1, 0.332 ]",0.293
+NCT01106677,Placebo,HDL cholesterol (mmol/L),"0.181 [-0.054, 0.416 ]",0.131
+NCT01106677,Placebo,Total cholesterol (mmol/L),"-0.046 [-0.269, 0.177 ]",0.688
+NCT01106677,Placebo,Comorbidities,"0.101 [-0.046, 0.248 ]",0.176
+NCT01106677,Placebo,Concomitant medications,"-0.019 [-0.06, 0.022 ]",0.361
+NCT01106690,Placebo,Age (in decades),"-0.164 [-0.668, 0.34 ]",0.524
+NCT01106690,Placebo,Male,"0.363 [-0.482, 1.208 ]",0.4
+NCT01106690,Placebo,Asian,"0.256 [-0.82, 1.332 ]",0.642
+NCT01106690,Placebo,Black/African American,"1.089 [-0.457, 2.635 ]",0.167
+NCT01106690,Placebo,Other race/ethnicity,"0.897 [-0.193, 1.987 ]",0.107
+NCT01106690,Placebo,BMI (kg/m2),"-0.124 [-0.473, 0.225 ]",0.487
+NCT01106690,Placebo,T2DM duration (years),"-0.253 [-0.702, 0.196 ]",0.269
+NCT01106690,Placebo,Current smoker,"-0.205 [-1.534, 1.124 ]",0.762
+NCT01106690,Placebo,HbA1c (%/DCCT units),"0.012 [-0.302, 0.326 ]",0.942
+NCT01106690,Placebo,eGFR (ml/min/1.73m2),"-0.029 [-0.648, 0.59 ]",0.928
+NCT01106690,Placebo,Systolic blood pressure (mmHg),"0.326 [-0.121, 0.773 ]",0.152
+NCT01106690,Placebo,HDL cholesterol (mmol/L),"0.013 [-0.428, 0.454 ]",0.953
+NCT01106690,Placebo,Total cholesterol (mmol/L),"0.083 [-0.364, 0.53 ]",0.717
+NCT01106690,Placebo,Comorbidities,"0.106 [-0.19, 0.402 ]",0.481
+NCT01106690,Placebo,Concomitant medications,"-0.005 [-0.128, 0.118 ]",0.936
+NCT01126580,Active,Age (in decades),"0.049 [-0.359, 0.457 ]",0.814
+NCT01126580,Active,Male,"0.082 [-0.518, 0.682 ]",0.789
+NCT01126580,Active,Asian,"-0.294 [-1.521, 0.933 ]",0.639
+NCT01126580,Active,Black/African American,"0.065 [-1.158, 1.288 ]",0.917
+NCT01126580,Active,Other race/ethnicity,"-0.249 [-1.211, 0.713 ]",0.613
+NCT01126580,Active,BMI (kg/m2),"0.023 [-0.308, 0.354 ]",0.893
+NCT01126580,Active,T2DM duration (years),"0.468 [-0.383, 1.319 ]",0.281
+NCT01126580,Active,Current smoker,"0.249 [-0.429, 0.927 ]",0.472
+NCT01126580,Active,HbA1c (%/DCCT units),"0.122 [-0.205, 0.449 ]",0.463
+NCT01126580,Active,eGFR (ml/min/1.73m2),"0.018 [-0.445, 0.481 ]",0.94
+NCT01126580,Active,Systolic blood pressure (mmHg),"0.054 [-0.224, 0.332 ]",0.702
+NCT01126580,Active,HDL cholesterol (mmol/L),"0.209 [-0.14, 0.558 ]",0.242
+NCT01126580,Active,Total cholesterol (mmol/L),"0.049 [-0.572, 0.67 ]",0.877
+NCT01126580,Active,Comorbidities,"0.013 [-0.25, 0.276 ]",0.921
+NCT01126580,Active,Concomitant medications,"0.002 [-0.129, 0.133 ]",0.981
+NCT01137812,Active,Age (in decades),"-0.157 [-0.392, 0.078 ]",0.189
+NCT01137812,Active,Male,"-0.3 [-0.633, 0.033 ]",0.078
+NCT01137812,Active,Asian,"-0.126 [-0.596, 0.344 ]",0.6
+NCT01137812,Active,Black/African American,"-0.339 [-0.874, 0.196 ]",0.215
+NCT01137812,Active,Other race/ethnicity,"-0.399 [-1.089, 0.291 ]",0.257
+NCT01137812,Active,BMI (kg/m2),"0.049 [-0.104, 0.202 ]",0.534
+NCT01137812,Active,T2DM duration (years),"0.019 [-0.153, 0.191 ]",0.831
+NCT01137812,Active,Current smoker,"-0.236 [-0.773, 0.301 ]",0.39
+NCT01137812,Active,HbA1c (%/DCCT units),"0.495 [0.332, 0.658 ]",<0.01
+NCT01137812,Active,eGFR (ml/min/1.73m2),"-0.263 [-0.51, -0.016 ]",0.037
+NCT01137812,Active,Systolic blood pressure (mmHg),"0.081 [-0.097, 0.259 ]",0.376
+NCT01137812,Active,HDL cholesterol (mmol/L),"-0.127 [-0.333, 0.079 ]",0.23
+NCT01137812,Active,Total cholesterol (mmol/L),"-0.079 [-0.259, 0.101 ]",0.386
+NCT01137812,Active,Comorbidities,"0.105 [-0.026, 0.236 ]",0.117
+NCT01137812,Active,Concomitant medications,"-0.024 [-0.085, 0.037 ]",0.447
+NCT01159600,Placebo,Age (in decades),"0.064 [-0.424, 0.552 ]",0.798
+NCT01159600,Placebo,Male,"-0.307 [-1.007, 0.393 ]",0.39
+NCT01159600,Placebo,Asian,"-0.411 [-1.156, 0.334 ]",0.279
+NCT01159600,Placebo,Black/African American,"0.666 [-0.912, 2.244 ]",0.408
+NCT01159600,Placebo,BMI (kg/m2),"-0.378 [-0.805, 0.049 ]",0.083
+NCT01159600,Placebo,T2DM duration (years),"0.28 [-0.077, 0.637 ]",0.125
+NCT01159600,Placebo,Current smoker,"0.318 [-0.535, 1.171 ]",0.465
+NCT01159600,Placebo,HbA1c (%/DCCT units),"0.018 [-0.325, 0.361 ]",0.917
+NCT01159600,Placebo,eGFR (ml/min/1.73m2),"0.021 [-0.477, 0.519 ]",0.933
+NCT01159600,Placebo,Systolic blood pressure (mmHg),"-0.029 [-0.341, 0.283 ]",0.853
+NCT01159600,Placebo,HDL cholesterol (mmol/L),"-0.237 [-0.625, 0.151 ]",0.23
+NCT01159600,Placebo,Total cholesterol (mmol/L),"0.054 [-0.307, 0.415 ]",0.769
+NCT01159600,Placebo,Comorbidities,"0.133 [-0.141, 0.407 ]",0.343
+NCT01159600,Placebo,Concomitant medications,"0.055 [-0.086, 0.196 ]",0.446
+NCT01164501,Placebo,Age (in decades),"-0.322 [-0.734, 0.09 ]",0.125
+NCT01164501,Placebo,Male,"0.703 [-0.008, 1.414 ]",0.053
+NCT01164501,Placebo,Asian,"-0.709 [-1.528, 0.11 ]",0.09
+NCT01164501,Placebo,Other race/ethnicity,"-0.468 [-2.551, 1.615 ]",0.66
+NCT01164501,Placebo,BMI (kg/m2),"0.102 [-0.261, 0.465 ]",0.582
+NCT01164501,Placebo,T2DM duration (years),"0.057 [-0.345, 0.459 ]",0.779
+NCT01164501,Placebo,Current smoker,"0.015 [-1.038, 1.068 ]",0.978
+NCT01164501,Placebo,HbA1c (%/DCCT units),"0.274 [-0.071, 0.619 ]",0.12
+NCT01164501,Placebo,eGFR (ml/min/1.73m2),"-0.501 [-0.854, -0.148 ]",<0.01
+NCT01164501,Placebo,Systolic blood pressure (mmHg),"-0.045 [-0.312, 0.222 ]",0.743
+NCT01164501,Placebo,HDL cholesterol (mmol/L),"-0.134 [-0.493, 0.225 ]",0.465
+NCT01164501,Placebo,Total cholesterol (mmol/L),"0.337 [-0.012, 0.686 ]",0.058
+NCT01164501,Placebo,Comorbidities,"0.084 [-0.153, 0.321 ]",0.488
+NCT01164501,Placebo,Concomitant medications,"-0.015 [-0.125, 0.095 ]",0.786
+NCT01167881,Active,Age (in decades),"-0.156 [-0.368, 0.056 ]",0.149
+NCT01167881,Active,Male,"-0.236 [-0.548, 0.076 ]",0.138
+NCT01167881,Active,Asian,"-0.464 [-0.856, -0.072 ]",0.02
+NCT01167881,Active,Black/African American,"1.094 [0.179, 2.009 ]",0.019
+NCT01167881,Active,BMI (kg/m2),"0.044 [-0.128, 0.216 ]",0.612
+NCT01167881,Active,T2DM duration (years),"-0.044 [-0.248, 0.16 ]",0.675
+NCT01167881,Active,Current smoker,"0.44 [0.079, 0.801 ]",0.017
+NCT01167881,Active,HbA1c (%/DCCT units),"0.163 [0.006, 0.32 ]",0.041
+NCT01167881,Active,eGFR (ml/min/1.73m2),"-0.049 [-0.319, 0.221 ]",0.721
+NCT01167881,Active,Systolic blood pressure (mmHg),"0.051 [-0.084, 0.186 ]",0.459
+NCT01167881,Active,HDL cholesterol (mmol/L),"-0.193 [-0.387, 0.001 ]",0.051
+NCT01167881,Active,Total cholesterol (mmol/L),"-0.09 [-0.274, 0.094 ]",0.337
+NCT01167881,Active,Comorbidities,"0.126 [-0.029, 0.281 ]",0.109
+NCT01167881,Active,Concomitant medications,"-0.037 [-0.092, 0.018 ]",0.193
+NCT01169779,Placebo,Age (in decades),"0.258 [-1.21, 1.726 ]",0.731
+NCT01169779,Placebo,Male,"-0.312 [-2.274, 1.65 ]",0.755
+NCT01169779,Placebo,BMI (kg/m2),"-0.49 [-1.437, 0.457 ]",0.311
+NCT01169779,Placebo,T2DM duration (years),"-2.611 [-4.859, -0.363 ]",0.023
+NCT01169779,Placebo,Current smoker,"-0.013 [-1.812, 1.786 ]",0.989
+NCT01169779,Placebo,HbA1c (%/DCCT units),"0.79 [-0.364, 1.944 ]",0.18
+NCT01169779,Placebo,eGFR (ml/min/1.73m2),"1.778 [-1.315, 4.871 ]",0.26
+NCT01169779,Placebo,Systolic blood pressure (mmHg),"1.162 [0.29, 2.034 ]",<0.01
+NCT01169779,Placebo,HDL cholesterol (mmol/L),"-1 [-2.237, 0.237 ]",0.113
+NCT01169779,Placebo,Total cholesterol (mmol/L),"0.651 [-0.327, 1.629 ]",0.192
+NCT01169779,Placebo,Comorbidities,"-1.505 [-3.255, 0.245 ]",0.092
+NCT01169779,Placebo,Concomitant medications,"0.145 [-0.541, 0.831 ]",0.678
+NCT01177813,Placebo,Age (in decades),"-0.361 [-0.729, 0.007 ]",0.055
+NCT01177813,Placebo,Male,"-0.264 [-0.844, 0.316 ]",0.372
+NCT01177813,Placebo,Asian,"-0.722 [-1.479, 0.035 ]",0.061
+NCT01177813,Placebo,Black/African American,"0.052 [-1.373, 1.477 ]",0.943
+NCT01177813,Placebo,BMI (kg/m2),"-0.281 [-0.657, 0.095 ]",0.142
+NCT01177813,Placebo,T2DM duration (years),"0.145 [-0.286, 0.576 ]",0.511
+NCT01177813,Placebo,Current smoker,"0.768 [0.155, 1.381 ]",0.014
+NCT01177813,Placebo,HbA1c (%/DCCT units),"0.006 [-0.321, 0.333 ]",0.971
+NCT01177813,Placebo,eGFR (ml/min/1.73m2),"-0.304 [-0.751, 0.143 ]",0.183
+NCT01177813,Placebo,Systolic blood pressure (mmHg),"0.154 [-0.077, 0.385 ]",0.193
+NCT01177813,Placebo,HDL cholesterol (mmol/L),"-0.085 [-0.414, 0.244 ]",0.612
+NCT01177813,Placebo,Total cholesterol (mmol/L),"-0.22 [-0.547, 0.107 ]",0.188
+NCT01177813,Placebo,Comorbidities,"-0.185 [-0.508, 0.138 ]",0.262
+NCT01177813,Placebo,Concomitant medications,"-0.027 [-0.17, 0.116 ]",0.709
+NCT01191268,Active,Age (in decades),"-0.271 [-0.665, 0.123 ]",0.179
+NCT01191268,Active,Male,"0.168 [-0.479, 0.815 ]",0.61
+NCT01191268,Active,Black/African American,"0.131 [-0.831, 1.093 ]",0.789
+NCT01191268,Active,Other race/ethnicity,"-0.132 [-1.067, 0.803 ]",0.782
+NCT01191268,Active,BMI (kg/m2),"0.094 [-0.231, 0.419 ]",0.572
+NCT01191268,Active,T2DM duration (years),"0.19 [-0.104, 0.484 ]",0.206
+NCT01191268,Active,Current smoker,"0.489 [-0.217, 1.195 ]",0.174
+NCT01191268,Active,HbA1c (%/DCCT units),"0.032 [-0.231, 0.295 ]",0.811
+NCT01191268,Active,eGFR (ml/min/1.73m2),"0.083 [-0.28, 0.446 ]",0.655
+NCT01191268,Active,Systolic blood pressure (mmHg),"-0.224 [-0.506, 0.058 ]",0.119
+NCT01191268,Active,HDL cholesterol (mmol/L),"-0.246 [-0.63, 0.138 ]",0.209
+NCT01191268,Active,Total cholesterol (mmol/L),"0.437 [0.102, 0.772 ]",0.01
+NCT01191268,Active,Comorbidities,"-0.058 [-0.309, 0.193 ]",0.65
+NCT01191268,Active,Concomitant medications,"0.081 [-0.021, 0.183 ]",0.119
+NCT01194830,Placebo,Age (in decades),"0.098 [-0.417, 0.613 ]",0.711
+NCT01194830,Placebo,Male,"-0.04 [-0.828, 0.748 ]",0.921
+NCT01194830,Placebo,BMI (kg/m2),"-0.031 [-0.427, 0.365 ]",0.878
+NCT01194830,Placebo,T2DM duration (years),"0.136 [-0.305, 0.577 ]",0.546
+NCT01194830,Placebo,Current smoker,"-0.55 [-2.055, 0.955 ]",0.474
+NCT01194830,Placebo,HbA1c (%/DCCT units),"0.123 [-0.177, 0.423 ]",0.421
+NCT01194830,Placebo,eGFR (ml/min/1.73m2),"0.286 [-0.22, 0.792 ]",0.268
+NCT01194830,Placebo,Systolic blood pressure (mmHg),"0.283 [-0.093, 0.659 ]",0.14
+NCT01194830,Placebo,HDL cholesterol (mmol/L),"0.23 [-0.111, 0.571 ]",0.185
+NCT01194830,Placebo,Total cholesterol (mmol/L),"-0.114 [-0.561, 0.333 ]",0.618
+NCT01194830,Placebo,Comorbidities,"-0.133 [-0.523, 0.257 ]",0.505
+NCT01194830,Placebo,Concomitant medications,"0.02 [-0.147, 0.187 ]",0.813
+NCT01210001,Placebo,Age (in decades),"-0.715 [-1.474, 0.044 ]",0.065
+NCT01210001,Placebo,Male,"-0.307 [-1.55, 0.936 ]",0.628
+NCT01210001,Placebo,Asian,"0.377 [-1.087, 1.841 ]",0.614
+NCT01210001,Placebo,BMI (kg/m2),"0.142 [-0.522, 0.806 ]",0.674
+NCT01210001,Placebo,T2DM duration (years),"0.415 [-0.149, 0.979 ]",0.149
+NCT01210001,Placebo,Current smoker,"1.09 [-0.472, 2.652 ]",0.171
+NCT01210001,Placebo,HbA1c (%/DCCT units),"-0.077 [-0.669, 0.515 ]",0.799
+NCT01210001,Placebo,eGFR (ml/min/1.73m2),"-0.614 [-1.306, 0.078 ]",0.082
+NCT01210001,Placebo,Systolic blood pressure (mmHg),"-0.369 [-0.939, 0.201 ]",0.204
+NCT01210001,Placebo,HDL cholesterol (mmol/L),"0.323 [-0.357, 1.003 ]",0.351
+NCT01210001,Placebo,Total cholesterol (mmol/L),"-0.529 [-1.242, 0.184 ]",0.147
+NCT01210001,Placebo,Comorbidities,"0.404 [-0.033, 0.841 ]",0.07
+NCT01210001,Placebo,Concomitant medications,"0.038 [-0.166, 0.242 ]",0.719
+NCT01214239,Placebo,Age (in decades),"-0.741 [-1.67, 0.188 ]",0.118
+NCT01214239,Placebo,Male,"-1.123 [-2.368, 0.122 ]",0.077
+NCT01214239,Placebo,BMI (kg/m2),"-0.169 [-1.178, 0.84 ]",0.743
+NCT01214239,Placebo,T2DM duration (years),"0.335 [-0.67, 1.34 ]",0.513
+NCT01214239,Placebo,Current smoker,"0.669 [-1.575, 2.913 ]",0.559
+NCT01214239,Placebo,HbA1c (%/DCCT units),"0.3 [-0.331, 0.931 ]",0.352
+NCT01214239,Placebo,eGFR (ml/min/1.73m2),"-0.351 [-1.404, 0.702 ]",0.513
+NCT01214239,Placebo,Systolic blood pressure (mmHg),"0.236 [-0.321, 0.793 ]",0.406
+NCT01214239,Placebo,HDL cholesterol (mmol/L),"-0.003 [-0.583, 0.577 ]",0.993
+NCT01214239,Placebo,Total cholesterol (mmol/L),"-0.081 [-0.924, 0.762 ]",0.851
+NCT01215097,Placebo,Age (in decades),"-0.198 [-0.943, 0.547 ]",0.603
+NCT01215097,Placebo,Male,"-0.361 [-1.686, 0.964 ]",0.593
+NCT01215097,Placebo,BMI (kg/m2),"0.062 [-0.759, 0.883 ]",0.882
+NCT01215097,Placebo,T2DM duration (years),"0.24 [-0.432, 0.912 ]",0.483
+NCT01215097,Placebo,Current smoker,"0.673 [-0.85, 2.196 ]",0.387
+NCT01215097,Placebo,HbA1c (%/DCCT units),"-0.123 [-0.778, 0.532 ]",0.714
+NCT01215097,Placebo,eGFR (ml/min/1.73m2),"-0.183 [-1.079, 0.713 ]",0.69
+NCT01215097,Placebo,Systolic blood pressure (mmHg),"-0.263 [-0.931, 0.405 ]",0.442
+NCT01215097,Placebo,HDL cholesterol (mmol/L),"-0.281 [-1.071, 0.509 ]",0.485
+NCT01215097,Placebo,Total cholesterol (mmol/L),"-0.272 [-0.995, 0.451 ]",0.46
+NCT01215097,Placebo,Comorbidities,"-0.842 [-2.128, 0.444 ]",0.199
+NCT01215097,Placebo,Concomitant medications,"0.305 [-0.062, 0.672 ]",0.103
+NCT01289119,Placebo,Age (in decades),"-0.575 [-1.19, 0.04 ]",0.067
+NCT01289119,Placebo,Male,"-0.256 [-1.175, 0.663 ]",0.585
+NCT01289119,Placebo,BMI (kg/m2),"-0.188 [-1.058, 0.682 ]",0.673
+NCT01289119,Placebo,T2DM duration (years),"0.032 [-0.384, 0.448 ]",0.878
+NCT01289119,Placebo,HbA1c (%/DCCT units),"0.498 [0.018, 0.978 ]",0.042
+NCT01289119,Placebo,eGFR (ml/min/1.73m2),"-0.477 [-1.024, 0.07 ]",0.087
+NCT01289119,Placebo,Systolic blood pressure (mmHg),"0.26 [-0.203, 0.723 ]",0.272
+NCT01289119,Placebo,HDL cholesterol (mmol/L),"-0.014 [-0.522, 0.494 ]",0.958
+NCT01289119,Placebo,Total cholesterol (mmol/L),"-0.075 [-0.61, 0.46 ]",0.783
+NCT01289119,Placebo,Comorbidities,"0.038 [-0.595, 0.671 ]",0.907
+NCT01289119,Placebo,Concomitant medications,"-0.041 [-0.435, 0.353 ]",0.839
+NCT01306214,Placebo,Age (in decades),"0.022 [-0.621, 0.665 ]",0.948
+NCT01306214,Placebo,Male,"-0.538 [-1.416, 0.34 ]",0.23
+NCT01306214,Placebo,Black/African American,"1.448 [0.051, 2.845 ]",0.042
+NCT01306214,Placebo,BMI (kg/m2),"-0.372 [-0.97, 0.226 ]",0.222
+NCT01306214,Placebo,T2DM duration (years),"-0.025 [-0.486, 0.436 ]",0.917
+NCT01306214,Placebo,Current smoker,"1.201 [0.297, 2.105 ]",<0.01
+NCT01306214,Placebo,HbA1c (%/DCCT units),"0.311 [-0.222, 0.844 ]",0.252
+NCT01306214,Placebo,eGFR (ml/min/1.73m2),"0.092 [-0.71, 0.894 ]",0.822
+NCT01306214,Placebo,Systolic blood pressure (mmHg),"-0.078 [-0.501, 0.345 ]",0.717
+NCT01306214,Placebo,HDL cholesterol (mmol/L),"0.25 [-0.156, 0.656 ]",0.228
+NCT01306214,Placebo,Total cholesterol (mmol/L),"-0.129 [-0.523, 0.265 ]",0.52
+NCT01306214,Placebo,Comorbidities,"0.079 [-0.186, 0.344 ]",0.558
+NCT01306214,Placebo,Concomitant medications,"0.042 [-0.08, 0.164 ]",0.499
+NCT01370005,Placebo,Age (in decades),"-0.356 [-1.25, 0.538 ]",0.435
+NCT01370005,Placebo,Male,"-1.051 [-2.266, 0.164 ]",0.09
+NCT01370005,Placebo,Asian,"5.057 [2.468, 7.646 ]",<0.01
+NCT01370005,Placebo,Black/African American,"-0.093 [-2.445, 2.259 ]",0.938
+NCT01370005,Placebo,BMI (kg/m2),"0.131 [-0.573, 0.835 ]",0.714
+NCT01370005,Placebo,T2DM duration (years),"-0.048 [-0.759, 0.663 ]",0.895
+NCT01370005,Placebo,Current smoker,"0.458 [-1.208, 2.124 ]",0.589
+NCT01370005,Placebo,HbA1c (%/DCCT units),"0.361 [-0.313, 1.035 ]",0.294
+NCT01370005,Placebo,eGFR (ml/min/1.73m2),"-0.189 [-1.189, 0.811 ]",0.711
+NCT01370005,Placebo,Systolic blood pressure (mmHg),"-0.374 [-1.305, 0.557 ]",0.43
+NCT01370005,Placebo,HDL cholesterol (mmol/L),"0.123 [-0.528, 0.774 ]",0.711
+NCT01370005,Placebo,Total cholesterol (mmol/L),"-0.36 [-1.111, 0.391 ]",0.347
+NCT01370005,Placebo,Comorbidities,"0.035 [-0.573, 0.643 ]",0.909
+NCT01370005,Placebo,Concomitant medications,"-0.109 [-0.411, 0.193 ]",0.477
+NCT01422876,Active,Age (in decades),"-0.107 [-0.513, 0.299 ]",0.606
+NCT01422876,Active,Male,"0.29 [-0.435, 1.015 ]",0.434
+NCT01422876,Active,Asian,"1.355 [0.393, 2.317 ]",<0.01
+NCT01422876,Active,Black/African American,"-0.429 [-1.525, 0.667 ]",0.443
+NCT01422876,Active,BMI (kg/m2),"0.2 [-0.147, 0.547 ]",0.258
+NCT01422876,Active,T2DM duration (years),"-0.25 [-0.756, 0.256 ]",0.331
+NCT01422876,Active,Current smoker,"0.569 [-0.199, 1.337 ]",0.146
+NCT01422876,Active,HbA1c (%/DCCT units),"0.051 [-0.294, 0.396 ]",0.771
+NCT01422876,Active,eGFR (ml/min/1.73m2),"-0.002 [-0.551, 0.547 ]",0.994
+NCT01422876,Active,Systolic blood pressure (mmHg),"-0.067 [-0.424, 0.29 ]",0.713
+NCT01422876,Active,HDL cholesterol (mmol/L),"0.186 [-0.245, 0.617 ]",0.397
+NCT01422876,Active,Total cholesterol (mmol/L),"0.08 [-0.273, 0.433 ]",0.656
+NCT01422876,Active,Comorbidities,"0.176 [-0.106, 0.458 ]",0.222
+NCT01422876,Active,Concomitant medications,"-0.011 [-0.154, 0.132 ]",0.878
+NCT01438814,Active,Age (in decades),"0.321 [-2.399, 3.041 ]",0.817
+NCT01438814,Active,Male,"-3.112 [-15.244, 9.02 ]",0.615
+NCT01438814,Active,Asian,"-1.772 [-4.892, 1.348 ]",0.266
+NCT01438814,Active,Other race/ethnicity,"-0.724 [-3.16, 1.712 ]",0.56
+NCT01438814,Active,BMI (kg/m2),"0.16 [-2.265, 2.585 ]",0.897
+NCT01438814,Active,T2DM duration (years),"0.202 [-1.335, 1.739 ]",0.797
+NCT01438814,Active,Current smoker,"0.614 [-1.83, 3.058 ]",0.623
+NCT01438814,Active,HbA1c (%/DCCT units),"0.384 [-0.714, 1.482 ]",0.493
+NCT01438814,Active,eGFR (ml/min/1.73m2),"-0.155 [-1.727, 1.417 ]",0.846
+NCT01438814,Active,Systolic blood pressure (mmHg),"0.168 [-1.62, 1.956 ]",0.854
+NCT01438814,Active,HDL cholesterol (mmol/L),"-4.194 [-28.084, 19.696 ]",0.731
+NCT01438814,Active,Total cholesterol (mmol/L),"-5.124 [-20.277, 10.029 ]",0.508
+NCT01438814,Active,Comorbidities,"-1.058 [-2.344, 0.228 ]",0.107
+NCT01438814,Active,Concomitant medications,"-0.285 [-0.977, 0.407 ]",0.42
+NCT01558271,Placebo,Age (in decades),"0.062 [-1.283, 1.407 ]",0.928
+NCT01558271,Placebo,Male,"-1.329 [-3.226, 0.568 ]",0.17
+NCT01558271,Placebo,BMI (kg/m2),"0.781 [-1.038, 2.6 ]",0.4
+NCT01558271,Placebo,T2DM duration (years),"0.04 [-1.065, 1.145 ]",0.944
+NCT01558271,Placebo,Current smoker,"-1.291 [-3.616, 1.034 ]",0.276
+NCT01558271,Placebo,HbA1c (%/DCCT units),"1.188 [0.118, 2.258 ]",0.03
+NCT01558271,Placebo,eGFR (ml/min/1.73m2),"0.029 [-1.745, 1.803 ]",0.974
+NCT01558271,Placebo,Systolic blood pressure (mmHg),"-0.323 [-1.181, 0.535 ]",0.46
+NCT01558271,Placebo,HDL cholesterol (mmol/L),"1.353 [-0.133, 2.839 ]",0.074
+NCT01558271,Placebo,Total cholesterol (mmol/L),"-2.17 [-5.13, 0.79 ]",0.151
+NCT01558271,Placebo,Comorbidities,"0.012 [-1.07, 1.094 ]",0.983
+NCT01558271,Placebo,Concomitant medications,"-0.026 [-0.328, 0.276 ]",0.863
+NCT01606007,Active,Age (in decades),"-0.516 [-1.408, 0.376 ]",0.257
+NCT01606007,Active,Male,"-1.779 [-3.449, -0.109 ]",0.037
+NCT01606007,Active,BMI (kg/m2),"-0.019 [-0.942, 0.904 ]",0.968
+NCT01606007,Active,T2DM duration (years),"0.588 [-0.133, 1.309 ]",0.11
+NCT01606007,Active,HbA1c (%/DCCT units),"0.616 [0.026, 1.206 ]",0.041
+NCT01606007,Active,eGFR (ml/min/1.73m2),"-0.669 [-1.627, 0.289 ]",0.171
+NCT01606007,Active,Systolic blood pressure (mmHg),"-0.648 [-1.597, 0.301 ]",0.181
+NCT01606007,Active,HDL cholesterol (mmol/L),"-0.666 [-1.058, -0.274 ]",<0.01
+NCT01606007,Active,Total cholesterol (mmol/L),"0.309 [-0.279, 0.897 ]",0.302
+NCT01606007,Active,Concomitant medications,"-0.088 [-0.306, 0.13 ]",0.432
+NCT01621178,Active,Age (in decades),"0.127 [-0.381, 0.635 ]",0.624
+NCT01621178,Active,Male,"0.039 [-0.774, 0.852 ]",0.925
+NCT01621178,Active,Black/African American,"-0.936 [-2.447, 0.575 ]",0.225
+NCT01621178,Active,Other race/ethnicity,"-0.589 [-1.769, 0.591 ]",0.327
+NCT01621178,Active,BMI (kg/m2),"-0.345 [-0.813, 0.123 ]",0.148
+NCT01621178,Active,T2DM duration (years),"0.11 [-0.151, 0.371 ]",0.408
+NCT01621178,Active,Current smoker,"-0.517 [-2.579, 1.545 ]",0.623
+NCT01621178,Active,HbA1c (%/DCCT units),"0.062 [-0.293, 0.417 ]",0.734
+NCT01621178,Active,eGFR (ml/min/1.73m2),"-0.503 [-1.126, 0.12 ]",0.114
+NCT01621178,Active,Systolic blood pressure (mmHg),"0.395 [-0.113, 0.903 ]",0.127
+NCT01621178,Active,HDL cholesterol (mmol/L),"-0.028 [-0.465, 0.409 ]",0.899
+NCT01621178,Active,Total cholesterol (mmol/L),"0.244 [-0.07, 0.558 ]",0.128
+NCT01621178,Active,Comorbidities,"0.009 [-0.179, 0.197 ]",0.928
+NCT01621178,Active,Concomitant medications,"0.014 [-0.104, 0.132 ]",0.816
+NCT01632163,Placebo,Age (in decades),"-0.732 [-1.428, -0.036 ]",0.039
+NCT01632163,Placebo,Male,"0.986 [-0.214, 2.186 ]",0.107
+NCT01632163,Placebo,BMI (kg/m2),"0.103 [-0.82, 1.026 ]",0.827
+NCT01632163,Placebo,T2DM duration (years),"-0.351 [-1.264, 0.562 ]",0.451
+NCT01632163,Placebo,Current smoker,"-1.196 [-2.907, 0.515 ]",0.171
+NCT01632163,Placebo,HbA1c (%/DCCT units),"1.207 [0.525, 1.889 ]",<0.01
+NCT01632163,Placebo,eGFR (ml/min/1.73m2),"-0.92 [-1.651, -0.189 ]",0.014
+NCT01632163,Placebo,Systolic blood pressure (mmHg),"-0.521 [-1.162, 0.12 ]",0.111
+NCT01632163,Placebo,HDL cholesterol (mmol/L),"0.079 [-0.603, 0.761 ]",0.821
+NCT01632163,Placebo,Total cholesterol (mmol/L),"0.158 [-0.344, 0.66 ]",0.539
+NCT01632163,Placebo,Comorbidities,"1.006 [0.275, 1.737 ]",<0.01
+NCT01632163,Placebo,Concomitant medications,"-0.158 [-0.503, 0.187 ]",0.369
+NCT01648582,Active,Age (in decades),"-0.591 [-1.199, 0.017 ]",0.056
+NCT01648582,Active,Male,"0.596 [-0.339, 1.531 ]",0.212
+NCT01648582,Active,Asian,"1.146 [-0.614, 2.906 ]",0.202
+NCT01648582,Active,BMI (kg/m2),"0.746 [-0.06, 1.552 ]",0.069
+NCT01648582,Active,T2DM duration (years),"-0.037 [-0.603, 0.529 ]",0.897
+NCT01648582,Active,Current smoker,"-1.581 [-3.169, 0.007 ]",0.051
+NCT01648582,Active,HbA1c (%/DCCT units),"0.011 [-0.379, 0.401 ]",0.956
+NCT01648582,Active,eGFR (ml/min/1.73m2),"-0.453 [-1.131, 0.225 ]",0.191
+NCT01648582,Active,Systolic blood pressure (mmHg),"-0.129 [-0.625, 0.367 ]",0.61
+NCT01648582,Active,HDL cholesterol (mmol/L),"0.945 [-0.305, 2.195 ]",0.138
+NCT01648582,Active,Total cholesterol (mmol/L),"0.108 [-1.258, 1.474 ]",0.877
+NCT01648582,Active,Comorbidities,"0.448 [-0.201, 1.097 ]",0.176
+NCT01648582,Active,Concomitant medications,"-0.169 [-0.51, 0.172 ]",0.331
+NCT01708902,Active,Age (in decades),"0.154 [-0.483, 0.791 ]",0.635
+NCT01708902,Active,Male,"-0.343 [-1.313, 0.627 ]",0.489
+NCT01708902,Active,BMI (kg/m2),"0.026 [-0.734, 0.786 ]",0.946
+NCT01708902,Active,T2DM duration (years),"-0.066 [-1.269, 1.137 ]",0.914
+NCT01708902,Active,Current smoker,"0.288 [-0.8, 1.376 ]",0.604
+NCT01708902,Active,HbA1c (%/DCCT units),"-0.076 [-0.45, 0.298 ]",0.69
+NCT01708902,Active,eGFR (ml/min/1.73m2),"0.015 [-0.843, 0.873 ]",0.974
+NCT01708902,Active,Systolic blood pressure (mmHg),"-0.099 [-0.544, 0.346 ]",0.664
+NCT01708902,Active,HDL cholesterol (mmol/L),"0.212 [-0.345, 0.769 ]",0.455
+NCT01708902,Active,Total cholesterol (mmol/L),"-0.182 [-0.648, 0.284 ]",0.445
+NCT01719003,Active,Age (in decades),"0.109 [-0.344, 0.562 ]",0.635
+NCT01719003,Active,Male,"0.14 [-0.566, 0.846 ]",0.697
+NCT01719003,Active,Asian,"0.633 [-0.206, 1.472 ]",0.14
+NCT01719003,Active,Black/African American,"-0.57 [-2.614, 1.474 ]",0.585
+NCT01719003,Active,Other race/ethnicity,"-0.192 [-1.282, 0.898 ]",0.73
+NCT01719003,Active,BMI (kg/m2),"0.268 [-0.11, 0.646 ]",0.166
+NCT01719003,Active,T2DM duration (years),"0.598 [0.098, 1.098 ]",0.019
+NCT01719003,Active,Current smoker,"0.074 [-0.79, 0.938 ]",0.866
+NCT01719003,Active,HbA1c (%/DCCT units),"-0.04 [-0.338, 0.258 ]",0.793
+NCT01719003,Active,eGFR (ml/min/1.73m2),"0.277 [-0.35, 0.904 ]",0.388
+NCT01719003,Active,Systolic blood pressure (mmHg),"-0.014 [-0.349, 0.321 ]",0.935
+NCT01719003,Active,HDL cholesterol (mmol/L),"0.132 [-0.266, 0.53 ]",0.516
+NCT01719003,Active,Total cholesterol (mmol/L),"0.1 [-0.231, 0.431 ]",0.554
+NCT01719003,Active,Comorbidities,"-0.156 [-0.491, 0.179 ]",0.362
+NCT01719003,Active,Concomitant medications,"-0.001 [-0.177, 0.175 ]",0.99
+NCT01733758,Placebo,Age (in decades),"-0.323 [-1.399, 0.753 ]",0.556
+NCT01733758,Placebo,Male,"-0.397 [-1.559, 0.765 ]",0.503
+NCT01733758,Placebo,BMI (kg/m2),"0.217 [-0.771, 1.205 ]",0.668
+NCT01733758,Placebo,T2DM duration (years),"0.44 [-0.366, 1.246 ]",0.285
+NCT01733758,Placebo,Current smoker,"-0.121 [-1.315, 1.073 ]",0.842
+NCT01733758,Placebo,HbA1c (%/DCCT units),"0.334 [-0.272, 0.94 ]",0.28
+NCT01733758,Placebo,eGFR (ml/min/1.73m2),"0.44 [-1.351, 2.231 ]",0.63
+NCT01733758,Placebo,Systolic blood pressure (mmHg),"0.042 [-0.636, 0.72 ]",0.903
+NCT01733758,Placebo,HDL cholesterol (mmol/L),"-0.4 [-1.088, 0.288 ]",0.255
+NCT01733758,Placebo,Total cholesterol (mmol/L),"0.362 [-0.657, 1.381 ]",0.487
+NCT01733758,Placebo,Concomitant medications,"0.002 [-0.253, 0.257 ]",0.99
+NCT01768559,Active,Age (in decades),"3.673 [-1.835, 9.181 ]",0.191
+NCT01768559,Active,Male,"-13.204 [-34.194, 7.786 ]",0.218
+NCT01768559,Active,BMI (kg/m2),"-3.006 [-7.561, 1.549 ]",0.196
+NCT01768559,Active,T2DM duration (years),"1.422 [-0.895, 3.739 ]",0.229
+NCT01768559,Active,Current smoker,"-2.227 [-6.649, 2.195 ]",0.324
+NCT01768559,Active,HbA1c (%/DCCT units),"-0.56 [-2.032, 0.912 ]",0.456
+NCT01768559,Active,eGFR (ml/min/1.73m2),"1.075 [-1.114, 3.264 ]",0.336
+NCT01768559,Active,Systolic blood pressure (mmHg),"1.111 [-0.4, 2.622 ]",0.149
+NCT01768559,Active,HDL cholesterol (mmol/L),"-32.832 [-80.709, 15.045 ]",0.179
+NCT01768559,Active,Total cholesterol (mmol/L),"-0.296 [-10.319, 9.727 ]",0.954
+NCT01768559,Active,Comorbidities,"-0.351 [-1.082, 0.38 ]",0.347
+NCT01768559,Active,Concomitant medications,"-0.156 [-0.558, 0.246 ]",0.446
+NCT01798706,Placebo,Age (in decades),"-0.179 [-1.469, 1.111 ]",0.786
+NCT01798706,Placebo,Male,"-0.058 [-1.189, 1.073 ]",0.919
+NCT01798706,Placebo,Other race/ethnicity,"-0.21 [-1.364, 0.944 ]",0.721
+NCT01798706,Placebo,BMI (kg/m2),"-0.243 [-0.947, 0.461 ]",0.498
+NCT01798706,Placebo,T2DM duration (years),"0.168 [-0.183, 0.519 ]",0.346
+NCT01798706,Placebo,Current smoker,"1.42 [0.285, 2.555 ]",0.014
+NCT01798706,Placebo,HbA1c (%/DCCT units),"0.621 [0.035, 1.207 ]",0.038
+NCT01798706,Placebo,eGFR (ml/min/1.73m2),"-0.83 [-1.461, -0.199 ]",0.01
+NCT01798706,Placebo,Systolic blood pressure (mmHg),"0.092 [-0.357, 0.541 ]",0.689
+NCT01798706,Placebo,HDL cholesterol (mmol/L),"-0.206 [-0.825, 0.413 ]",0.515
+NCT01798706,Placebo,Total cholesterol (mmol/L),"-0.009 [-0.599, 0.581 ]",0.975
+NCT01798706,Placebo,Comorbidities,"0.046 [-0.281, 0.373 ]",0.785
+NCT01798706,Placebo,Concomitant medications,"0.037 [-0.173, 0.247 ]",0.73
+NCT01809327,Active,Age (in decades),"-0.401 [-0.909, 0.107 ]",0.122
+NCT01809327,Active,Male,"0.236 [-0.671, 1.143 ]",0.611
+NCT01809327,Active,Black/African American,"-0.681 [-2.782, 1.42 ]",0.525
+NCT01809327,Active,Other race/ethnicity,"-2.061 [-4.131, 0.009 ]",0.051
+NCT01809327,Active,BMI (kg/m2),"-0.304 [-0.678, 0.07 ]",0.111
+NCT01809327,Active,T2DM duration (years),"-0.185 [-0.912, 0.542 ]",0.618
+NCT01809327,Active,Current smoker,"0.108 [-0.897, 1.113 ]",0.834
+NCT01809327,Active,HbA1c (%/DCCT units),"0.502 [0.186, 0.818 ]",<0.01
+NCT01809327,Active,eGFR (ml/min/1.73m2),"0.065 [-0.695, 0.825 ]",0.867
+NCT01809327,Active,Systolic blood pressure (mmHg),"0.254 [-0.214, 0.722 ]",0.287
+NCT01809327,Active,HDL cholesterol (mmol/L),"-0.141 [-0.77, 0.488 ]",0.662
+NCT01809327,Active,Total cholesterol (mmol/L),"-0.782 [-1.305, -0.259 ]",<0.01
+NCT01809327,Active,Comorbidities,"-0.063 [-0.426, 0.3 ]",0.732
+NCT01809327,Active,Concomitant medications,"0.089 [-0.042, 0.22 ]",0.182
+NCT01890122,Placebo,Age (in decades),"-0.366 [-0.703, -0.029 ]",0.033
+NCT01890122,Placebo,Male,"-0.309 [-0.783, 0.165 ]",0.202
+NCT01890122,Placebo,Asian,"-0.843 [-2.868, 1.182 ]",0.414
+NCT01890122,Placebo,BMI (kg/m2),"0.097 [-0.221, 0.415 ]",0.55
+NCT01890122,Placebo,T2DM duration (years),"0.219 [-0.206, 0.644 ]",0.313
+NCT01890122,Placebo,HbA1c (%/DCCT units),"0.836 [0.55, 1.122 ]",<0.01
+NCT01890122,Placebo,eGFR (ml/min/1.73m2),"-0.039 [-0.525, 0.447 ]",0.876
+NCT01890122,Placebo,Systolic blood pressure (mmHg),"0.035 [-0.216, 0.286 ]",0.786
+NCT01890122,Placebo,HDL cholesterol (mmol/L),"0.131 [-0.122, 0.384 ]",0.307
+NCT01890122,Placebo,Total cholesterol (mmol/L),"-0.168 [-0.438, 0.102 ]",0.223
+NCT01890122,Placebo,Comorbidities,"0.169 [-0.123, 0.461 ]",0.257
+NCT01890122,Placebo,Concomitant medications,"0.165 [0.042, 0.288 ]",<0.01
+NCT02025907,Placebo,Age (in decades),"0.937 [-6.382, 8.256 ]",0.802
+NCT02025907,Placebo,Male,"3.208 [-4.706, 11.122 ]",0.427
+NCT02025907,Placebo,Black/African American,"0.921 [-2.493, 4.335 ]",0.597
+NCT02025907,Placebo,BMI (kg/m2),"14.125 [-14.867, 43.117 ]",0.34
+NCT02025907,Placebo,T2DM duration (years),"0.802 [-1.45, 3.054 ]",0.485
+NCT02025907,Placebo,Current smoker,"1.122 [-1.726, 3.97 ]",0.44
+NCT02025907,Placebo,HbA1c (%/DCCT units),"0.148 [-0.605, 0.901 ]",0.7
+NCT02025907,Placebo,eGFR (ml/min/1.73m2),"0.849 [-0.807, 2.505 ]",0.315
+NCT02025907,Placebo,Systolic blood pressure (mmHg),"7.433 [-19.713, 34.579 ]",0.592
+NCT02025907,Placebo,HDL cholesterol (mmol/L),"1.709 [-1.388, 4.806 ]",0.279
+NCT02025907,Placebo,Total cholesterol (mmol/L),"-0.25 [-2.839, 2.339 ]",0.85
+NCT02025907,Placebo,Concomitant medications,"-0.455 [-1.402, 0.492 ]",0.346
+NCT02152371,Placebo,Age (in decades),"-0.94 [-1.767, -0.113 ]",0.026
+NCT02152371,Placebo,Male,"0.988 [-0.321, 2.297 ]",0.139
+NCT02152371,Placebo,BMI (kg/m2),"0.027 [-0.649, 0.703 ]",0.939
+NCT02152371,Placebo,T2DM duration (years),"0.304 [-0.157, 0.765 ]",0.195
+NCT02152371,Placebo,Current smoker,"-1.073 [-3.153, 1.007 ]",0.312
+NCT02152371,Placebo,HbA1c (%/DCCT units),"-0.209 [-0.813, 0.395 ]",0.498
+NCT02152371,Placebo,eGFR (ml/min/1.73m2),"-0.385 [-1.11, 0.34 ]",0.298
+NCT02152371,Placebo,Systolic blood pressure (mmHg),"0.263 [-0.303, 0.829 ]",0.363
+NCT02152371,Placebo,HDL cholesterol (mmol/L),"-0.261 [-0.99, 0.468 ]",0.483
+NCT02152371,Placebo,Total cholesterol (mmol/L),"-0.119 [-0.725, 0.487 ]",0.701
+NCT02152371,Placebo,Concomitant medications,"0.109 [-0.087, 0.305 ]",0.277
+NCT02182830,Placebo,Age (in decades),"0.686 [-0.294, 1.666 ]",0.17
+NCT02182830,Placebo,Male,"-2.615 [-4.256, -0.974 ]",<0.01
+NCT02182830,Placebo,BMI (kg/m2),"-0.294 [-0.749, 0.161 ]",0.205
+NCT02182830,Placebo,T2DM duration (years),"-0.095 [-0.665, 0.475 ]",0.745
+NCT02182830,Placebo,Current smoker,"5.916 [3.307, 8.525 ]",<0.01
+NCT02182830,Placebo,HbA1c (%/DCCT units),"0.865 [0.091, 1.639 ]",0.029
+NCT02182830,Placebo,eGFR (ml/min/1.73m2),"-0.494 [-1.296, 0.308 ]",0.226
+NCT02182830,Placebo,Systolic blood pressure (mmHg),"-0.34 [-1.257, 0.577 ]",0.468
+NCT02182830,Placebo,HDL cholesterol (mmol/L),"-0.251 [-0.829, 0.327 ]",0.395
+NCT02182830,Placebo,Total cholesterol (mmol/L),"0.219 [-0.583, 1.021 ]",0.593
+NCT02182830,Placebo,Comorbidities,"0.508 [0.112, 0.904 ]",0.012
+NCT02182830,Placebo,Concomitant medications,"-0.589 [-0.983, -0.195 ]",<0.01
+NCT02229227,Active,Age (in decades),"0.108 [-0.288, 0.504 ]",0.591
+NCT02229227,Active,Male,"0.236 [-0.334, 0.806 ]",0.418
+NCT02229227,Active,Asian,"-0.266 [-1.497, 0.965 ]",0.672
+NCT02229227,Active,Black/African American,"-0.467 [-1.651, 0.717 ]",0.44
+NCT02229227,Active,Other race/ethnicity,"0.775 [0.022, 1.528 ]",0.043
+NCT02229227,Active,BMI (kg/m2),"0.114 [-0.237, 0.465 ]",0.525
+NCT02229227,Active,T2DM duration (years),"-0.04 [-0.297, 0.217 ]",0.759
+NCT02229227,Active,Current smoker,"0.005 [-0.889, 0.899 ]",0.991
+NCT02229227,Active,HbA1c (%/DCCT units),"-0.046 [-0.438, 0.346 ]",0.818
+NCT02229227,Active,eGFR (ml/min/1.73m2),"-0.072 [-0.372, 0.228 ]",0.639
+NCT02229227,Active,Systolic blood pressure (mmHg),"-0.014 [-0.298, 0.27 ]",0.92
+NCT02229227,Active,HDL cholesterol (mmol/L),"-0.139 [-0.488, 0.21 ]",0.436
+NCT02229227,Active,Total cholesterol (mmol/L),"-0.014 [-0.351, 0.323 ]",0.933
+NCT02229227,Active,Comorbidities,"0.206 [-0.121, 0.533 ]",0.217
+NCT02229227,Active,Concomitant medications,"-0.004 [-0.09, 0.082 ]",0.934
+NCT02471404,Active,Age (in decades),"-0.432 [-1.371, 0.507 ]",0.367
+NCT02471404,Active,Male,"0.604 [-0.88, 2.088 ]",0.425
+NCT02471404,Active,BMI (kg/m2),"0.048 [-0.971, 1.067 ]",0.926
+NCT02471404,Active,T2DM duration (years),"0.647 [-0.117, 1.411 ]",0.097
+NCT02471404,Active,HbA1c (%/DCCT units),"-0.477 [-1.481, 0.527 ]",0.352
+NCT02471404,Active,eGFR (ml/min/1.73m2),"0.147 [-0.929, 1.223 ]",0.79
+NCT02471404,Active,Systolic blood pressure (mmHg),"-0.436 [-1.193, 0.321 ]",0.259
+NCT02471404,Active,HDL cholesterol (mmol/L),"-0.904 [-1.792, -0.016 ]",0.046
+NCT02471404,Active,Total cholesterol (mmol/L),"0.638 [-0.032, 1.308 ]",0.062
+NCT02471404,Active,Comorbidities,"-0.628 [-1.486, 0.23 ]",0.152
+NCT02471404,Active,Concomitant medications,"-0.084 [-0.429, 0.261 ]",0.634

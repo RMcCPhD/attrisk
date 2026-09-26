@@ -1,0 +1,31 @@
+raw_name,tidy_name,mean,median,sd,2.5%,97.5%
+trttypeactive,Active comparator arm,1.004,1,0.07,0.861,1.165
+trttypeplacebo_active,Placebo and active comparator arms,1.037,1.01,0.127,0.827,1.36
+n_cat250-499,Trial size: N = 250-499,0.965,0.976,0.068,0.812,1.09
+n_cat500-749,Trial size: N = 500-749,0.965,0.977,0.076,0.798,1.111
+n_cat750-999,Trial size: N = 750-999,1.024,1.007,0.1,0.847,1.268
+n_cat>=1000,Trial size: N >= 1000,0.983,0.991,0.104,0.758,1.202
+arm_n_cat100-199,Arm size: N = 100-199,0.968,0.98,0.069,0.81,1.092
+arm_n_cat200-299,Arm size: N = 200-299,0.948,0.963,0.081,0.767,1.087
+arm_n_cat>=300,Arm size: N >= 300,0.939,0.959,0.098,0.718,1.109
+n_arms_cat,Number of arms: >2,1.048,1.031,0.077,0.925,1.232
+n_sites_cat100-199,Number of sites: 100-199,0.918,0.927,0.084,0.744,1.058
+n_sites_cat>=200,Number of sites: >= 200,0.975,0.988,0.098,0.76,1.175
+n_poms_cat,Number of POMs: >1,1.013,1.005,0.071,0.878,1.18
+phase,Phase 4,1.1,1.065,0.133,0.92,1.431
+maskingdouble,Double blinding,1.025,1.009,0.082,0.882,1.228
+maskingtriple,Triple blinding,1.027,1.009,0.098,0.853,1.276
+maskingquadruple,Quadruple blinding,1.229,1.215,0.151,0.994,1.568
+region_of_the_americas,WHO region: Americas,1.738,1.72,0.235,1.331,2.246
+european_region,WHO region: Europe,0.846,0.843,0.098,0.662,1.018
+western_pacific_region,WHO region: Western pacific,0.954,0.965,0.068,0.803,1.072
+african_region,WHO region: Africa,1.027,1.012,0.079,0.885,1.219
+south_east_asia_region,WHO region: South-east Asia,1.031,1.016,0.07,0.915,1.203
+eastern_mediterranean_region,WHO region: Eastern mediterranean,0.969,0.984,0.099,0.748,1.163
+upper_age>80,Eligibility: Upper age limit >80,0.754,0.75,0.069,0.629,0.904
+lower_age>18,Eligibility: Lower age limit >18,0.934,0.945,0.08,0.765,1.067
+upper_bmi>30,Eligibility: Upper BMI limit >30kg/m2,0.931,0.956,0.119,0.659,1.133
+upper_bmi>40,Eligibility: Upper BMI limit >40kg/m2,0.988,0.994,0.059,0.859,1.107
+lower_bmi<27,Eligibility: Lower BMI limit <27kg/m2,0.929,0.947,0.098,0.712,1.092
+lower_egfr<30,Eligibility: Lower eGFR limit <30mL/min/1.73m2,0.778,0.771,0.129,0.542,1.013
+lower_egfr<60,Eligibility: Lower eGFR limit <60mL/min/1.73m2,0.85,0.85,0.104,0.649,1.028

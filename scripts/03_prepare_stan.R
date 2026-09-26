@@ -1,14 +1,13 @@
 
-# Generate STAN-ready data for design-stage model
-
+# Generate STAN-ready data for fitting design-stage model
 source("scripts/00_config.R")
 source("scripts/00_functions_packages_etc.R")
 
 # Import tidied AgD data
 imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
 
-# Import exploratory model outputs (rate beta, uncertainty)
-imp_expl <- readRDS("processed_data/shape_rate.rds")
+# Import exploratoryGompertz outputs
+imp_expl <- readRDS("processed_data/shape_rate_design.rds")
 
 # Import model matrix
 imp_mat <- readRDS("processed_data/agd_covar_mat.rds")

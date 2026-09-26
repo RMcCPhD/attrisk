@@ -13,14 +13,17 @@ source("scripts/00_functions_packages_etc.R")
 # Import tidied AgD data
 imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
 
+read_csv("../project_data/data/aact/detailed_descriptions.csv") %>% 
+  rename(trial_id = nct_id) %>% 
+  inner_join(imp_agd %>% distinct(trial_id)) %>% 
+  view()
+
 # Import intercept-only Gompertz models from attrition rates analyses
 imp_fit <- read_csv("data/rates_tidy_res.csv")
 imp_fit2 <- read_csv("data/rates_paper_res.csv")
 
 # Prepare TTE model outputs
 # Scale of estimates must match to the AgD data, i.e. in years
-# This was the case for the remaining trial models, but not for the rates paper
-# So rates model outputs are scaled to estimate TTE in years
 prep_ipd_res <- imp_fit %>%
   select(-contains("se")) %>%
   rename(trial_id = nct_id) %>%
@@ -35,7 +38,10 @@ prep_ipd_res <- imp_fit %>%
         shape = shape * 365,
         rate = rate + log(365)
       )
-  )
+  ) %>% 
+  group_by(trial_id) %>% 
+  slice_head(n = 1) %>% 
+  ungroup()
 
 # 135 trials in total
 n_distinct(prep_ipd_res$trial_id)
@@ -97,7 +103,7 @@ emp_plots <- cowplot::plot_grid(
 )
 
 ggsave(
-  "outputs/design/gompertz_explore/01_empirical.png",
+  "outputs/design_stage/gompertz_explore/01_empirical.png",
   emp_plots,
   width = 10,
   height = 4,
@@ -107,9 +113,6 @@ ggsave(
 # Parameters and covariates ----------------------------------------------------
 
 # Explore the relationship between each parameter and covariates
-# Informing design model specification
-# - Covariates will be placed on rate by default, but exploring whether it is
-#   informative to also place covariates on shape, if feasible
 
 # Pivot parameters and characteristics
 # Nest data by parameter for plotting
@@ -155,7 +158,7 @@ rel_binary_plots <- cowplot::plot_grid(
 )
 
 ggsave(
-  "outputs/design/gompertz_explore/02a_relationship_parameters_binary.png",
+  "outputs/design_stage/gompertz_explore/02a_relationship_parameters_binary.png",
   rel_binary_plots,
   width = 12,
   height = 4,
@@ -204,7 +207,7 @@ rel_factor_plots <- cowplot::plot_grid(
 )
 
 ggsave(
-  "outputs/design/gompertz_explore/02b_relationship_parameters_factor.png",
+  "outputs/design_stage/gompertz_explore/02b_relationship_parameters_factor.png",
   rel_factor_plots,
   width = 14,
   height = 8,
@@ -213,17 +216,14 @@ ggsave(
 
 # Model parameters and covariates ----------------------------------------------
 
-# Exploration suggests no or weak relationship between shape and covariates
-# Covariates will be placed on log_rate only
-# Parsimonious structure: log-rate explained by covariates, shape partially
-# explained by log_rate with some degree of uncertainty
-# Additionally avoids double-adjustment (i.e. covariates predict log-rate,
-# log-rate predicts shape; same covariates involved twice)
-
 # Fit model of shape on rate
-mdl_shape <- lm(shape ~ log_rate, data = prep_rdy)
+mdl_dat <- prep_rdy %>% unnest(chars) %>% ungroup()
+mdl_shape <- lm(shape ~ log_rate, data = mdl_dat)
 mdl_shape_sum <- tidy(mdl_shape)
 mdl_shape_diag <- glance(mdl_shape)
+
+write_csv(mdl_shape_sum, "outputs/design_stage/gompertz_explore/mdl_out.csv")
+write_csv(mdl_shape_diag, "outputs/design_stage/gompertz_explore/mdl_diag.csv")
 
 # Inspect
 # - Plot predicted against observed shape
@@ -249,30 +249,22 @@ mdl_shape_plots <- cowplot::plot_grid(
 )
 
 ggsave(
-  "outputs/design/gompertz_explore/03_model_shape_rate.png",
+  "outputs/design_stage/gompertz_explore/03_model_shape_rate.png",
   mdl_shape_plots,
   width = 8,
   height = 4,
   units = "in"
 )
 
-# Get residual standard deviation
-# Acts as an uncertainty parameter (Uncertainty ~ Normal(0, RSD)) when
-# specifying relationship between shape and rate in model specification
-# i.e. Rate predicts shape to some degree of uncertainty draw from a normal
-#      distribution (since both parameters are roughly regular)
-mdl_shape_rsd <- sigma(mdl_shape)
-
 # Extract outputs for model specification
+# Shape intercept
+# Log-rate beta
+# Error term (residual SD)
 mdl_out <- tibble(
   shape_alpha = mdl_shape_sum$estimate[[1]],
   lograte_beta = mdl_shape_sum$estimate[[2]],
-  uncertainty = mdl_shape_rsd
+  uncertainty = sigma(mdl_shape)
 )
 
 # Save
-saveRDS(mdl_out, "processed_data/shape_rate.rds")
-
-# Save model outputs
-write_csv(mdl_shape_sum, "outputs/design/gompertz_explore/03a_mdl_out.csv")
-write_csv(mdl_shape_diag, "outputs/design/gompertz_explore/03b_mdl_diag.csv")
+saveRDS(mdl_out, "processed_data/shape_rate_design.rds")

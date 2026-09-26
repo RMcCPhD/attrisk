@@ -1,0 +1,4 @@
+metric,value
+n_arms,342
+n_arms_delta_median_below_zero,265
+prop_arms_delta_median_below_zero,0.7748538011695907

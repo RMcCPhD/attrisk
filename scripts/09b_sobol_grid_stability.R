@@ -5,97 +5,118 @@
 source("scripts/00_config.R")
 source("scripts/00_functions_packages_etc.R")
 
-# Import Sobol distribution summaries
-imp_dist <- readRDS("processed_data/sobol_dist.rds")
-
-# Import ecological correlation matrix
-imp_cor <- readRDS("processed_data/sobol_cor_mat.rds")
-
-# Import primary Sobol outputs
-imp_sobol <- readRDS("processed_data/sobol_lst.rds")
-imp_sobol_profiles <- readRDS("processed_data/sobol_unnest.rds")
+# Import all-imputed-data Sobol inputs and outputs
+imp_sobol_mi <- readRDS("outputs/conduct_stage/profiles_imputations_full_data.rds")
+imp_sobol_lst_mi <- readRDS("outputs/conduct_stage/profiles_imputation.rds")
+imp_sobol_profiles_mi <- readRDS("outputs/conduct_stage/profiles_imputation_unnest.rds")
 
 # Import covariate scaling
-imp_scale <- read_csv(
-  "vivli/v2/Summaries/covariate_mu_d.csv",
-  show_col_types = FALSE
-)
+imp_scale <- read_csv("vivli/Summaries/covariate_mu_d.csv")
 
 # Import primary CITL outputs
-imp_citl <- readRDS("outputs/conduct/citl/citl_draws.rds")
+imp_citl <- readRDS("outputs/conduct_stage/citl/citl_draws.rds")
 
 # Import AgD
 imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
 
 # Output directory
-z_out <- "outputs/sensitivity"
+z_out <- "outputs/conduct_stage/citl_sensitivity"
 dir.create(z_out, recursive = TRUE, showWarnings = FALSE)
 
 # Sobol grid sizes
 n_sobol_grid <- c(64L, 128L, 256L, 512L)
+sobol_seed <- 20260721L
 
-# Check inputs -----------------------------------------------------------------
+# Check inputs ---------------------------------------------------------------
 
 # Required CITL outputs
 required_citl_elements <- c(
-  "I",
-  "J",
-  "S",
-  "trial_id",
-  "sobol_lp",
-  "n_citl_grid",
-  "target_risk",
-  "avg_risk_pre",
-  "delta"
+  "I", "J", "J_by_imputation", "M", "imputation", "S", "trial_id",
+  "sobol_lp", "n_citl_grid", "target_risk", "avg_risk_pre", "delta"
 )
 
-missing_citl_elements <- setdiff(
-  required_citl_elements,
-  names(imp_citl)
-)
+missing_citl_elements <- setdiff(required_citl_elements, names(imp_citl))
 
 if (length(missing_citl_elements) > 0) {
   stop(
     "CITL outputs missing: ",
     paste(missing_citl_elements, collapse = ", "),
-    ". Rerun scripts/09_conduct_citl.R"
+    ". Rerun scripts/08c_sobol_generate.R and ",
+    "scripts/09a_citl_all.R."
   )
 }
 
-# Number of trials
-I <- nrow(imp_dist)
+# Numbers of trials and imputations
+I <- imp_citl$I
+M <- imp_citl$M
 n_citl_grid <- imp_citl$n_citl_grid
+primary_n_sobol <- unique(imp_citl$J_by_imputation)
+
+if (length(primary_n_sobol) != 1L) {
+  stop("Primary Sobol grid size must be the same in every imputation.")
+}
 
 # Check trial order and dimensions
 stopifnot(
   I == nrow(imp_agd),
-  I == imp_sobol$I,
-  I == imp_citl$I,
-  identical(imp_dist$trial_id, imp_agd$trial_id),
-  identical(imp_dist$trial_id, imp_sobol_profiles$trial_id),
-  identical(imp_dist$trial_id, imp_citl$trial_id),
+  nrow(imp_sobol_mi) == M,
+  nrow(imp_sobol_lst_mi) == M,
+  nrow(imp_sobol_profiles_mi) == M,
+  identical(imp_sobol_mi$.imp, imp_citl$imputation),
+  identical(imp_sobol_lst_mi$.imp, imp_citl$imputation),
+  identical(imp_sobol_profiles_mi$.imp, imp_citl$imputation),
+  all(map_lgl(
+      imp_sobol_mi$dist,
+      ~ identical(
+        .x$trial_id,
+        imp_citl$trial_id
+      )
+  )),
+  all(map_lgl(
+      imp_sobol_profiles_mi$sobol_unnest,
+      ~ identical(.x$trial_id, imp_citl$trial_id)
+  )),
+  all(map_lgl(
+      imp_sobol_lst_mi$sobol_lst,
+      ~ identical(.x$trial_id, imp_citl$trial_id)
+  )),
+  identical(imp_citl$trial_id, imp_agd$trial_id),
   ncol(imp_citl$target_risk) == I,
   ncol(imp_citl$avg_risk_pre) == I,
   ncol(imp_citl$delta) == I,
-  length(imp_citl$sobol_lp) == I * imp_sobol$J,
+  nrow(imp_citl$target_risk) == imp_citl$S,
+  nrow(imp_citl$avg_risk_pre) == imp_citl$S,
+  nrow(imp_citl$delta) == imp_citl$S,
+  length(imp_citl$sobol_lp) == I * imp_citl$J,
   length(n_citl_grid) == 1L,
   is.finite(n_citl_grid),
   n_citl_grid > 0,
-  imp_sobol$J == 64L,
-  imp_citl$J == 64L
+  primary_n_sobol == 64L,
+  imp_citl$J == sum(imp_citl$J_by_imputation),
+  all(map_int(imp_sobol_lst_mi$sobol_lst, "I") == I),
+  all(map_int(imp_sobol_lst_mi$sobol_lst, "J") == primary_n_sobol)
 )
 
-# Get correlation matrix
-cor_mat <- imp_cor$out[[1]]
-
-stopifnot(
-  is.matrix(cor_mat),
-  identical(rownames(cor_mat), colnames(cor_mat)),
-  isSymmetric(cor_mat),
-  all(eigen(cor_mat, symmetric = TRUE, only.values = TRUE)$values > 0)
+# Check the IPD-derived correlation matrix carried into every imputation
+expected_cor_vars <- c(
+  "age", "male_p", "bmi", "durn", "sbp", 
+  "chol_hdl", "chol_total", "hba1c", "egfr", "cursmoke", "race_cat",
+  "comorbs", "conmeds"
 )
 
-# Helper functions -------------------------------------------------------------
+valid_cor_mat <- function(x) {
+  is.matrix(x) &&
+    identical(rownames(x), expected_cor_vars) &&
+    identical(colnames(x), expected_cor_vars) &&
+    all(is.finite(x)) &&
+    all(abs(diag(x) - 1) < 1e-10) &&
+    isSymmetric(x) &&
+    all(eigen(x, symmetric = TRUE, only.values = TRUE)$values > 0)
+}
+
+stopifnot(all(map_lgl(imp_sobol_mi$cor, valid_cor_mat)))
+
+# Helper functions -----------------------------------------------------------
 
 # Quantiles
 q025 <- function(x) {
@@ -108,7 +129,6 @@ q975 <- function(x) {
 
 # Summarise vector
 summ_vec <- function(x) {
-  
   tibble(
     mean = mean(x, na.rm = TRUE),
     median = median(x, na.rm = TRUE),
@@ -118,66 +138,24 @@ summ_vec <- function(x) {
   )
 }
 
-# Distribution parameter helper functions
-get_lnorm_meanlog <- function(mu, d) {
-  log(mu^2 / sqrt(d^2 + mu^2))
-}
-
-get_lnorm_sdlog <- function(mu, d) {
-  sqrt(log(1 + d^2 / mu^2))
-}
-
-get_gamma_shape <- function(mu, d) {
-  (mu / d)^2
-}
-
-get_gamma_rate <- function(mu, d) {
-  mu / d^2
-}
-
-get_weibull_shape <- function(mu, d) {
-  
-  cv <- d / mu
-  
-  map_dbl(cv, ~ {
-    uniroot(
-      function(k) {
-        sqrt(gamma(1 + 2 / k) / gamma(1 + 1 / k)^2 - 1) - .x
-      },
-      interval = c(0.1, 50)
-    )$root
-  })
-}
-
-get_weibull_scale <- function(mu, shape) {
-  mu / gamma(1 + 1 / shape)
-}
-
 # Add distribution parameters
 make_distribution_parameters <- function(dist) {
-  
-  dist %>% 
+  dist %>%
     mutate(
       across(ends_with("_d"), ~ pmax(.x, .Machine$double.eps)),
-      
       # Log-normal: BMI, HDL cholesterol and SBP
       bmi_meanlog = get_lnorm_meanlog(bmi_mu, bmi_d),
       bmi_sdlog   = get_lnorm_sdlog(bmi_mu, bmi_d),
-      
       chol_hdl_meanlog = get_lnorm_meanlog(chol_hdl_mu, chol_hdl_d),
       chol_hdl_sdlog   = get_lnorm_sdlog(chol_hdl_mu, chol_hdl_d),
-      
       sbp_meanlog = get_lnorm_meanlog(sbp_mu, sbp_d),
       sbp_sdlog   = get_lnorm_sdlog(sbp_mu, sbp_d),
-      
       # Gamma: total cholesterol
       chol_total_shape = get_gamma_shape(chol_total_mu, chol_total_d),
       chol_total_rate  = get_gamma_rate(chol_total_mu, chol_total_d),
-      
       # Weibull: diabetes duration and eGFR
       durn_shape = get_weibull_shape(durn_mu, durn_d),
       durn_scale = get_weibull_scale(durn_mu, durn_shape),
-      
       egfr_shape = get_weibull_shape(egfr_mu, egfr_d),
       egfr_scale = get_weibull_scale(egfr_mu, egfr_shape)
     )
@@ -185,14 +163,10 @@ make_distribution_parameters <- function(dist) {
 
 # Centre variables on mean and scale by standard deviation
 scale_centre_cov <- function(dat, imp_scale) {
-  
-  scale_lkp <- imp_scale %>% 
-    filter(name %in% names(dat))
-  
+  scale_lkp <- imp_scale %>%filter(name %in% names(dat))
   mu <- setNames(scale_lkp$mu, scale_lkp$name)
   d <- setNames(scale_lkp$d, scale_lkp$name)
-  
-  dat %>% 
+  dat %>%
     mutate(
       across(
         all_of(scale_lkp$name),
@@ -204,21 +178,17 @@ scale_centre_cov <- function(dat, imp_scale) {
 # Quantile function for mutually exclusive race categories
 # 0 = White, 1 = Black/AA, 2 = Asian, 3 = Other
 q_race <- function(p, white, black_aa, asian, other) {
-  
   white <- pmax(as.numeric(white), 0)
   black_aa <- pmax(as.numeric(black_aa), 0)
   asian <- pmax(as.numeric(asian), 0)
   other <- pmax(as.numeric(other), 0)
-  
   total <- white + black_aa + asian + other
   white <- white / total
   black_aa <- black_aa / total
   asian <- asian / total
-  
   cut_white <- white
   cut_black <- white + black_aa
   cut_asian <- white + black_aa + asian
-  
   ifelse(
     p < cut_white,
     0L,
@@ -227,82 +197,91 @@ q_race <- function(p, white, black_aa, asian, other) {
 }
 
 # Generate trial-specific Sobol profiles
-generate_sobol_profiles <- function(n_sobol, dist, cor_mat, imp_scale, loghr) {
-  
-  # Generate integration points using same setup as primary analysis
+generate_sobol_profiles <- function(n_sobol,
+                                    dist,
+                                    cor_mat,
+                                    imp_scale,
+                                    loghr,
+                                    sobol_seed) {
+
+  # Generate integration points using same setup and seed as primary analysis
+  set.seed(sobol_seed)
+
   sobol_gen <- add_integration(
     dist,
-    age        = distr(qnorm,  mean = age_mu, sd = age_d),
-    male_p     = distr(qbern,  prob = 1 - female_p),
-    bmi        = distr(qlnorm, meanlog = bmi_meanlog, sdlog = bmi_sdlog),
-    durn       = distr(qweibull, shape = durn_shape, scale = durn_scale),
-    sbp        = distr(qlnorm, meanlog = sbp_meanlog, sdlog = sbp_sdlog),
-    chol_hdl   = distr(qlnorm, meanlog = chol_hdl_meanlog, sdlog = chol_hdl_sdlog),
-    chol_total = distr(qgamma, shape = chol_total_shape, rate = chol_total_rate),
-    hba1c      = distr(qnorm, mean = hba1c_mu, sd = hba1c_d),
-    egfr       = distr(qweibull, shape = egfr_shape, scale = egfr_scale),
-    cursmoke   = distr(qbern, prob = cursmoke),
-    race_cat   = distr(
+    age = distr(qnorm,  mean = age_mu, sd = age_d),
+    male_p = distr(qbern,  prob = 1 - female_p),
+    bmi = distr(qlnorm, meanlog = bmi_meanlog, sdlog = bmi_sdlog),
+    durn = distr(qweibull, shape = durn_shape, scale = durn_scale),
+    sbp = distr(qlnorm, meanlog = sbp_meanlog, sdlog = sbp_sdlog),
+    chol_hdl = distr(qlnorm, meanlog = chol_hdl_meanlog, sdlog = chol_hdl_sdlog),
+    chol_total = distr(qgamma, shape = chol_total_shape,rate = chol_total_rate),
+    hba1c = distr(qnorm, mean = hba1c_mu, sd = hba1c_d),
+    egfr = distr(qweibull, shape = egfr_shape, scale = egfr_scale),
+    cursmoke = distr(qbern, prob = cursmoke),
+    race_cat = distr(
       q_race,
       white = white,
       black_aa = black_aa,
       asian = asian,
       other = other
     ),
-    comorbs    = distr(qpois, lambda = comorbs_mu),
-    conmeds    = distr(qpois, lambda = conmeds_mu),
+    comorbs = distr(qpois, lambda = comorbs_mu),
+    conmeds = distr(qpois, lambda = conmeds_mu),
     cor = cor_mat,
     cor_adjust = "spearman",
     n_int = n_sobol
   )
-  
+
   # Unnest integration points
   int_cols <- names(sobol_gen)[startsWith(names(sobol_gen), ".int_")]
-  
-  raw <- sobol_gen %>% 
-    select(trial_id, all_of(int_cols)) %>% 
-    rename_with(., ~ gsub(".int_", "", .)) %>% 
-    unnest(cols = -trial_id) %>% 
-    group_by(trial_id) %>% 
-    mutate(profile = row_number()) %>% 
-    ungroup() %>% 
+
+  raw <- sobol_gen %>%
+    select(trial_id, all_of(int_cols)) %>%
+    rename_with(., ~ gsub(".int_", "", .)) %>%
+    unnest(cols = -trial_id) %>%
+    group_by(trial_id) %>%
+    mutate(profile = row_number()) %>%
+    ungroup() %>%
     mutate(
       race_cat = as.integer(race_cat),
       white = as.integer(race_cat == 0L),
       black_aa = as.integer(race_cat == 1L),
       asian = as.integer(race_cat == 2L),
       other = as.integer(race_cat == 3L)
-    ) %>% 
-    select(-race_cat) %>% 
+    ) %>%
+    select(-race_cat) %>%
     relocate(trial_id, profile)
-  
+
   # Scale profiles
-  scaled <- raw %>% 
+  scaled <- raw %>%
     rename(
       age10 = age,
       sex = male_p
-    ) %>% 
-    mutate(age10 = age10 / 10) %>% 
+    ) %>%
+    mutate(age10 = age10 / 10) %>%
     scale_centre_cov(imp_scale)
-  
+
   # Construct linear predictors
-  Z <- scaled %>% 
-    select(all_of(names(loghr))) %>% 
-    as.matrix()
-  
+  Z <- scaled %>% select(all_of(names(loghr))) %>% as.matrix()
   lp <- as.vector(Z %*% loghr)
   lp_mat <- matrix(lp, nrow = n_sobol, ncol = nrow(dist))
-  
+
   # Final checks
   stopifnot(
     nrow(raw) == nrow(dist) * n_sobol,
     all(count(raw, trial_id)$n == n_sobol),
     identical(unique(raw$trial_id), dist$trial_id),
-    all(rowSums(as.matrix(raw[c("white", "black_aa", "asian", "other")])) == 1),
+    all(rowSums(as.matrix(raw[c(
+              "white",
+              "black_aa",
+              "asian",
+              "other"
+      )])) == 1),
     all(is.finite(Z)),
     all(is.finite(lp_mat))
   )
-  
+
   list(
     raw = raw,
     scaled = scaled,
@@ -312,15 +291,15 @@ generate_sobol_profiles <- function(n_sobol, dist, cor_mat, imp_scale, loghr) {
     hr = exp(lp),
     hr_mat = exp(lp_mat)
   )
+
 }
 
 # Summarise generated covariates
 summarise_covariates <- function(dat, n_sobol, scale) {
-  
-  dat %>% 
-    select(-any_of(c("trial_id", "profile"))) %>% 
-    pivot_longer(everything(), names_to = "covariate") %>% 
-    group_by(covariate) %>% 
+  dat %>%
+    select(-any_of(c("source_imputation", "trial_id", "profile"))) %>%
+    pivot_longer(everything(), names_to = "covariate") %>%
+    group_by(covariate) %>%
     summarise(
       n_sobol = n_sobol,
       scale = scale,
@@ -330,7 +309,7 @@ summarise_covariates <- function(dat, n_sobol, scale) {
       q025 = q025(value),
       q975 = q975(value),
       .groups = "drop"
-    ) %>% 
+    ) %>%
     select(n_sobol, scale, covariate, everything())
 }
 
@@ -341,111 +320,158 @@ laplace_survival <- function(h, hr) {
 
 # Create interpolation functions for pre-CITL risk and CITL shift
 make_citl_functions <- function(H, hr, n_grid = n_citl_grid, buffer = 6) {
-  
+
   H <- H[is.finite(H) & H > 0]
-  
+
   log_h_grid <- seq(
     log(min(H)) - buffer,
     log(max(H)) + buffer,
     length.out = n_grid
   )
-  
+
   h_grid <- exp(log_h_grid)
   survival_grid <- laplace_survival(h_grid, hr)
   risk_grid <- 1 - survival_grid
   marginal_h_grid <- -log(pmax(survival_grid, .Machine$double.xmin))
-  
+
   # Remove duplicated values following numerical underflow
   keep <- is.finite(marginal_h_grid) & !duplicated(marginal_h_grid)
-  
+
   pre_interp <- approxfun(
     log_h_grid,
     risk_grid,
     rule = 2
   )
-  
+
   delta_interp <- approxfun(
     marginal_h_grid[keep],
     log_h_grid[keep],
     rule = 2
   )
-  
+
   list(
     pre = function(H) pre_interp(log(H)),
     delta = function(H) delta_interp(H) - log(H)
   )
+
 }
 
 # Recalculate CITL summaries for each trial-specific population
 calculate_citl <- function(H_mat, hr_mat) {
-  
+
   S <- nrow(H_mat)
   I <- ncol(H_mat)
-  
+
   pre <- matrix(NA_real_, nrow = S, ncol = I)
   delta <- matrix(NA_real_, nrow = S, ncol = I)
-  
+
   for (i in seq_len(I)) {
-    
+
     if (i %% 25 == 1 || i == I) {
+
       message(sprintf("Trial %d/%d", i, I))
+
     }
-    
+
     citl_fun <- make_citl_functions(
       H = H_mat[, i],
       hr = hr_mat[, i]
     )
-    
+
     pre[, i] <- citl_fun$pre(H_mat[, i])
     delta[, i] <- citl_fun$delta(H_mat[, i])
+
   }
-  
+
   list(
     pre = pre,
     delta = delta
   )
+
 }
 
-# Prepare Sobol inputs ---------------------------------------------------------
+# Prepare Sobol inputs -------------------------------------------------------
 
-# Add distribution parameters
-dist_par <- make_distribution_parameters(imp_dist)
-
-# Pooled participant-level effects
-citl_beta <- imp_sobol$loghr
-
-# Check coefficient names
-stopifnot(
-  identical(colnames(imp_sobol$Z), names(citl_beta)),
-  all(is.finite(citl_beta))
+# Add distribution parameters separately within every imputation
+dist_par_mi <- map(
+  imp_sobol_mi$dist,
+  make_distribution_parameters
 )
 
-# Unnest primary raw profiles
-primary_raw <- imp_sobol_profiles %>% 
-  select(trial_id, sobol_unnest) %>% 
-  unnest(sobol_unnest) %>% 
-  group_by(trial_id) %>% 
-  mutate(profile = row_number()) %>% 
-  ungroup() %>% 
-  relocate(trial_id, profile)
+# Participant-level effects are fixed across imputations
+citl_beta <- imp_sobol_lst_mi$sobol_lst[[1]]$loghr
 
-# Unnest primary scaled profiles
-primary_scaled <- imp_sobol_profiles %>% 
-  select(trial_id, sobol_rdy) %>% 
-  unnest(sobol_rdy) %>% 
-  group_by(trial_id) %>% 
-  mutate(profile = row_number()) %>% 
-  ungroup() %>% 
-  relocate(trial_id, profile)
+stopifnot(
+  all(is.finite(citl_beta)),
+  all(map_lgl(
+      imp_sobol_lst_mi$sobol_lst,
+      ~ .x$I == I &&
+        .x$J == primary_n_sobol &&
+        identical(.x$loghr, citl_beta) &&
+        identical(colnames(.x$Z), names(citl_beta))
+  ))
+)
 
-# Get primary linear predictors
-primary_lp <- as.vector(imp_sobol$Z %*% citl_beta)
-primary_lp_mat <- matrix(primary_lp, nrow = imp_sobol$J, ncol = I)
+# Flatten one nested set of raw or scaled trial-specific profiles
+flatten_profile_set <- function(profile_data,
+                                profile_column,
+                                source_imputation) {
+
+  profile_data %>%
+    transmute(
+      trial_id,
+      profiles = .data[[profile_column]]
+    ) %>%
+    unnest(profiles) %>%
+    group_by(trial_id) %>%
+    mutate(profile = row_number()) %>%
+    ungroup() %>%
+    mutate(source_imputation = source_imputation, .before = 1) %>%
+    relocate(source_imputation, trial_id, profile)
+
+}
+
+# Pool all saved primary profiles and keep source explicit
+# Same approach as 09a
+bind_primary_profiles <- function(profile_column) {
+  map2_dfr(
+    imp_sobol_profiles_mi$.imp,
+    imp_sobol_profiles_mi$sobol_unnest,
+    ~ flatten_profile_set(.y, profile_column, .x)
+  )
+}
+
+primary_raw <- bind_primary_profiles("sobol_unnest") %>%
+  arrange(
+    source_imputation,
+    match(trial_id, imp_citl$trial_id),
+    profile
+  )
+
+primary_scaled <- bind_primary_profiles("sobol_rdy") %>%
+  arrange(
+    source_imputation,
+    match(trial_id, imp_citl$trial_id),
+    profile
+  )
+
+# Convert an imputation-specific Sobol object to a profiles-by-trials LP matrix
+get_lp_matrix <- function(sobol_object) {
+  lp <- as.vector(sobol_object$Z %*% sobol_object$loghr)
+  matrix(lp, nrow = sobol_object$J, ncol = sobol_object$I)
+}
+
+# Reconstruct the primary pooled linear predictors
+primary_lp_mi <- map(imp_sobol_lst_mi$sobol_lst, get_lp_matrix)
+primary_lp_mat <- do.call(rbind, primary_lp_mi)
+primary_lp <- as.vector(primary_lp_mat)
 primary_hr <- exp(primary_lp)
 primary_hr_mat <- exp(primary_lp_mat)
 
-# Check CITL used current primary Sobol profiles
+# Check pooled linear predictors match the saved CITL inputs
 stopifnot(
+  nrow(primary_lp_mat) == imp_citl$J,
+  ncol(primary_lp_mat) == I,
   max(abs(primary_lp - imp_citl$sobol_lp)) < 1e-12
 )
 
@@ -461,10 +487,15 @@ H_mat <- -log1p(-target_risk)
 
 # Final checks
 stopifnot(
-  nrow(primary_raw) == I * imp_sobol$J,
-  nrow(primary_scaled) == I * imp_sobol$J,
-  identical(unique(primary_raw$trial_id), imp_dist$trial_id),
-  identical(unique(primary_scaled$trial_id), imp_dist$trial_id),
+  nrow(primary_raw) == I * imp_citl$J,
+  nrow(primary_scaled) == I * imp_citl$J,
+  identical(unique(primary_raw$trial_id), imp_citl$trial_id),
+  identical(unique(primary_scaled$trial_id), imp_citl$trial_id),
+  identical(sort(unique(primary_raw$source_imputation)), imp_citl$imputation),
+  identical(
+    sort(unique(primary_scaled$source_imputation)),
+    imp_citl$imputation
+  ),
   all(is.finite(primary_lp_mat)),
   all(is.finite(H_mat))
 )
@@ -474,65 +505,110 @@ check_draws <- unique(
   round(seq(1, nrow(H_mat), length.out = 8))
 )
 
-primary_match_error <- map_dbl(seq_len(I), ~ {
-  
-  pre_check <- 1 - laplace_survival(
-    H_mat[check_draws, .x],
-    primary_hr_mat[, .x]
-  )
-  
-  max(
-    abs(pre_check - imp_citl$avg_risk_pre[check_draws, .x]),
-    na.rm = TRUE
-  )
-}) %>% 
-  max()
+primary_match_error <- map_dbl(
+  seq_len(I), ~ {
+    pre_check <- 1 - laplace_survival(
+      H_mat[check_draws, .x],
+      primary_hr_mat[, .x]
+    )
+    max(
+      abs(pre_check - imp_citl$avg_risk_pre[check_draws, .x]),
+      na.rm = TRUE
+    )
+  }
+) %>% max()
 
 if (primary_match_error > 1e-8) {
   stop(
     "Saved CITL outputs do not match current Sobol profiles. ",
-    "Rerun scripts/09_conduct_citl.R before this script."
+    "Rerun scripts/08c_sobol_generate.R and ",
+    "scripts/09a_citl_all.R before this script."
   )
 }
 
-# Generate alternative grids --------------------------------------------------
+# Generate alternative grids -------------------------------------------------
+
+# Generate an alternative grid inside every imputation, then pool the profile
+# rows exactly as in the primary all-imputation CITL analysis
+generate_pooled_grid <- function(n_sobol) {
+
+  grid_mi <- map(
+    seq_len(M), ~ {
+      m <- .x
+      grid <- generate_sobol_profiles(
+        n_sobol = n_sobol,
+        dist = dist_par_mi[[m]],
+        cor_mat = imp_sobol_mi$cor[[m]],
+        imp_scale = imp_scale,
+        loghr = citl_beta,
+        sobol_seed = sobol_seed
+      )
+      
+      grid$raw <- grid$raw %>%
+        mutate(source_imputation = imp_sobol_mi$.imp[[m]], .before = 1)
+      
+      grid$scaled <- grid$scaled %>%
+        mutate(source_imputation = imp_sobol_mi$.imp[[m]], .before = 1)
+      
+      grid
+    }
+  )
+
+  lp_mat <- do.call(rbind, map(grid_mi, ~ .x$lp_mat))
+  raw <- map_dfr(grid_mi, ~ .x$raw)
+  scaled <- map_dfr(grid_mi, ~ .x$scaled)
+
+  stopifnot(
+    nrow(lp_mat) == M * n_sobol,
+    ncol(lp_mat) == I,
+    nrow(raw) == I * M * n_sobol,
+    nrow(scaled) == I * M * n_sobol,
+    identical(unique(raw$trial_id), imp_citl$trial_id),
+    identical(unique(scaled$trial_id), imp_citl$trial_id),
+    all(is.finite(lp_mat))
+  )
+
+  list(
+    raw = raw,
+    scaled = scaled,
+    lp = as.vector(lp_mat),
+    lp_mat = lp_mat,
+    hr = exp(as.vector(lp_mat)),
+    hr_mat = exp(lp_mat)
+  )
+
+}
 
 grid_objects <- list()
 covariate_summaries <- list()
 stability_work <- list()
 
 for (n_sobol in n_sobol_grid) {
-  
+
   message(sprintf("Processing n_sobol = %d", n_sobol))
-  
-  if (n_sobol == imp_sobol$J) {
-    
-    # Use saved primary Sobol and CITL outputs
+
+  if (n_sobol == primary_n_sobol) {
+
+    # Use saved pooled primary Sobol and CITL outputs
     raw <- primary_raw
     scaled <- primary_scaled
     lp <- primary_lp
     hr <- primary_hr
     pre <- imp_citl$avg_risk_pre
     delta <- imp_citl$delta
-    source <- "primary_saved_grid"
-    
+    source <- "primary_saved_pooled_grid"
+
   } else {
-    
-    # Generate trial-specific alternative grid
-    grid <- generate_sobol_profiles(
-      n_sobol = n_sobol,
-      dist = dist_par,
-      cor_mat = cor_mat,
-      imp_scale = imp_scale,
-      loghr = citl_beta
-    )
-    
+
+    # Generate trial-specific alternative grids in all imputations and pool
+    grid <- generate_pooled_grid(n_sobol)
+
     # Recalculate CITL for each trial
     citl_grid <- calculate_citl(
       H_mat = H_mat,
       hr_mat = grid$hr_mat
     )
-    
+
     raw <- grid$raw
     scaled <- grid$scaled
     lp <- grid$lp
@@ -540,99 +616,176 @@ for (n_sobol in n_sobol_grid) {
     pre <- citl_grid$pre
     delta <- citl_grid$delta
     source <- "generated_grid"
+
   }
-  
+
   # Store grids
   grid_objects[[as.character(n_sobol)]] <- list(
     n_sobol = n_sobol,
+    n_imputations = M,
+    n_pooled_profiles_per_arm = M * n_sobol,
     source = source,
     raw = raw,
     scaled = scaled,
     lp = lp,
     hr = hr
   )
-  
+
   # Summarise covariates
   covariate_summaries[[as.character(n_sobol)]] <- bind_rows(
     summarise_covariates(raw, n_sobol, "raw"),
     summarise_covariates(scaled, n_sobol, "scaled")
   )
-  
+
   # Store CITL outputs
   stability_work[[as.character(n_sobol)]] <- list(
     n_sobol = n_sobol,
+    n_imputations = M,
+    n_pooled_profiles_per_arm = M * n_sobol,
     lp = lp,
     hr = hr,
     pre = pre,
     delta = delta
   )
+
 }
 
-# Summarise stability ----------------------------------------------------------
+# Summarise stability --------------------------------------------------------
 
 # Use largest grid as reference
 ref <- stability_work[[as.character(max(n_sobol_grid))]]
 
 # Overall summaries
-stability_table <- map_dfr(stability_work, ~ {
-  
-  lp_sum <- summ_vec(.x$lp)
-  hr_sum <- summ_vec(.x$hr)
-  
-  pre_diff <- abs(.x$pre - ref$pre)
-  delta_diff <- abs(.x$delta - ref$delta)
-  
-  tibble(
-    n_sobol = .x$n_sobol,
-    mean_participant_linear_predictor = lp_sum$mean,
-    sd_participant_linear_predictor = lp_sum$sd,
-    q025_participant_linear_predictor = lp_sum$q025,
-    q975_participant_linear_predictor = lp_sum$q975,
-    mean_hazard_multiplier = hr_sum$mean,
-    sd_hazard_multiplier = hr_sum$sd,
-    q025_hazard_multiplier = hr_sum$q025,
-    q975_hazard_multiplier = hr_sum$q975,
-    mean_pre_citl_participant_marginalised_risk = mean(.x$pre, na.rm = TRUE),
-    mean_post_citl_participant_marginalised_risk = mean(target_risk, na.rm = TRUE),
-    mean_citl_intercept_shift = mean(.x$delta, na.rm = TRUE),
-    mean_abs_difference_pre_citl_risk_vs_n512 = mean(pre_diff, na.rm = TRUE),
-    max_abs_difference_pre_citl_risk_vs_n512 = max(pre_diff, na.rm = TRUE),
-    mean_abs_difference_citl_intercept_shift_vs_n512 = mean(delta_diff, na.rm = TRUE),
-    max_abs_difference_citl_intercept_shift_vs_n512 = max(delta_diff, na.rm = TRUE)
-  )
-}) %>% 
+stability_table <- map_dfr(
+  stability_work,
+  ~ {
+
+    lp_sum <- summ_vec(.x$lp)
+    hr_sum <- summ_vec(.x$hr)
+
+    # Pool draw-by-arm values as in 09a's global pooled-profile summary
+    # These distributions include posterior uncertainty and between-arm variation
+    pre_pooled <- as.numeric(.x$pre)
+    delta_pooled <- as.numeric(.x$delta)
+
+    pre_diff <- abs(.x$pre - ref$pre)
+    delta_diff <- abs(.x$delta - ref$delta)
+
+    tibble(
+      n_sobol = .x$n_sobol,
+      n_imputations = .x$n_imputations,
+      n_pooled_profiles_per_arm = .x$n_pooled_profiles_per_arm,
+      mean_participant_linear_predictor = lp_sum$mean,
+      sd_participant_linear_predictor = lp_sum$sd,
+      q025_participant_linear_predictor = lp_sum$q025,
+      q975_participant_linear_predictor = lp_sum$q975,
+      mean_hazard_multiplier = hr_sum$mean,
+      sd_hazard_multiplier = hr_sum$sd,
+      q025_hazard_multiplier = hr_sum$q025,
+      q975_hazard_multiplier = hr_sum$q975,
+      mean_pre_citl_participant_marginalised_risk = mean(
+        pre_pooled,
+        na.rm = TRUE
+      ),
+      q025_pre_citl_participant_marginalised_risk = q025(pre_pooled),
+      q975_pre_citl_participant_marginalised_risk = q975(pre_pooled),
+      mean_post_citl_participant_marginalised_risk = mean(
+        target_risk,
+        na.rm = TRUE
+      ),
+      q025_post_citl_participant_marginalised_risk = q025(as.numeric(target_risk)),
+      q975_post_citl_participant_marginalised_risk = q975(as.numeric(target_risk)),
+      mean_citl_intercept_shift = mean(delta_pooled, na.rm = TRUE),
+      q025_citl_intercept_shift = q025(delta_pooled),
+      q975_citl_intercept_shift = q975(delta_pooled),
+      mean_abs_difference_pre_citl_risk_vs_n512 = mean(pre_diff, na.rm = TRUE),
+      max_abs_difference_pre_citl_risk_vs_n512 = max(pre_diff, na.rm = TRUE),
+      mean_abs_difference_citl_intercept_shift_vs_n512 = mean(
+        delta_diff,
+        na.rm = TRUE
+      ),
+      max_abs_difference_citl_intercept_shift_vs_n512 = max(
+        delta_diff,
+        na.rm = TRUE
+      )
+    )
+
+  }
+) %>%
   arrange(n_sobol)
 
-# Trial-level summaries
-stability_by_trial <- map_dfr(stability_work, ~ {
-  
-  pre_diff <- abs(.x$pre - ref$pre)
-  delta_diff <- abs(.x$delta - ref$delta)
-  
-  tibble(
-    n_sobol = .x$n_sobol,
-    trial_id = imp_dist$trial_id,
-    mean_abs_difference_pre_citl_risk_vs_n512 = colMeans(pre_diff, na.rm = TRUE),
-    max_abs_difference_pre_citl_risk_vs_n512 = apply(pre_diff, 2, max, na.rm = TRUE),
-    mean_abs_difference_citl_intercept_shift_vs_n512 = colMeans(delta_diff, na.rm = TRUE),
-    max_abs_difference_citl_intercept_shift_vs_n512 = apply(
-      delta_diff,
-      2,
-      max,
-      na.rm = TRUE
+# Summarise pooled profiles, risks and CITL shifts in long format
+# Use the same summary measures as 09a
+stability_global_summary <- map_dfr(
+  stability_work, ~ {
+    grid <- .x
+    metrics <- list(
+      participant_linear_predictor = grid$lp,
+      participant_hazard_multiplier = grid$hr,
+      design_stage_risk = as.numeric(target_risk),
+      pre_citl_risk = as.numeric(grid$pre),
+      post_citl_risk = as.numeric(target_risk),
+      delta_log_rate = as.numeric(grid$delta)
     )
-  )
-}) %>% 
-  arrange(n_sobol, trial_id)
+    
+    imap_dfr(metrics, ~ bind_cols(tibble(metric = .y), summ_vec(.x))) %>%
+      mutate(
+        n_sobol = grid$n_sobol,
+        n_imputations = grid$n_imputations,
+        n_pooled_profiles_per_arm = grid$n_pooled_profiles_per_arm,
+        .before = 1
+      )
+  }
+) %>% arrange(n_sobol)
+
+# Trial-level summaries
+stability_by_trial <- map_dfr(
+  stability_work, ~ {
+    pre_diff <- abs(.x$pre - ref$pre)
+    delta_diff <- abs(.x$delta - ref$delta)
+    
+    tibble(
+      n_sobol = .x$n_sobol,
+      n_imputations = .x$n_imputations,
+      n_pooled_profiles_per_arm = .x$n_pooled_profiles_per_arm,
+      trial_id = imp_citl$trial_id,
+      mean_abs_difference_pre_citl_risk_vs_n512 = colMeans(
+        pre_diff,
+        na.rm = TRUE
+      ),
+      max_abs_difference_pre_citl_risk_vs_n512 = apply(
+        pre_diff,
+        2,
+        max,
+        na.rm = TRUE
+      ),
+      mean_abs_difference_citl_intercept_shift_vs_n512 = colMeans(
+        delta_diff,
+        na.rm = TRUE
+      ),
+      max_abs_difference_citl_intercept_shift_vs_n512 = apply(
+        delta_diff,
+        2,
+        max,
+        na.rm = TRUE
+      )
+    )
+  }
+) %>% arrange(n_sobol, trial_id)
 
 # Covariate summaries
-covariate_summary <- bind_rows(covariate_summaries) %>% 
+covariate_summary <- bind_rows(covariate_summaries) %>%
+  mutate(
+    n_imputations = M,
+    n_pooled_profiles_per_arm = M * n_sobol,
+    .after = n_sobol
+  ) %>%
   arrange(n_sobol, scale, covariate)
 
-# Validate interpolation -------------------------------------------------------
+# Validate interpolation -----------------------------------------------------
 
-# Recalculate primary 64-grid CITL outputs using interpolation
-message("Validating primary n_sobol = 64 grid")
+# Recalculate pooled primary 64-per-imputation CITL outputs using interpolation
+message("Validating pooled primary n_sobol = 64 per imputation grid")
 
 primary_check <- calculate_citl(
   H_mat = H_mat,
@@ -641,6 +794,9 @@ primary_check <- calculate_citl(
 
 # Compare to saved primary outputs
 primary_validation <- tibble(
+  n_sobol = primary_n_sobol,
+  n_imputations = M,
+  n_pooled_profiles_per_arm = imp_citl$J,
   check = c(
     "max_abs_pre_citl_risk_interpolation_error",
     "mean_abs_pre_citl_risk_interpolation_error",
@@ -655,12 +811,17 @@ primary_validation <- tibble(
   )
 )
 
-# Save outputs -----------------------------------------------------------------
+# Save outputs ---------------------------------------------------------------
 
 # Save summaries
 write_csv(
   stability_table,
   file.path(z_out, "sobol_grid_stability.csv")
+)
+
+write_csv(
+  stability_global_summary,
+  file.path(z_out, "sobol_grid_global_summary_pooled_profiles.csv")
 )
 
 write_csv(
@@ -676,68 +837,4 @@ write_csv(
 write_csv(
   primary_validation,
   file.path(z_out, "sobol_grid_stability_primary_validation.csv")
-)
-
-# Save full object
-saveRDS(
-  list(
-    stability = stability_table,
-    stability_by_trial = stability_by_trial,
-    covariate_summary = covariate_summary,
-    primary_validation = primary_validation,
-    n_citl_grid = n_citl_grid,
-    grids = grid_objects,
-    note = paste(
-      "n_sobol = 64 uses saved primary Sobol and CITL outputs.",
-      "Larger grids use trial-specific baseline distributions and the",
-      "shared ecological Spearman correlation matrix."
-    )
-  ),
-  file.path(z_out, "sobol_grid_stability.rds")
-)
-
-# Log --------------------------------------------------------------------------
-
-# Get primary comparison to largest grid
-mat_change <- stability_table %>% 
-  filter(n_sobol == imp_sobol$J)
-
-# Log lines
-log_lines <- c(
-  "Sobol grid stability sensitivity analysis",
-  "",
-  paste0("Grid sizes: ", paste(n_sobol_grid, collapse = ", ")),
-  "n_sobol = 64 uses saved primary Sobol and CITL outputs.",
-  "Larger grids use trial-specific baseline distributions.",
-  "The ecological Spearman correlation matrix is shared across trials.",
-  "No design-stage or conduct-stage model refitting was performed.",
-  "",
-  "Outputs produced:",
-  file.path(z_out, "sobol_grid_stability.csv"),
-  file.path(z_out, "sobol_grid_stability_by_trial.csv"),
-  file.path(z_out, "sobol_grid_covariate_summaries.csv"),
-  file.path(z_out, "sobol_grid_stability_primary_validation.csv"),
-  file.path(z_out, "sobol_grid_stability.rds"),
-  "",
-  paste0(
-    "Primary 64-grid mean absolute pre-CITL risk difference versus n = 512: ",
-    signif(mat_change$mean_abs_difference_pre_citl_risk_vs_n512, 4)
-  ),
-  paste0(
-    "Primary 64-grid maximum absolute pre-CITL risk difference versus n = 512: ",
-    signif(mat_change$max_abs_difference_pre_citl_risk_vs_n512, 4)
-  ),
-  paste0(
-    "Primary 64-grid mean absolute CITL shift difference versus n = 512: ",
-    signif(mat_change$mean_abs_difference_citl_intercept_shift_vs_n512, 4)
-  ),
-  paste0(
-    "Primary 64-grid maximum absolute CITL shift difference versus n = 512: ",
-    signif(mat_change$max_abs_difference_citl_intercept_shift_vs_n512, 4)
-  )
-)
-
-writeLines(
-  log_lines,
-  file.path(z_out, "sobol_grid_stability_README.txt")
 )

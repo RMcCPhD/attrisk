@@ -1,0 +1,17 @@
+Baseline characteristic,Pooled control-arm reference,Pooled Sobol-generated participant profiles,Difference (reference - profiles)
+Age (years),57.3 [10.7],57.0 [10.4],0.3 [0.3]
+Female,44.3%,44.6%,-0.2%
+Asian,40.4%,40.6%,-0.3%
+Black/African American,6.1%,6.1%,0.0%
+Other race/ethnicity,5.0%,4.4%,0.5%
+White/Caucasian,48.6%,48.8%,-0.2%
+Current smoker,19.7%,19.2%,0.4%
+Duration of type 2 diabetes (years),7.7 [7.4],7.6 [6.7],0.2 [0.6]
+HbA1c (%),8.2 [1.0],8.2 [0.9],0.0 [0.1]
+BMI (kg/m^2),29.8 [5.8],29.8 [5.6],0.0 [0.3]
+eGFR (mL/min/1.73 m^2),88.1 [25.3],88.4 [24.2],-0.3 [1.1]
+Systolic blood pressure (mmHg),132.0 [15.1],131.6 [14.1],0.4 [1.0]
+HDL cholesterol (mmol/L),1.2 [0.3],1.2 [0.3],0.0 [0.0]
+Total cholesterol (mmol/L),4.8 [1.1],4.8 [1.1],0.0 [0.0]
+Number of comorbidities,1.0 [1.0],1.0 [1.0],0.0 [0.1]
+Number of concomitant medications,4.0 [2.0],4.0 [1.9],0.0 [0.1]

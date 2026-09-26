@@ -224,7 +224,7 @@ agd_plot_imp <- agd_found_chars %>%
   labs(x = "Number of sites", y = "Density", colour = "Imputation stage")
 
 ggsave(
-  "outputs/design/dist_before_after_sites_imputation.png",
+  "outputs/design_stage/agd_prep/dist_before_after_sites_imputation.png",
   agd_plot_imp,
   width = 6,
   height = 4,
@@ -604,3 +604,20 @@ out_dat <- tibble(
 saveRDS(out_dat, "processed_data/agd_steps_out.rds")
 saveRDS(mdl_data_mat, "processed_data/agd_covar_mat.rds")
 
+# Eligibility criteria ---------------------------------------------------------
+
+# Join and isolate trial that is not included
+# Select relevant variables
+elig_agd <- out_dat$format_covars[[1]] %>% 
+  distinct(trial_id) %>% 
+  inner_join(imp_agd_elig) %>% 
+  select(
+    trial_id, 
+    contains(c("_age", "bmi", "renal"))
+  ) %>% 
+  mutate(across(everything(), as.character)) %>% 
+  arrange(trial_id) %>% 
+  rename(nct_id = trial_id)
+
+# Save
+write_csv(elig_agd, "data/eligibility_criteria.csv")

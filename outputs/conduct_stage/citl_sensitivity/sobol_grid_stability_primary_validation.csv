@@ -1,0 +1,5 @@
+n_sobol,n_imputations,n_pooled_profiles_per_arm,check,value
+64,20,1280,max_abs_pre_citl_risk_interpolation_error,3.346959270844607e-7
+64,20,1280,mean_abs_pre_citl_risk_interpolation_error,9.24693581178563e-8
+64,20,1280,max_abs_delta_interpolation_error,1.3322676295501878e-14
+64,20,1280,mean_abs_delta_interpolation_error,6.361218136603427e-17

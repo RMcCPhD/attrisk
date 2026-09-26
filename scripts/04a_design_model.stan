@@ -1,3 +1,4 @@
+
 // Safely estimate Gompertz cumulative distribution
 // If a is close to 0, collapse to exponential
 // Otherwise use Gompertz
@@ -55,7 +56,7 @@ transformed parameters {
   // exponentiate to get b (rate)
   vector[I] b = exp(log_b);      
   
-  // a for each row (conditioned on log-rate, linear predictor and error)
+  // a for each row (conditioned on log-rate and residual error)
   vector[I] a = alpha_shape + log_b * beta_lograte + error;       
   
   // p for each row

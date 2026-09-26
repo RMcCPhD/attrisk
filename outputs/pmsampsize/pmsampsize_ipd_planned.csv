@@ -1,0 +1,2 @@
+csrsquared,parameters,rate,timepoint,meanfup,shrinkage,sample_size,events,epp,available_sample,feasible,sample_difference,observed_events,observed_epp
+0.1,13,0.107,1,1,0.9,1104,118.128,9.09,19023,TRUE,17919,4022,309.38461538461536

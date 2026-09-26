@@ -1,0 +1,31 @@
+tidy_name,mean,median,sd,rhat,ess_bulk,ess_tail,2.5%,97.5%,raw_name
+Active comparator arm,0,0,0.08,1,9980.69,9552.85,-0.18,0.19,trttypeactive
+Placebo and active comparator arms,0.03,0.01,0.14,1,11483.91,9504.03,-0.23,0.37,trttypeplacebo_active
+Trial size: N = 250-499,-0.05,-0.03,0.09,1,9254.64,8556.68,-0.25,0.1,n_cat250-499
+Trial size: N = 500-749,-0.05,-0.03,0.1,1,9266.19,9054.31,-0.28,0.13,n_cat500-749
+Trial size: N = 750-999,0.02,0.01,0.11,1,10467.94,9416.37,-0.2,0.29,n_cat750-999
+Trial size: N >= 1000,-0.03,-0.01,0.13,1,11320.47,9956.78,-0.34,0.22,n_cat>=1000
+Arm size: N = 100-199,-0.04,-0.02,0.09,1,8148.97,8440.11,-0.25,0.11,arm_n_cat100-199
+Arm size: N = 200-299,-0.07,-0.05,0.11,1,7512.22,8612.24,-0.32,0.1,arm_n_cat200-299
+Arm size: N >= 300,-0.08,-0.05,0.13,1,7913.2,7969.57,-0.41,0.13,arm_n_cat>=300
+Number of arms: >2,0.05,0.04,0.09,1,8199.31,8930.5,-0.1,0.25,n_arms_cat
+Number of sites: 100-199,-0.11,-0.09,0.11,1,7122.25,9596.01,-0.36,0.07,n_sites_cat100-199
+Number of sites: >= 200,-0.04,-0.02,0.13,1,9641.22,8923.95,-0.34,0.19,n_sites_cat>=200
+Number of POMs: >1,0.01,0.01,0.08,1,9928.32,9683.62,-0.16,0.2,n_poms_cat
+Phase 4,0.11,0.08,0.14,1,7369.39,9290.21,-0.1,0.43,phase
+Double blinding,0.03,0.01,0.1,1,7598.75,7706.53,-0.15,0.25,maskingdouble
+Triple blinding,0.03,0.01,0.11,1,10091.21,9315.39,-0.19,0.3,maskingtriple
+Quadruple blinding,0.24,0.24,0.15,1,5326.08,4199.18,-0.01,0.54,maskingquadruple
+WHO region: Americas,0.66,0.66,0.16,1,5440.67,7776.17,0.35,0.98,region_of_the_americas
+WHO region: Europe,-0.22,-0.21,0.15,1,5248.52,7431.65,-0.52,0.02,european_region
+WHO region: Western pacific,-0.06,-0.04,0.09,1,9045.22,9427.88,-0.27,0.09,western_pacific_region
+WHO region: Africa,0.03,0.01,0.09,1,10203.03,9829.62,-0.15,0.24,african_region
+WHO region: South-east Asia,0.03,0.02,0.08,1,9076.57,9291.59,-0.11,0.23,south_east_asia_region
+WHO region: Eastern mediterranean,-0.05,-0.02,0.13,1,11329.47,9581.1,-0.36,0.19,eastern_mediterranean_region
+Eligibility: Upper age limit >80,-0.35,-0.35,0.11,1,7303.92,6015.73,-0.56,-0.12,upper_age>80
+Eligibility: Lower age limit >18,-0.09,-0.07,0.11,1,7180.03,8682.41,-0.33,0.08,lower_age>18
+Eligibility: Upper BMI limit >30kg/m2,-0.1,-0.05,0.17,1,9394.28,9632.72,-0.51,0.15,upper_bmi>30
+Eligibility: Upper BMI limit >40kg/m2,-0.02,-0.01,0.07,1,9197.61,9320.01,-0.18,0.12,upper_bmi>40
+Eligibility: Lower BMI limit <27kg/m2,-0.1,-0.07,0.13,1,8481.87,9899.42,-0.42,0.11,lower_bmi<27
+Eligibility: Lower eGFR limit <30mL/min/1.73m2,-0.33,-0.32,0.21,1,5725.69,6751.99,-0.76,0.02,lower_egfr<30
+Eligibility: Lower eGFR limit <60mL/min/1.73m2,-0.21,-0.2,0.15,1,5479.79,8530.77,-0.53,0.03,lower_egfr<60

@@ -1,5 +1,6 @@
 
-# Approximate sample size adequacy for AgD and IPD models
+# Exploratory assessment of the number of candidate predictor parameters
+# supported by the available conduct-stage IPD
 
 rm(list = ls())
 gc()
@@ -7,28 +8,14 @@ gc()
 library(tidyverse)
 library(pmsampsize)
 
-# Helper functions for running psampsize (AgD: Binary, IPD: Survival)
-pms_binary <- function(csrsquared, parameters, prevalence) {
-  
-  out <- pmsampsize(
-    type = "b",
-    csrsquared = csrsquared,
-    parameters = parameters,
-    prevalence = prevalence
-  )
-  
-  tibble(
-    csrsquared = csrsquared,
-    parameters = parameters,
-    prevalence = prevalence,
-    sample_size = out$sample_size,
-    events = out$events,
-    epp = out$EPP
-  )
-  
-}
+# Helper function for survival-outcome calculations ---------------------------
 
-pms_surv <- function(csrsquared, parameters, rate, timepoint, meanfup) {
+pms_surv <- function(csrsquared,
+                     parameters,
+                     rate,
+                     timepoint,
+                     meanfup,
+                     shrinkage = 0.90) {
   
   out <- pmsampsize(
     type = "s",
@@ -36,7 +23,8 @@ pms_surv <- function(csrsquared, parameters, rate, timepoint, meanfup) {
     parameters = parameters,
     rate = rate,
     timepoint = timepoint,
-    meanfup = meanfup
+    meanfup = meanfup,
+    shrinkage = shrinkage
   )
   
   tibble(
@@ -45,6 +33,7 @@ pms_surv <- function(csrsquared, parameters, rate, timepoint, meanfup) {
     rate = rate,
     timepoint = timepoint,
     meanfup = meanfup,
+    shrinkage = shrinkage,
     sample_size = out$sample_size,
     events = out$events,
     epp = out$EPP
@@ -52,181 +41,209 @@ pms_surv <- function(csrsquared, parameters, rate, timepoint, meanfup) {
   
 }
 
-# AgD model --------------------------------------------------------------------
-
-# Data
-a_imp_stan <- readRDS("processed_data/stan_data.rds")
-a_imp_agd <- readRDS("processed_data/agd_steps_out.rds")$format_covars[[1]]
-
-# Define observed sample (342)
-a_agd_n <- nrow(a_imp_agd)
-
-# Attrition prevalence (median: 0.129, overall: 0.166)
-a_agd_attr_fu <- a_imp_agd %>% 
-  select(trial_id, arm_n, arm_attr, duration) %>% 
-  mutate(rate = arm_attr / arm_n) %>% 
-  reframe(
-    med_rate = median(rate),
-    med_fu = mean(duration)
-  )
-
-a_agd_attr_overall <- sum(a_imp_agd$arm_attr) / sum(a_imp_agd$arm_n)
-
-# 30 covariates (max number of covariates including dummy coded factors)
-glimpse(a_imp_stan)
-
-# Create expansion grid to explore scenarios
-a_agd_grid <- expand_grid(
-  csrsquared = seq(0.05, 0.20, by = 0.01),
-  parameters = 1:25,
-  prevalence = c(
-    round(a_agd_attr_overall, 3),
-    0.10, 0.15, 0.20, 0.25, 0.30
-  ) %>% unique() %>% sort()
-)
-
-# Run pmsampsize and extract results
-a_agd_res <- pmap_dfr(
-  a_agd_grid,
-  \(csrsquared, parameters, prevalence) {
-    pms_binary(
-      csrsquared = csrsquared,
-      parameters = parameters,
-      prevalence = prevalence
-    )
-  }
-)
-
-a_agd_out <- a_agd_res %>%
-  mutate(
-    available_sample = a_agd_n,
-    feasible = sample_size <= available_sample,
-    sample_diff = available_sample - sample_size
-  )
-
-# Get largest feasible model for each scenario
-a_agd_sum <- a_agd_out %>%
-  filter(feasible) %>%
-  group_by(csrsquared, prevalence) %>%
-  slice_max(order_by = parameters, n = 1, with_ties = FALSE) %>%
-  ungroup() %>%
-  arrange(prevalence, csrsquared)
-
-# Scenario closest to observed data
-a_agd_closest <- a_agd_sum %>% 
-  filter(
-    abs(prevalence - a_agd_attr_overall) == min(abs(prevalence - a_agd_attr_overall))
-  ) %>%
-  arrange(csrsquared)
-
-# Conservative scenarios
-agd_consv <- a_agd_sum %>%
-  summarise(
-    min_feasible_parameters = min(parameters),
-    max_feasible_parameters = max(parameters),
-    min_epp = min(epp),
-    max_epp = max(epp)
-  )
-
-# IPD model --------------------------------------------------------------------
-
-# Data from previous attrition rates analysis
-b_imp_ipd <- read_csv("../attrition_rates_modelling/usable_data/total_attrition/study_chars.csv") %>% 
-  filter(condition == "Type 2 diabetes")
-
-# Sample size (28335)
-# Test it with the actual IPD sample size (19023)
-b_ipd_n <- sum(b_imp_ipd$n)
-b_ipd_n <- 19023
-
-# Median event rate and follow-up (0.107, 1.10)
-b_ipd_rate_fu <- b_imp_ipd %>% 
-  mutate(
-    rate = total_events / n,
-    fu_yr = fu_mth / 12
-  ) %>% 
-  reframe(
-    med_rate = median(rate),
-    med_fu = mean(fu_yr)
-  )
-
-# Rounding to 1 median year of FU for simplicity
-b_ipd_rate <- 0.107
-b_ipd_fu <- 1
-b_ipd_tmpt <- 1
-b_ipd_covars <- 13
-
-# Expansion grid to explore scenarios
-b_ipd_grid <- expand_grid(
-  csrsquared = seq(0.05, 0.20, by = 0.01),
-  parameters = 1:13,
-  rate = c(b_ipd_rate, 0.10, 0.15, 0.20) %>% unique() %>% sort(),
-  timepoint = b_ipd_tmpt,
-  meanfup = b_ipd_fu
-)
-
-# Run pmsampsize and extract results
-b_ipd_res <- pmap_dfr(
-  b_ipd_grid,
-  \(csrsquared, parameters, rate, timepoint, meanfup) {
+# pmsampsize calculates the minimum sample size for a specified number of
+# candidate predictor parameters. This function inverts that calculation by
+# finding the largest integer number of parameters whose required sample size
+# does not exceed the available sample.
+find_max_parameters <- function(available_sample,
+                                csrsquared,
+                                rate,
+                                timepoint,
+                                meanfup,
+                                shrinkage = 0.90) {
+  
+  required_n <- function(parameters) {
     pms_surv(
       csrsquared = csrsquared,
       parameters = parameters,
       rate = rate,
       timepoint = timepoint,
-      meanfup = meanfup
+      meanfup = meanfup,
+      shrinkage = shrinkage
     )
   }
-)
+  
+  # First identify an upper bound that is not feasible
+  lower <- 0L
+  upper <- 1L
+  upper_res <- required_n(upper)
+  
+  while (upper_res$sample_size <= available_sample) {
+    lower <- upper
+    upper <- upper * 2L
+    upper_res <- required_n(upper)
+  }
+  
+  # Then use a binary search to locate the exact feasibility boundary
+  while ((upper - lower) > 1L) {
+    midpoint <- as.integer(floor((lower + upper) / 2))
+    midpoint_res <- required_n(midpoint)
+    
+    if (midpoint_res$sample_size <= available_sample) {
+      lower <- midpoint
+    } else {
+      upper <- midpoint
+    }
+  }
+  
+  max_res <- required_n(lower)
+  next_res <- required_n(upper)
+  
+  tibble(
+    available_sample = available_sample,
+    csrsquared = csrsquared,
+    rate = rate,
+    timepoint = timepoint,
+    meanfup = meanfup,
+    shrinkage = shrinkage,
+    max_parameters = lower,
+    required_sample_at_max = max_res$sample_size,
+    expected_events_at_max = max_res$events,
+    epp_at_max = max_res$epp,
+    expected_events_in_available_sample = available_sample * rate * meanfup,
+    expected_epp_in_available_sample =
+      (available_sample * rate * meanfup) / lower,
+    first_infeasible_parameters = upper,
+    required_sample_first_infeasible = next_res$sample_size
+  )
+  
+}
 
-b_ipd_out <- b_ipd_res %>% 
+# Conduct-stage model assumptions ---------------------------------------------
+
+# Available IPD
+b_ipd_n <- 19023L
+b_ipd_events <- 4022L
+
+# Assumptions retained from the original exploratory assessment:
+# - one-year prediction horizon and mean follow-up
+# - event rate of 0.107 per participant-year, based on the previous attrition
+#   rates analysis of trials involving participants with type 2 diabetes
+# - anticipated Cox-Snell R-squared of 0.10
+# - target shrinkage of 0.90 (the pmsampsize default)
+b_ipd_rate <- 0.107
+b_ipd_fu <- 1
+b_ipd_tmpt <- 1
+b_ipd_csr2 <- 0.10
+b_ipd_shrinkage <- 0.90
+
+# Begin with the available sample and calculate the largest supportable number 
+# of candidate predictor parameters
+b_ipd_primary <- find_max_parameters(
+  available_sample = b_ipd_n,
+  csrsquared = b_ipd_csr2,
+  rate = b_ipd_rate,
+  timepoint = b_ipd_tmpt,
+  meanfup = b_ipd_fu,
+  shrinkage = b_ipd_shrinkage
+) %>%
+  mutate(observed_events = b_ipd_events)
+
+# Retain the two rows surrounding the primary feasibility boundary so that the
+# maximum supported value and the first unsupported value can be inspected
+b_ipd_boundary <- tibble(
+  parameters = c(
+    b_ipd_primary$max_parameters,
+    b_ipd_primary$first_infeasible_parameters
+  )
+) %>%
+  mutate(
+    result = map(
+      parameters,
+      \(parameters) pms_surv(
+        csrsquared = b_ipd_csr2,
+        parameters = parameters,
+        rate = b_ipd_rate,
+        timepoint = b_ipd_tmpt,
+        meanfup = b_ipd_fu,
+        shrinkage = b_ipd_shrinkage
+      )
+    )
+  ) %>%
+  select(-parameters) %>%
+  unnest(result) %>%
   mutate(
     available_sample = b_ipd_n,
     feasible = sample_size <= available_sample,
-    sample_diff = available_sample - sample_size
+    sample_difference = available_sample - sample_size,
+    observed_events = b_ipd_events,
+    observed_epp = observed_events / parameters
   )
 
-# Get largest feasible model
-b_ipd_sum <- b_ipd_out %>% 
-  filter(feasible) %>%
-  group_by(csrsquared, rate, timepoint, meanfup) %>%
-  slice_max(order_by = parameters, n = 1, with_ties = FALSE) %>%
-  ungroup() %>%
+# Secondary check for the candidate set considered during model development.
+# pmsampsize counts candidate predictor parameters rather than raw predictor
+# variables; update this value if the 13 characteristics require more than 13
+# parameters after accounting for categorical coding or non-linear terms.
+b_ipd_planned_parameters <- 13L
+
+b_ipd_planned <- pms_surv(
+  csrsquared = b_ipd_csr2,
+  parameters = b_ipd_planned_parameters,
+  rate = b_ipd_rate,
+  timepoint = b_ipd_tmpt,
+  meanfup = b_ipd_fu,
+  shrinkage = b_ipd_shrinkage
+) %>%
+  mutate(
+    available_sample = b_ipd_n,
+    feasible = sample_size <= available_sample,
+    sample_difference = available_sample - sample_size,
+    observed_events = b_ipd_events,
+    observed_epp = observed_events / parameters
+  )
+
+# Sensitivity analyses ---------------------------------------------------------
+
+# Explore how the maximum supported number of parameters changes across the
+# Cox-Snell R-squared and event-rate scenarios considered previously.
+b_ipd_scenarios <- expand_grid(
+  csrsquared = seq(0.05, 0.20, by = 0.01),
+  rate = c(b_ipd_rate, 0.10, 0.15, 0.20) %>% unique() %>% sort(),
+  timepoint = b_ipd_tmpt,
+  meanfup = b_ipd_fu
+)
+
+b_ipd_sensitivity <- pmap_dfr(
+  b_ipd_scenarios,
+  \(csrsquared, rate, timepoint, meanfup) {
+    find_max_parameters(
+      available_sample = b_ipd_n,
+      csrsquared = csrsquared,
+      rate = rate,
+      timepoint = timepoint,
+      meanfup = meanfup,
+      shrinkage = b_ipd_shrinkage
+    )
+  }
+) %>%
   arrange(rate, csrsquared)
 
-# Get scenario matching observed data
-b_ipd_closest <- b_ipd_out %>% 
-  filter(rate == b_ipd_rate) %>%
-  arrange(csrsquared)
-
-# Convervative scenarios
-b_ipd_consv <- b_ipd_out %>% 
+b_ipd_sensitivity_summary <- b_ipd_sensitivity %>%
   summarise(
-    min_feasible_parameters = min(parameters),
-    max_feasible_parameters = max(parameters),
-    min_epp = min(epp),
-    max_epp = max(epp)
+    min_supported_parameters = min(max_parameters),
+    max_supported_parameters = max(max_parameters),
+    min_epp_at_boundary = min(epp_at_max),
+    max_epp_at_boundary = max(epp_at_max)
   )
 
-# Get reportable scenario ------------------------------------------------------
+# Export results ---------------------------------------------------------------
 
-c_target_csrq <- 0.10 # Conservative
+write_csv(
+  b_ipd_sensitivity,
+  "outputs/pmsampsize/pmsampsize_ipd_all.csv"
+)
 
-c_agd <- a_agd_out %>% 
-  filter(
-    feasible,
-    abs(prevalence - a_agd_attr_overall) == min(abs(prevalence - a_agd_attr_overall)),
-    csrsquared == c_target_csrq
-  ) %>%
-  slice_max(order_by = parameters, n = 1, with_ties = FALSE)
+write_csv(
+  b_ipd_primary,
+  "outputs/pmsampsize/pmsampsize_ipd_best.csv"
+)
 
-c_ipd <- b_ipd_out %>%
-  filter(
-    feasible,
-    rate == b_ipd_rate,
-    csrsquared == c_target_csrq
-  ) %>%
-  slice_max(order_by = parameters, n = 1, with_ties = FALSE)
+write_csv(
+  b_ipd_boundary,
+  "outputs/pmsampsize/pmsampsize_ipd_boundary.csv"
+)
 
-write_csv(b_ipd_res, "../../Attrisk/GitHub/pmsampsize_ipd_all.csv")
-write_csv(c_ipd, "../../Attrisk/GitHub/pmsampsize_ipd_best.csv")
+write_csv(
+  b_ipd_planned,
+  "outputs/pmsampsize/pmsampsize_ipd_planned.csv"
+)

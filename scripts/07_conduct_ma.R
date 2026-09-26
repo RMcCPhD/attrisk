@@ -9,8 +9,11 @@ source("scripts/00_functions_packages_etc.R")
 # Import Vivli outputs
 # Model estimates on log-scale
 # Covariate correlation, upper triangle of VCOV converted to correlations
-imp_vivli_res <- read_csv("vivli/v2/Models/export_res.csv")
-imp_vivli_cor <- read_csv("vivli/v2/Models/export_covcor.csv")
+imp_vivli_res <- read_csv("vivli/Models/export_res.csv")
+imp_vivli_cor <- read_csv("vivli/Models/export_covcor.csv")
+
+# Directory for saving outputs
+z_out_dir <- "outputs/conduct_stage/ipd_meta_analysis/"
 
 # Prepare meta-analysis inputs -------------------------------------------------
 
@@ -24,7 +27,7 @@ res_grid_terms <- expand.grid(
 ) %>% as_tibble()
 
 # Generate a summary of missing trial-level terms for supplementary
-imp_vivli_res %>%
+res_sum_terms <- imp_vivli_res %>%
   full_join(res_grid_terms) %>% 
   group_by(term) %>% 
   reframe(
@@ -34,12 +37,12 @@ imp_vivli_res %>%
       round(sum(is.na(estimate)) / n_trials * 100, 2),
       "%)"
     )
-  ) %>% 
-  write_csv("outputs/manuscript_summaries/sum_terms_ipd_models.csv")
+  )
 
-# Fill in missing terms (i.e. covariate or covariate level not fitted in
-# trial-level IPD models due to convergence issues)
-# Add zero estimates and large standard errors
+write_csv(res_sum_terms, paste0(z_out_dir, "sum_terms_ipd_models.csv"))
+
+# Fill in missing terms
+# Add zero estimates and large standard errors to minimise contributions
 res_compl_terms <- imp_vivli_res %>%
   full_join(res_grid_terms) %>% 
   mutate(
@@ -162,8 +165,8 @@ for (i in seq_along(vcov_construct$vcov_matrix)) {
 }
 
 # Save prepared outputs
-saveRDS(res_compl_terms, "outputs/conduct/ma/data/ipd_trial_res.rds")
-saveRDS(vcov_construct, "outputs/conduct/ma/data/ipd_trial_vcov.rds")
+saveRDS(res_compl_terms, paste0(z_out_dir, "ipd_trial_res.rds"))
+saveRDS(vcov_construct, paste0(z_out_dir, "ipd_trial_vcov.rds"))
 
 # Meta-analysis ----------------------------------------------------------------
 
@@ -210,20 +213,20 @@ ma_vcov_bdiag <- as.matrix(bdiag(ma_vcov$vcov_matrix))
 # As prepared above, missing terms retained with estimate = 0 and very large
 # SEs, contributes negligible information while preserving a common beta and
 # VCOV structure across trials
-# ma_fit <- rma.mv(
-#   yi = estimate,
-#   V = ma_vcov_bdiag,
-#   mods = ~ ma_param - 1,
-#   random = ~ ma_param | ma_id,
-#   struct = "DIAG",
-#   data = ma_dat,
-#   method = "REML",
-#   verbose = TRUE
-# )
+ma_fit <- rma.mv(
+  yi = estimate,
+  V = ma_vcov_bdiag,
+  mods = ~ ma_param - 1,
+  random = ~ ma_param | ma_id,
+  struct = "DIAG",
+  data = ma_dat,
+  method = "REML",
+  verbose = TRUE
+)
 
 # Save to skip refitting unstructured model
-ma_fit <- readRDS("outputs/conduct/ma/out/fit.rds")
 # saveRDS(ma_fit, "outputs/conduct/ma/out/fit.rds")
+ma_fit <- readRDS(paste0(z_out_dir, "fit.rds"))
 
 # Extract term-specific heterogeneity
 ma_het <- tibble(
@@ -232,7 +235,10 @@ ma_het <- tibble(
   tau = sqrt(ma_fit$tau2),
   hr_lower_approx = exp(-sqrt(ma_fit$tau2)),
   hr_upper_approx = exp(sqrt(ma_fit$tau2))
-) %>%
+)
+
+# Overall heterogeneity
+ma_het_sum <- ma_het %>% 
   reframe(
     mean_tau = mean(tau, na.rm = TRUE),
     sd_tau = sd(tau, na.rm = TRUE),
@@ -244,12 +250,11 @@ ma_het <- tibble(
   ) %>%
   pivot_longer(everything())
 
-# Generate outputs -------------------------------------------------------------
+write_csv(ma_het, paste0(z_out_dir, "term_heterogeneity.csv"))
+write_csv(ma_het_sum, paste0(z_out_dir, "sum_heterogeneity.csv"))
 
 # Tidy meta-analysis results
-# - Get hazard ratio estimate summaries
-# - Round estimates
-# - Join tidy term names
+# Treatment type dropped as related to treatment at design-stage in conduct model
 out_tidy <- tidy(ma_fit) %>% 
   mutate(term = gsub("ma_param", "", term)) %>% 
   mutate(
@@ -298,21 +303,20 @@ out_tidy <- tidy(ma_fit) %>%
   filter(!term == "trttype") %>% 
   select(term_tidy, hr, std.error, lo_hr, hi_hr, p.value, everything())
 
-saveRDS(out_tidy, "outputs/conduct/ma/out/ma_tidy.rds")
-write_csv(out_tidy, "outputs/conduct/ma/out/ma_tidy.csv")
+write_csv(out_tidy, paste0(z_out_dir, "ma_tidy.csv"))
 
 # Plot hazard ratio
-out_hr_plot <- readRDS("outputs/conduct/ma/out/ma_tidy.rds") %>% 
+out_hr_plot <- out_tidy %>% 
   ggplot(aes(x = hr, y = fct_rev(term_tidy))) +
   geom_point() + 
   geom_linerange(aes(xmin = lo_hr, xmax = hi_hr)) +
   scale_x_continuous(limits = c(0.4, 1.6), n.breaks = 7) +
   geom_vline(xintercept = 1, colour = "red", linetype = "dashed") +
   theme_classic() +
-  labs(x = "Pooled mean hazard ratio (95% confidence intervals)", y = NULL)
+  labs(x = "Pooled hazard ratio for attrition (95% CI)", y = NULL)
 
 ggsave(
-  "outputs/conduct/ma/out/ma_plot_hr.png",
+  paste0(z_out_dir, "ma_plot_hr.png"),
   out_hr_plot,
   height = 6,
   width = 6,

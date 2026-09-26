@@ -1,0 +1,2 @@
+prediction,metric,estimate,posterior_mean,posterior_median,posterior_sd,posterior_q025,posterior_q975,n_posterior_draws,n_held_out_trials,n_distinct_observed_risks
+typical,trial_risk_concordance,0.6622864200919508,0.6479140205059585,0.6481335346188156,0.007197457078611008,0.6334145337267549,0.661652113497564,12000,342,324

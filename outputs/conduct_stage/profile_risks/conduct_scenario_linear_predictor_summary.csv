@@ -1,0 +1,7 @@
+profile,profile_label,target_percentile,sex_label,selected_score,lp_nonsex,lp,hazard_multiplier
+p10,Lower-risk profile,10,Female,-0.27171676454320015,-0.272,-0.272,0.762
+p10,Lower-risk profile,10,Male,-0.27171676454320015,-0.272,-0.384,0.681
+p50,Moderate-risk profile,50,Female,0.1326252437119582,0.133,0.133,1.142
+p50,Moderate-risk profile,50,Male,0.1326252437119582,0.133,0.021,1.021
+p90,Higher-risk profile,90,Female,0.558286926630487,0.558,0.558,1.748
+p90,Higher-risk profile,90,Male,0.558286926630487,0.558,0.446,1.562

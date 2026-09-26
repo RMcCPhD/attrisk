@@ -1,0 +1,18 @@
+design_feature,specification
+Total follow-up,52 weeks
+Treatment type,Placebo and active comparator
+Eligibility: Lower age limit,18 years
+Eligibility: Upper age limit,80 years
+Eligibility: Lower BMI limit,None
+Eligibility: Upper BMI limit,None
+Eligibility: Lower eGFR limit,None
+Eligibility: Upper eGFR limit,None
+Trial size,Large (>500 participants)
+Trial phase,Phase 3
+Trial blinding,Double blinding
+Number of arms,"3 arms (experimental, placebo, active comparator)"
+Number of facilities,>=100 facilities
+Number of primary outcomes,One primary outcome
+WHO regions,Americas and Europe
+Participant profiles,"Sobol profiles pooled across 20 completed AgD datasets; medoids selected within +/-1 percentile point of the 10th, 50th and 90th percentiles of the non-sex prognostic score"
+CITL shift used,Average pooled-imputation CITL intercept shift across 342 AgD trial arms
