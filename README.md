@@ -49,7 +49,7 @@ parent_directory/
 The external files referenced by the scripts are:
 
 | Source folder | Required files | Used by |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | `nma_agesex_public/` | `Scratch_data/agg_ipd_hba1c.Rds` | `08a_sobol_prepare_ipd.R` |
 | `nma_more_covariates/` | Covariate-summary files matching `Data/*covariates*`, plus `Data/ipd_age_sex.csv`, `Data/categorical_variables_percentage.csv`, and `Data/hba1c_base_summary_ipd.csv` | `08a_sobol_prepare_ipd.R` |
 | `nma_more_covariates/` | `Scratch_data/correlation_summary.rds` | `08c_sobol_generate.R` |
@@ -97,7 +97,7 @@ Disclosure-reviewed exports from the secure research environment. `Models/` cont
 Run preparation and post-processing scripts from the repository root so that relative paths resolve correctly. The standalone fitting scripts instead expect a staged working directory, as described in the HPC instructions. Script filenames in the table are relative to `scripts/`.
 
 | Stage | Script | Purpose |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | Setup | `00_config.R` | Clears the R workspace and sets global options. |
 | Setup | `00_functions_packages_etc.R` | Loads packages and defines shared preparation, prediction, and validation functions. |
 | Sample-size assessment | `00_protocol_ss.R` | Explores the number of candidate predictors supported under alternative sample-size assumptions. |
